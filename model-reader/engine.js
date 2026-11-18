@@ -222,6 +222,44 @@
     SUMPRODUCT: (a, m, s, c) => { const arrs = a.map(x => x.k === "ref" ? m._expand(x.sheet, x.a, x.b).map(k => { const v = m.value(k, c); return typeof v === "number" ? v : 0; }) : [num(ev1(x, m, s, c))]);
       let t = 0; for (let i = 0; i < arrs[0].length; i++) t += arrs.reduce((p, arr) => p * (arr[i] || 0), 1); return t; },
   };
+  /* 2-D access to a range argument */
+  function grid(n, m, ctx) {
+    if (n.k !== "ref") { const v = ev1(n, m, null, ctx); return { R: 1, C: 1, at: () => v }; }
+    const bd = m.bounds[n.sheet]; let A = splitAddr(n.a), B = n.b ? splitAddr(n.b) : null;
+    if (!A) { A = { c: colToNum(n.a), r: bd ? bd.r0 : 1 }; B = { c: colToNum(n.b), r: bd ? bd.r1 : 1 }; }
+    if (!B) B = A;
+    const r0 = Math.min(A.r, B.r), c0 = Math.min(A.c, B.c), R = Math.abs(B.r - A.r) + 1, C = Math.abs(B.c - A.c) + 1;
+    return { R, C, at: (i, j) => { const v = m.value(key(n.sheet, numToCol(c0 + j) + (r0 + i)), ctx); return v === null || v === undefined ? 0 : v; } };
+  }
+  function crit(c) {
+    if (typeof c === "number") return v => v === c;
+    const s = String(c), m = /^(<=|>=|<>|<|>|=)?(.*)$/.exec(s), op = m[1] || "=", rhs = m[2], n = Number(rhs);
+    const cmp = (v) => { const x = isNaN(n) ? String(v).toLowerCase() : Number(v), y = isNaN(n) ? rhs.toLowerCase() : n;
+      return op === "=" ? x == y : op === "<>" ? x != y : op === "<" ? x < y : op === ">" ? x > y : op === "<=" ? x <= y : x >= y; };
+    return cmp;
+  }
+  function matchPos(look, g, type) {
+    const vals = []; for (let i = 0; i < g.R; i++) for (let j = 0; j < g.C; j++) vals.push(g.at(i, j));
+    if (type === 0) { const i = vals.findIndex(v => (typeof v === "string" && typeof look === "string") ? v.toLowerCase() === look.toLowerCase() : v == look); if (i < 0) throw new XlErr("#N/A"); return i + 1; }
+    let best = -1; for (let i = 0; i < vals.length; i++) { if (type > 0 ? vals[i] <= look : vals[i] >= look) best = i; else break; }
+    if (best < 0) throw new XlErr("#N/A"); return best + 1;
+  }
+  Object.assign(FN, {
+    CHOOSE: (a, m, s, c) => { const i = Math.floor(num(ev1(a[0], m, s, c))); if (i < 1 || i >= a.length) throw new XlErr("#VALUE!"); return m._ev(a[i], s, c); },
+    INDEX: (a, m, s, c) => { const g = grid(a[0], m, c); let r = a[1] ? Math.floor(num(ev1(a[1], m, s, c))) : 1, k = a[2] ? Math.floor(num(ev1(a[2], m, s, c))) : 1;
+      if (g.R === 1 && !a[2]) { k = r; r = 1; } if (r < 1 || k < 1 || r > g.R || k > g.C) throw new XlErr("#REF!"); return g.at(r - 1, k - 1); },
+    MATCH: (a, m, s, c) => matchPos(ev1(a[0], m, s, c), grid(a[1], m, c), a[2] ? num(ev1(a[2], m, s, c)) : 1),
+    VLOOKUP: (a, m, s, c) => { const g = grid(a[1], m, c), col = Math.floor(num(ev1(a[2], m, s, c))), exact = a[3] && !truthy(ev1(a[3], m, s, c));
+      const first = { R: g.R, C: 1, at: (i) => g.at(i, 0) }; return g.at(matchPos(ev1(a[0], m, s, c), first, exact ? 0 : 1) - 1, col - 1); },
+    HLOOKUP: (a, m, s, c) => { const g = grid(a[1], m, c), row = Math.floor(num(ev1(a[2], m, s, c))), exact = a[3] && !truthy(ev1(a[3], m, s, c));
+      const first = { R: 1, C: g.C, at: (i, j) => g.at(0, j) }; return g.at(row - 1, matchPos(ev1(a[0], m, s, c), first, exact ? 0 : 1) - 1); },
+    SUMIF: (a, m, s, c) => { const g = grid(a[0], m, c), f = crit(ev1(a[1], m, s, c)), sg = a[2] ? grid(a[2], m, c) : g; let t = 0;
+      for (let i = 0; i < g.R; i++) for (let j = 0; j < g.C; j++) if (f(g.at(i, j))) { const v = sg.at(i, j); if (typeof v === "number") t += v; } return t; },
+    COUNTIF: (a, m, s, c) => { const g = grid(a[0], m, c), f = crit(ev1(a[1], m, s, c)); let t = 0; for (let i = 0; i < g.R; i++) for (let j = 0; j < g.C; j++) if (f(g.at(i, j))) t++; return t; },
+    MEDIAN: (a, m, s, c) => { const f = flat(a, m, s, c).sort((x, y) => x - y); if (!f.length) throw new XlErr("#NUM!"); const h = f.length >> 1; return f.length % 2 ? f[h] : (f[h - 1] + f[h]) / 2; },
+    MROUND: (a, m, s, c) => { const x = num(ev1(a[0], m, s, c)), k = num(ev1(a[1], m, s, c)); if (!k) return 0; return Math.round(x / k + 1e-12 * Math.sign(x)) * k; },
+    PRODUCT: (a, m, s, c) => flat(a, m, s, c).reduce((x, y) => x * y, 1),
+  });
   function truthy(v) { if (typeof v === "string") { if (/^true$/i.test(v)) return true; if (/^false$/i.test(v)) return false; } return !!num(v); }
   function ev1(n, m, s, c) { return scalar(m._ev(n, s, c)); }
 

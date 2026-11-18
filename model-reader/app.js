@@ -78,13 +78,15 @@
     const EARN = /^(adj(usted)?\.?\s*|pro ?forma\s*|non-gaap\s*|diluted\s*|operating\s*)?(EBITDA|EPS|earnings per share)\b/i;
     const cand = new Map(); // key -> {tgt, earn}
     const add = (k, tgt, earn) => { const c = M.cell(k); if (!c || !c.f) return; const v = M.safeValue(k); if (typeof v !== "number") return; const o = cand.get(k) || { tgt: 0, earn: 0 }; o.tgt = Math.max(o.tgt, tgt); o.earn = Math.max(o.earn, earn); cand.set(k, o); };
-    for (const k of M.ast.keys()) {                      // rows labelled as a target or upside
-      const l = M.rowLabel(k); if (TGT.test(l) && !/guid|consensus|street|convert/i.test(l)) add(k, 1, 0);
+    const ALT = /probab|weight|bear|bull|downside|sensitiv|scenario \d|low case|high case/i;
+    const pref = (txt, base) => base + (/price/i.test(txt) ? 0.1 : 0);
+    for (const k of M.ast.keys()) {                      // rows labelled as a target or upside: strongest signal
+      const l = M.rowLabel(k); if (TGT.test(l) && !/guid|consensus|street|conver/i.test(l)) add(k, ALT.test(l) ? 0.5 : pref(l, 2), 0);
     }
     for (const [k, c] of M.cells) {                      // column headers labelled as a target or upside
       if (c.f || typeof c.v !== "string" || !TGT.test(c.v)) continue;
       const [sn, a] = k.split("!"), A = E.splitAddr(a);
-      for (let r = A.r + 1; r <= A.r + 40; r++) add(E.key(sn, E.numToCol(A.c) + r), 1, 0);
+      for (let r = A.r + 1; r <= A.r + 40; r++) { const kk = E.key(sn, E.numToCol(A.c) + r); add(kk, ALT.test(M.rowLabel(kk)) ? 0.5 : pref(c.v, 1), 0); }
     }
     const rows = new Map();                              // earnings rows: furthest-out forecast in each
     for (const k of M.ast.keys()) {
@@ -96,6 +98,8 @@
     for (const k of rows.values()) { const l = M.rowLabel(k); add(k, 0, (/EPS|earnings per share/i.test(l) ? 2 : 1) + (/oper|adj|pro ?forma|non-gaap/i.test(l) ? 0.5 : 0)); }
     let list = [...cand.entries()].slice(0, 120).map(([k, o]) => ({ k, ...o, n: M.inputsOf(k).inputs.length }));
     list = list.filter(x => x.n >= 3);
+    const maxN = Math.max(0, ...list.filter(x => x.tgt > 0).map(x => x.n));
+    for (const x of list) if (x.tgt > 0 && x.n < 0.3 * maxN) x.tgt = 0.3; // a "target" fed by a handful of inputs is a side calculation
     if (!list.length) { // last resort: the formula cells nothing else depends on, biggest cones first
       list = [...M.ast.keys()].filter(k => !M.dep.has(k)).slice(0, 300).map(k => ({ k, tgt: 0, earn: 0, n: M.inputsOf(k).inputs.length }));
     }
