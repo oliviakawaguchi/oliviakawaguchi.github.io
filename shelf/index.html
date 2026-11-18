@@ -1,0 +1,917 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Shelf Variance</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: four tabs on a shelf-tag grid. Guess, map, shelf, verdict. */
+:root{
+  --bg:#f7f4f1; --surface:#fff; --line:#e0d8d2; --fg:#241b19; --muted:#7d6f6a;
+  --kdp:#8c1d33; --ko:#c8342b; --pep:#1f4f9c; --rb:#6f6258;
+  --empty:#ded5cf; --blank:#eee8e4; --warn:#9a6b12; --good:#2f6b4f;
+  --d0:#efe7e3; --d1:#e3c2c6; --d2:#cf8f9c; --d3:#b15a72; --d4:#8c1d33;
+  --display:'Barlow Condensed','Oswald','Arial Narrow',sans-serif;
+  --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#17120f; --surface:#211a17; --line:#372c27; --fg:#f2eae6; --muted:#a4918a;
+  --kdp:#e0607d; --ko:#f0756b; --pep:#7aa5e8; --rb:#9a8a7e;
+  --empty:#3a2f2a; --blank:#2a221e; --warn:#d6a33f; --good:#6fb894;
+  --d0:#2e2521; --d1:#5d3340; --d2:#8a4257; --d3:#b85272; --d4:#e0607d; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#17120f; --surface:#211a17; --line:#372c27; --fg:#f2eae6; --muted:#a4918a;
+  --kdp:#e0607d; --ko:#f0756b; --pep:#7aa5e8; --rb:#9a8a7e;
+  --empty:#3a2f2a; --blank:#2a221e; --warn:#d6a33f; --good:#6fb894;
+  --d0:#2e2521; --d1:#5d3340; --d2:#8a4257; --d3:#b85272; --d4:#e0607d; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 48px;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:900px;margin:0 auto}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,6.5vw,46px);line-height:.97;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:700;font-size:clamp(23px,4.2vw,30px);line-height:1.06;margin:0 0 6px;text-wrap:balance}
+h3{font-family:var(--display);font-weight:600;font-size:19px;margin:0 0 6px;letter-spacing:.01em}
+.stamp{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:12.5px;color:var(--muted);margin:0 0 6px}
+.dek{color:var(--muted);margin:10px 0 0;max-width:62ch;font-size:15px}
+
+/* tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bg);
+  display:flex;gap:4px;margin:18px 0 0;padding:8px 0;border-bottom:2px solid var(--fg);overflow-x:auto}
+.tab{font:inherit;font-family:var(--display);font-size:17px;font-weight:600;letter-spacing:.02em;
+  background:none;border:1px solid transparent;border-radius:3px;color:var(--muted);
+  padding:9px 14px;min-height:44px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--surface);border-color:var(--line);color:var(--fg)}
+.tab:focus-visible{outline:2px solid var(--fg);outline-offset:1px}
+.panel{padding-top:24px}
+
+/* guess */
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:18px}
+.choice{font:inherit;font-family:var(--display);font-size:21px;font-weight:600;color:var(--fg);
+  background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:18px 16px;
+  min-height:68px;cursor:pointer;text-align:left;transition:border-color .15s}
+.choice:hover,.choice:focus-visible{border-color:var(--kdp);outline:none}
+.rankrow{display:grid;grid-template-columns:1fr 2.2fr auto auto;gap:12px;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--line)}
+.rankrow b{font-family:var(--display);font-weight:600;font-size:18px}
+.rankrow small{color:var(--muted);display:block;font-size:12px;line-height:1.3}
+.bar{height:16px;background:var(--kdp);border-radius:2px;min-width:3px;display:block}
+.rankrow .num{font-family:var(--display);font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
+.rankrow .tag{font-family:var(--display);text-transform:uppercase;letter-spacing:.09em;font-size:11px;color:var(--warn);white-space:nowrap}
+.rankrow.you{background:var(--surface);box-shadow:inset 3px 0 0 var(--warn)}
+.verdict{margin-top:18px;font-size:16px;max-width:60ch;border-left:3px solid var(--kdp);padding-left:14px}
+.again{margin-top:16px;font:inherit;background:none;border:1px solid var(--line);border-radius:4px;
+  padding:10px 16px;min-height:44px;color:var(--muted);cursor:pointer}
+
+/* switch */
+.switch{display:flex;gap:6px;margin:16px 0 0;flex-wrap:wrap}
+.sw{font:inherit;font-family:var(--display);font-size:16px;font-weight:600;background:var(--surface);
+  border:1px solid var(--line);border-radius:3px;color:var(--muted);padding:9px 13px;min-height:44px;cursor:pointer}
+.sw[aria-pressed="true"]{background:var(--kdp);border-color:var(--kdp);color:#fff}
+.sw:focus-visible{outline:2px solid var(--fg);outline-offset:1px}
+
+/* map */
+.map{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;margin-top:16px;max-width:620px}
+.st{aspect-ratio:1;border:none;border-radius:2px;background:var(--blank);
+  font:inherit;font-family:var(--display);font-weight:600;font-size:clamp(8px,1.5vw,12px);
+  color:var(--muted);display:flex;align-items:center;justify-content:center;padding:0}
+.st.on{cursor:pointer;color:#fff}
+.st.on.lt{color:var(--fg)}
+.st.on:hover,.st.on:focus-visible{outline:2px solid var(--fg);outline-offset:1px}
+.scale{display:flex;align-items:center;gap:6px;margin-top:12px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.scale i{width:24px;height:13px;border-radius:2px;display:inline-block}
+
+.swlab{font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;font-size:11px;
+  color:var(--muted);margin:14px 0 0}
+.swlab.inline{align-self:center;margin:0 0 0 8px}
+.mx{display:grid;grid-template-columns:1.6fr repeat(4,auto);gap:6px 10px;align-items:center;margin-top:14px}
+.mx .h{font-family:var(--display);text-transform:uppercase;letter-spacing:.07em;font-size:10.5px;color:var(--muted);
+  writing-mode:horizontal-tb;text-align:center}
+.mx .cn{font-size:13.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mx .dot{width:17px;height:17px;border-radius:3px;background:var(--empty);margin:0 auto}
+.mx .dot.on{background:var(--kdp)}
+.mx .rg{grid-column:1/-1;font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;
+  font-size:10.5px;color:var(--muted);padding-top:9px;border-top:1px solid var(--line)}
+
+/* shelf */
+.shelf{border-top:1px solid var(--line);margin-top:16px}
+.reg{font-family:var(--display);text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--muted);
+  padding:15px 0 5px;border-bottom:1px solid var(--line)}
+.headrow,.row{display:grid;grid-template-columns:1.45fr repeat(3,1fr);gap:8px;border-bottom:1px solid var(--line)}
+.headrow div{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--muted);padding:8px 0}
+.chain{padding:12px 8px 12px 0;min-width:0}
+.chain b{font-family:var(--display);font-weight:600;font-size:18px;display:block;line-height:1.15}
+.chain small{color:var(--muted);font-size:12.5px;display:block;margin-top:1px}
+.flag{color:var(--warn);font-size:11.5px;display:block;margin-top:3px;font-weight:500}
+.bay{display:flex;flex-direction:column;justify-content:center;gap:6px;padding:10px 6px;border:none;
+  background:none;cursor:pointer;min-height:64px;border-left:1px solid var(--line);text-align:left;font:inherit;color:inherit}
+.bay:hover,.bay:focus-visible{background:var(--surface);outline:none}
+.cans{display:flex;gap:3px}
+.can{width:11px;height:19px;border-radius:2px;background:var(--empty)}
+.bay[data-b="kdp"] .can.on{background:var(--kdp)}
+.bay[data-b="ko"] .can.on{background:var(--ko)}
+.bay[data-b="pep"] .can.on{background:var(--pep)}
+.n{font-family:var(--display);font-weight:700;font-size:17px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.n.zero{color:var(--empty)}
+
+/* verdict tab */
+.claims{display:grid;gap:14px;margin-top:4px}
+.cardX{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:16px 18px}
+.card.pro{box-shadow:inset 4px 0 0 var(--good)}
+.card.con{box-shadow:inset 4px 0 0 var(--warn)}
+.card.no{box-shadow:inset 4px 0 0 var(--muted)}
+.card h3{color:var(--fg)}
+.card ol,.card ul{margin:8px 0 0;padding-left:20px}
+.card li{margin:7px 0;font-size:15px}
+.card li b{font-variant-numeric:tabular-nums}
+.kill{width:100%;border-collapse:collapse;margin-top:10px;font-size:14.5px}
+.kill th{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:11.5px;
+  color:var(--muted);text-align:left;padding:6px 10px 6px 0;border-bottom:1px solid var(--line);font-weight:600}
+.kill td{padding:9px 10px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.kill td:nth-child(2){font-variant-numeric:tabular-nums;white-space:nowrap;font-family:var(--display);font-weight:600;font-size:17px}
+.pull{font-family:var(--display);font-size:clamp(21px,3.6vw,27px);line-height:1.18;margin:0 0 4px;text-wrap:balance}
+
+
+/* charts */
+.chart{margin:0 0 26px}
+.chart h3{margin:0 0 2px}
+.chart .cap{color:var(--muted);font-size:13px;margin:0 0 12px}
+.grp{font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;font-size:11px;
+  color:var(--muted);margin:14px 0 6px}
+.grp:first-of-type{margin-top:0}
+.brow{display:grid;grid-template-columns:minmax(120px,1.35fr) 1fr auto;gap:10px;align-items:center;
+  padding:5px 0}
+.brow .lbl{font-size:14px;line-height:1.25;min-width:0}
+.brow .lbl em{font-style:normal;color:var(--muted);font-size:12px;display:block}
+.track{height:22px;background:var(--blank);border-radius:2px;overflow:hidden;display:flex}
+.fill{height:100%}
+.fill.kdp{background:var(--kdp)} .fill.ko{background:var(--ko)} .fill.pep{background:var(--pep)}
+.fill.rb{background:var(--rb)}
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:0 0 12px}
+.leg span{display:flex;align-items:center;gap:5px}
+.leg i{width:11px;height:11px;border-radius:2px;display:block}
+.brow.tight{padding:3px 0;border:none}
+.brow.tight .lbl{font-size:13px}
+.brow.tight .track{height:16px}
+.brow.tight .val{font-size:14px}
+.fill.soft{opacity:.32}
+.brow .val{font-family:var(--display);font-weight:700;font-size:19px;font-variant-numeric:tabular-nums;
+  min-width:2.4em;text-align:right}
+.axis{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);
+  border-top:1px solid var(--line);padding-top:4px;margin-top:6px;font-variant-numeric:tabular-nums}
+.key{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:8px}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.key i{width:15px;height:12px;border-radius:2px;display:inline-block}
+.nots{display:grid;gap:8px;margin-top:4px}
+.not{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:baseline;font-size:14.5px}
+.not b{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:11px;
+  color:var(--muted);white-space:nowrap}
+
+/* the read */
+.rp-stage{background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:14px;margin-top:14px}
+.rp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.rp-go{font:inherit;font-family:var(--display);font-size:16px;font-weight:600;background:var(--kdp);
+  border:1px solid var(--kdp);border-radius:3px;color:#fff;padding:9px 18px;min-height:44px;cursor:pointer}
+.rp-go:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.rp-go[disabled]{opacity:.5;cursor:default}
+.rp-url{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted);
+  background:var(--bg);border:1px solid var(--line);border-radius:3px;padding:7px 10px;flex:1 1 220px;
+  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rp-clock{font-family:var(--display);font-weight:700;font-size:21px;font-variant-numeric:tabular-nums;
+  color:var(--muted);min-width:3.6em;text-align:right}
+.rp-track{position:relative;height:7px;background:var(--blank);border-radius:4px;margin:0 0 4px;overflow:visible}
+.rp-prog{position:absolute;inset:0 auto 0 0;width:0;background:var(--kdp);border-radius:4px}
+.rp-mark{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--warn)}
+.rp-marklab{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);
+  font-variant-numeric:tabular-nums;margin-bottom:14px}
+.rp-marklab b{color:var(--warn);font-weight:600;font-family:var(--display);text-transform:uppercase;letter-spacing:.07em}
+.rp-counts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.rp-c{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:10px 12px}
+.rp-c.bad{box-shadow:inset 4px 0 0 var(--warn)}
+.rp-c.good{box-shadow:inset 4px 0 0 var(--good)}
+.rp-c .k{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:10.5px;color:var(--muted)}
+.rp-c .v{font-family:var(--display);font-weight:700;font-size:33px;line-height:1.05;font-variant-numeric:tabular-nums}
+.rp-c .s{font-size:12px;color:var(--muted);line-height:1.3;margin-top:2px}
+.rp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:6px}
+.rp-t{aspect-ratio:3/4;border-radius:3px;background:var(--bg);border:1px solid var(--line);
+  opacity:0;transform:translateY(6px);transition:opacity .28s ease,transform .28s ease;
+  display:flex;flex-direction:column;justify-content:flex-end;padding:5px;overflow:hidden;position:relative}
+.rp-t::after{content:"";position:absolute;left:5px;right:5px;top:5px;height:52%;
+  border-radius:2px;background:var(--empty)}
+.rp-t.in{opacity:1;transform:none}
+.rp-t i{display:block;height:6px;border-radius:2px;background:var(--rb);margin-bottom:4px;width:78%}
+.rp-t u{display:block;height:6px;border-radius:2px;background:var(--empty);width:46%;text-decoration:none}
+.rp-t.sp{border-color:var(--warn);border-width:2px}
+.rp-t.sp::after{background:var(--blank)}
+.rp-t.sp::before{content:"AD";font-family:var(--display);font-weight:700;font-size:10px;letter-spacing:.1em;
+  color:var(--warn);align-self:flex-start;margin-bottom:auto;position:relative;z-index:1}
+.rp-plat{display:flex;align-items:center;gap:7px;margin-top:12px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.rp-dots{display:flex;gap:4px}
+.rp-dots b{width:10px;height:10px;border-radius:50%;background:var(--empty);display:block}
+.rp-dots b.on{background:var(--good)}
+.rp-say{margin-top:12px;font-size:14.5px;min-height:3em;border-left:3px solid var(--line);padding-left:12px;color:var(--muted)}
+.rp-say.hot{border-left-color:var(--warn);color:var(--fg)}
+.rp-say.done{border-left-color:var(--good);color:var(--fg)}
+.rp-tab{width:100%;border-collapse:collapse;margin-top:10px;font-size:14.5px}
+.rp-tab th{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:11px;
+  color:var(--muted);text-align:left;padding:6px 10px 6px 0;border-bottom:1px solid var(--line);font-weight:600}
+.rp-tab td{padding:8px 10px 8px 0;border-bottom:1px solid var(--line)}
+.rp-tab td.n{font-variant-numeric:tabular-nums;font-family:var(--display);font-weight:700;font-size:18px;
+  white-space:nowrap;text-align:right;width:3.2em}
+.rp-tab td.n.was{color:var(--warn)}
+.rp-tab td.n.is{color:var(--good)}
+.rp-tab td small{color:var(--muted);display:block;font-size:12px;line-height:1.3}
+@media (prefers-reduced-motion:reduce){.rp-t{transition:none}}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(20,12,10,.45);z-index:20}
+.drawer{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--surface);border-top:2px solid var(--fg);
+  border-radius:10px 10px 0 0;max-height:82vh;overflow-y:auto;
+  padding:18px max(18px,env(safe-area-inset-left,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-right,0px))}
+.drawer h3{font-family:var(--display);font-size:26px;margin:0;line-height:1.1}
+.drawer .sub{color:var(--muted);font-size:13.5px;margin:3px 0 14px}
+.packs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.sku{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.sku span:last-child{font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+.none{color:var(--muted);font-style:italic;padding:9px 0;font-size:14.5px}
+.src{margin-top:14px;font-size:12px;color:var(--muted);word-break:break-all;line-height:1.6}
+.src b{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-weight:600;display:block;font-size:11px}
+.close{margin-top:16px;width:100%;min-height:46px;border:1px solid var(--line);background:var(--bg);color:var(--fg);
+  border-radius:4px;font:inherit;font-weight:600;cursor:pointer}
+.note{margin-top:30px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:13.5px;max-width:68ch}
+.note b{color:var(--fg)}
+@media (max-width:560px){
+  .row,.headrow{grid-template-columns:1fr}
+  .headrow{display:none}
+  .bay{border-left:none;border-top:1px dotted var(--line);flex-direction:row;align-items:center;gap:10px;min-height:48px}
+  .bay::before{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--muted);width:76px;flex:none}
+  .bay[data-b="kdp"]::before{content:"Dr Pepper"}
+  .bay[data-b="ko"]::before{content:"Coca-Cola"}
+  .bay[data-b="pep"]::before{content:"Pepsi"}
+  .rankrow{grid-template-columns:1fr auto auto}
+  .rankrow .bar{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <p class="stamp">Read 17 Nov 2026 &middot; 25 US grocery chains &middot; all 50 states</p>
+  <h1>Watching a launch<br>cross the country</h1>
+  <p class="dek">Three soda launches, read on one morning across 25 chains covering every state. One finished rolling out last year. Two are still moving.</p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-p="guess" aria-selected="true">Guess first</button>
+    <button class="tab" role="tab" data-p="map" aria-selected="false">The map</button>
+    <button class="tab" role="tab" data-p="shelf" aria-selected="false">The shelf</button>
+    <button class="tab" role="tab" data-p="energy" aria-selected="false">Energy</button>
+    <button class="tab" role="tab" data-p="depth" aria-selected="false">Depth</button>
+    <button class="tab" role="tab" data-p="read" aria-selected="false">The read</button>
+    <button class="tab" role="tab" data-p="says" aria-selected="false">What it says</button>
+  </div>
+
+  <section class="panel" id="p-guess" role="tabpanel">
+    <h2>Where is Dr Pepper rolling its newest flavour first?</h2>
+    <p class="dek">Creamy Coconut launched this year and is in 11 of the 25 chains. Pick where it went first.</p>
+    <div class="choices" id="choices"></div>
+    <div id="reveal" hidden></div>
+  </section>
+
+  <section class="panel" id="p-map" role="tabpanel" hidden>
+    <h2>The same country, two launches apart</h2>
+    <p class="dek">Switch between launches. Each state shows the average of the sampled chains operating there; blank means none. Tap a coloured state.</p>
+    <p class="swlab">Soda launches</p>
+    <div class="switch" id="mapsw">
+      <button class="sw" data-k="bb" aria-pressed="true">Blackberry &middot; 2025</button>
+      <button class="sw" data-k="cc" aria-pressed="false">Creamy Coconut &middot; 2026</button>
+      <button class="sw" data-k="cf" aria-pressed="false">Cherry Float &middot; KO 2026</button>
+      <span class="swlab inline">Energy brands</span>
+      <button class="sw" data-k="eg" aria-pressed="false">Ghost</button>
+      <button class="sw" data-k="ebl" aria-pressed="false">Bloom</button>
+      <button class="sw" data-k="ec4" aria-pressed="false">C4</button>
+      <button class="sw" data-k="ebr" aria-pressed="false">Black Rifle</button>
+    </div>
+    <div class="map" id="map"></div>
+    <div class="scale">
+      <span>none</span><i style="background:var(--d0)"></i><i style="background:var(--d1)"></i>
+      <i style="background:var(--d2)"></i><i style="background:var(--d3)"></i><i style="background:var(--d4)"></i><span id="scalemax">2 SKUs</span>
+      <span style="margin-left:10px"><i style="background:var(--blank)"></i> not sampled</span>
+    </div>
+  </section>
+
+  <section class="panel" id="p-shelf" role="tabpanel" hidden>
+    <h2>What each chain stocks</h2>
+    <p class="dek">One mark per 12-can pack. Dr Pepper has two launches in play, so four are possible; the others have one, so two. Tap a bay for products, prices and source.</p>
+    <div class="shelf">
+      <div class="headrow"><div>Chain</div><div>Dr Pepper</div><div>Coca-Cola</div><div>Pepsi</div></div>
+      <div id="rows"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-energy" role="tabpanel" hidden>
+    <p class="pull">The company named two of its four energy brands as driving share. Those two are the two on the most shelves.</p>
+
+    <div class="chart">
+      <h3>Chains stocking each brand</h3>
+      <p class="cap">Of 25. Ghost and Bloom are the two Keurig Dr Pepper credited with its first-quarter share gain.</p>
+      <div class="brow"><div class="lbl">Bloom</div>
+        <div class="track"><div class="fill kdp" style="width:92%"></div></div><div class="val">23</div></div>
+      <div class="brow"><div class="lbl">Ghost</div>
+        <div class="track"><div class="fill kdp" style="width:88%"></div></div><div class="val">22</div></div>
+      <div class="brow"><div class="lbl">C4</div>
+        <div class="track"><div class="fill kdp" style="width:84%"></div></div><div class="val">21</div></div>
+      <div class="brow"><div class="lbl">Black Rifle<em>newest of the four</em></div>
+        <div class="track"><div class="fill kdp" style="width:32%"></div></div><div class="val">8</div></div>
+      <div class="axis"><span>0</span><span>25 chains</span></div>
+    </div>
+
+    <div class="chart">
+      <h3>Brands on shelf, by region</h3>
+      <p class="cap">Average of the four, per chain. Depth puts the Midwest first; the soda launches put it third.</p>
+      <div class="brow"><div class="lbl">Midwest<em>5 chains</em></div>
+        <div class="track"><div class="fill kdp" style="width:90%"></div></div><div class="val">3.60</div></div>
+      <div class="brow"><div class="lbl">South<em>9 chains</em></div>
+        <div class="track"><div class="fill kdp" style="width:80.5%"></div></div><div class="val">3.22</div></div>
+      <div class="brow"><div class="lbl">West<em>7 chains</em></div>
+        <div class="track"><div class="fill kdp" style="width:64.3%"></div></div><div class="val">2.57</div></div>
+      <div class="brow"><div class="lbl">Northeast<em>4 chains</em></div>
+        <div class="track"><div class="fill kdp" style="width:56%"></div></div><div class="val">2.25</div></div>
+      <div class="axis"><span>0</span><span>4 brands</span></div>
+    </div>
+
+    <div class="chart">
+      <h3>Every chain, every brand</h3>
+      <p class="cap">Filled means stocked. Two chains carry none of the four: Ingles and Market Basket.</p>
+      <div class="mx" id="mx"></div>
+    </div>
+
+    <div class="chart">
+      <h3>Black Rifle is barely in grocery</h3>
+      <p class="cap">Stocked at eight chains, all in the South and the Midwest: Food Lion, Food City, Randalls, Tom Thumb, Homeland, Meijer, Festival Foods, Hornbacher&rsquo;s. None of the four Northeast chains, none of the seven Western ones. Twenty-four products in all, against Monster&rsquo;s 583. The company positions it for convenience stores, which this sample cannot see.</p>
+    </div>
+
+    <div class="chart">
+      <h3>One retailer, one answer</h3>
+      <p class="cap">Kroger banners in the sample. All three carry the same three brands &mdash; Ghost, Bloom and C4, not Black Rifle. An earlier read of these pages showed two of them empty; it had missed products that load late.</p>
+      <div class="brow"><div class="lbl">Smith&rsquo;s<em>Utah, Nevada</em></div>
+        <div class="track"><div class="fill kdp" style="width:75%"></div></div><div class="val">3</div></div>
+      <div class="brow"><div class="lbl">King Soopers<em>Colorado</em></div>
+        <div class="track"><div class="fill kdp" style="width:75%"></div></div><div class="val">3</div></div>
+      <div class="brow"><div class="lbl">Fred Meyer<em>Pacific Northwest, Alaska</em></div>
+        <div class="track"><div class="fill kdp" style="width:75%"></div></div><div class="val">3</div></div>
+      <div class="axis"><span>0</span><span>4 brands</span></div>
+    </div>
+
+    <div class="chart">
+      <h3>What this misses</h3>
+      <div class="nots">
+        <div class="not"><b>no convenience</b><span>Energy sells mostly through convenience stores and forecourts. Casey&rsquo;s, Sheetz and Gopuff all refused to load from this delivery address, so the channel that matters most is absent. Black Rifle&rsquo;s eight is a floor, not a count.</span></div>
+        <div class="not"><b>presence only</b><span>This tab is stocked-or-not. For how deep each brand goes, see Depth.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-depth" role="tabpanel" hidden>
+    <p class="pull">Presence says who is on the shelf. Depth says how much of it they hold.</p>
+    <p class="dek">Distinct products on each brand&rsquo;s search page, read at the same 25 chains on the same morning. Eight brands, two hundred reads.</p>
+
+    <div class="chart">
+      <h3>Who holds the energy shelf</h3>
+      <p class="cap">Total distinct products across all 25 chains, grouped by the system that distributes the brand.</p>
+      <div id="dsys"></div>
+      <div class="axis"><span>0</span><span id="dsysmax"></span></div>
+    </div>
+
+    <div class="chart">
+      <h3>Brand by brand</h3>
+      <p class="cap">Bloom alone is deeper than Alani Nu, which Pepsi distributes. Black Rifle is the newest and barely in grocery.</p>
+      <div id="dbrand"></div>
+      <div class="axis"><span>0</span><span id="dbrandmax"></span></div>
+    </div>
+
+    <div class="chart">
+      <h3>Keurig Dr Pepper&rsquo;s share of shelf depth, by region</h3>
+      <p class="cap">Share of the eight tracked brands&rsquo; products. The Midwest is deepest &mdash; the reverse of the soda launches, where it ran fourth.</p>
+      <div id="dreg"></div>
+      <div class="axis"><span>0%</span><span>40%</span></div>
+    </div>
+
+    <div class="chart">
+      <h3>Every chain, split four ways</h3>
+      <p class="cap">Each bar is one chain&rsquo;s tracked energy products, in proportion. The number is Keurig Dr Pepper&rsquo;s share of it.</p>
+      <div class="leg">
+        <span><i style="background:var(--kdp)"></i>Keurig Dr Pepper</span>
+        <span><i style="background:var(--pep)"></i>Pepsi system</span>
+        <span><i style="background:var(--ko)"></i>Coca-Cola system</span>
+        <span><i style="background:var(--rb)"></i>Red Bull</span>
+      </div>
+      <div id="dchains"></div>
+    </div>
+
+    <div class="chart">
+      <h3>What this does not say</h3>
+      <div class="nots">
+        <div class="not"><b>floors</b><span>Counts stop at the first results page, about 45 products. Harmons reads 43 Monster and 44 Red Bull; both are floors, not counts.</span></div>
+        <div class="not"><b>not facings</b><span>Distinct products, not shelf space and not volume. A chain can carry twelve flavours in one narrow bay.</span></div>
+        <div class="not"><b>grocery only</b><span>All 25 are supermarket banners, Meijer the one supercenter. Convenience &mdash; where energy actually sells &mdash; is absent entirely, along with mass, club, drug and fountain. Every convenience chain we tried refuses to show a catalogue without a named store. That gap runs one way: it understates Black Rifle, which is built for convenience, and leaves grocery-led Bloom close to whole. Keurig Dr Pepper&rsquo;s 799 is the conservative side of the error.</span></div>
+        <div class="not"><b>a feed gap</b><span>Red Bull reads zero at Smith&rsquo;s, King Soopers and Fred Meyer, on fully loaded pages. Three Kroger divisions, one answer: the brand is almost certainly missing from Kroger&rsquo;s delivery feed rather than from the shelf. Red Bull&rsquo;s total is understated.</span></div>
+        <div class="not"><b>remeasured</b><span>An earlier read of this same shelf used page text and missed products that load late. Nine of a hundred cells read empty when they were not, and two findings drawn from them were withdrawn. These counts replace them.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-read" role="tabpanel" hidden>
+    <h2>Every number here was wrong the first time</h2>
+    <p class="dek">These pages do not finish loading when they look finished. Four sponsored tiles
+    arrive at once and sit there. The real shelf comes seconds later. Press play and watch the gap.</p>
+
+    <div class="rp-stage">
+      <div class="rp-bar">
+        <button class="rp-go" id="rpgo">&#9654;&nbsp; Play the read</button>
+        <span class="rp-url" id="rpurl">instacart.com/store/food-lion/s?k=red+bull</span>
+        <span class="rp-clock" id="rpclock">0.0s</span>
+      </div>
+
+      <div class="rp-track"><div class="rp-prog" id="rpprog"></div>
+        <div class="rp-mark" style="left:52.5%"></div></div>
+      <div class="rp-marklab"><span>page opens</span><b>8.4s &mdash; first pass stopped here</b><span>16.0s</span></div>
+
+      <div class="rp-counts">
+        <div class="rp-c"><div class="k">products on page</div><div class="v" id="rpnow">0</div>
+          <div class="s">distinct product links matching <i>red bull</i></div></div>
+        <div class="rp-c bad"><div class="k">fixed 8.4s scroll</div><div class="v" id="rpbad">&mdash;</div>
+          <div class="s">what the first pass wrote down</div></div>
+        <div class="rp-c good"><div class="k">plateau + floor</div><div class="v" id="rpgood">&mdash;</div>
+          <div class="s">unchanged four reads running, and at least 20</div></div>
+      </div>
+
+      <div class="rp-grid" id="rpgrid"></div>
+
+      <div class="rp-plat"><span>Plateau check</span><span class="rp-dots" id="rpdots"></span>
+        <span id="rpdotlab">waiting for the count to stop moving</span></div>
+
+      <p class="rp-say" id="rpsay">Food Lion, 17 November, query <i>red bull</i>. Reconstructed from the
+      diagnostic re-run &mdash; the timings and both counts are the ones we recorded; the tiles are drawn,
+      not a recording of the page.</p>
+    </div>
+
+    <div class="chart" style="margin-top:30px">
+      <h3>The same shelf, read twice</h3>
+      <p class="cap">Food Lion. The first pass used a fixed scroll and stopped early. The whole row was
+      thrown away, not corrected.</p>
+      <table class="rp-tab">
+        <thead><tr><th>Brand</th><th class="n">First</th><th class="n">Final</th><th>What happened</th></tr></thead>
+        <tbody>
+          <tr><td>Red Bull</td><td class="n was">2</td><td class="n is">28</td>
+            <td>Organic grid had not rendered<small>Re-running the same query with a stopwatch caught it mid-render: 4 products, then 27 a few seconds later. That re-run is what the replay above shows.</small></td></tr>
+          <tr><td>Celsius</td><td class="n was">3</td><td class="n is">22</td>
+            <td>Same<small></small></td></tr>
+          <tr><td>Ghost</td><td class="n was">0</td><td class="n is">9</td>
+            <td>Same &mdash; and this is the zero that gave it away<small>Ghost could not be absent from Food Lion; the presence data said it was there</small></td></tr>
+          <tr><td>Monster</td><td class="n was">27</td><td class="n is">24</td>
+            <td>Counted by name, not by link<small>Three of the 27 were banner headings, not products</small></td></tr>
+          <tr><td>Black Rifle</td><td class="n was">4</td><td class="n is">3</td>
+            <td>The pattern matched Black Rifle <i>Coffee</i><small>A later run read 13 here; ten were coffee, not energy</small></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="chart">
+      <h3>What replaced the clock</h3>
+      <div class="nots">
+        <div class="not"><b>not a timer</b><span>Stop when the product count is unchanged four reads in a row
+          <i>and</i> is at least 20. A timer stops when you run out of patience; this stops when the page does.</span></div>
+        <div class="not"><b>the floor matters</b><span>Plateau alone still failed. Four sponsored tiles are
+          a perfectly stable count. The floor is what tells a finished page from an empty one.</span></div>
+        <div class="not"><b>a ceiling too</b><span>30 seconds, then give up and record what is there.
+          Three chains never got past the sponsored row and were re-run by hand.</span></div>
+        <div class="not"><b>why it is honest</b><span>This bug only ever removes products. Every error it caused
+          was a number too low &mdash; which is why the headline is a floor, not an estimate.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-says" role="tabpanel" hidden>
+    <p class="pull">A launch arrives as a pair, one chain at a time.</p>
+
+    <div class="chart">
+      <h3>How far each launch has travelled</h3>
+      <p class="cap">Chains stocking it, of 25. Grouped by year of launch, so the comparison is age for age.</p>
+      <p class="grp">Launched 2025</p>
+      <div class="brow"><div class="lbl">Dr Pepper Blackberry</div>
+        <div class="track"><div class="fill kdp" style="width:88%"></div></div><div class="val">22</div></div>
+      <div class="brow"><div class="lbl">Pepsi Wild Cherry &amp; Cream</div>
+        <div class="track"><div class="fill pep" style="width:80%"></div></div><div class="val">20</div></div>
+      <p class="grp">Launched 2026</p>
+      <div class="brow"><div class="lbl">Coca-Cola Cherry Float</div>
+        <div class="track"><div class="fill ko" style="width:76%"></div></div><div class="val">19</div></div>
+      <div class="brow"><div class="lbl">Dr Pepper Creamy Coconut</div>
+        <div class="track"><div class="fill kdp" style="width:44%"></div></div><div class="val">11</div></div>
+      <div class="axis"><span>0</span><span>25 chains</span></div>
+    </div>
+
+    <div class="chart">
+      <h3>When it lands, it lands as two</h3>
+      <p class="cap">Of the chains stocking each launch, how many take both the regular and the zero-sugar pack.</p>
+      <div class="brow"><div class="lbl">Blackberry<em>22 chains</em></div>
+        <div class="track"><div class="fill kdp" style="width:86%"></div><div class="fill kdp soft" style="width:14%"></div></div>
+        <div class="val">19</div></div>
+      <div class="brow"><div class="lbl">Wild Cherry &amp; Cream<em>20 chains</em></div>
+        <div class="track"><div class="fill pep" style="width:85%"></div><div class="fill pep soft" style="width:15%"></div></div>
+        <div class="val">17</div></div>
+      <div class="brow"><div class="lbl">Cherry Float<em>19 chains</em></div>
+        <div class="track"><div class="fill ko" style="width:89%"></div><div class="fill ko soft" style="width:11%"></div></div>
+        <div class="val">17</div></div>
+      <div class="brow"><div class="lbl">Creamy Coconut<em>11 chains</em></div>
+        <div class="track"><div class="fill kdp" style="width:45%"></div><div class="fill kdp soft" style="width:55%"></div></div>
+        <div class="val">5</div></div>
+      <div class="key"><span><i style="background:var(--kdp)"></i>both packs</span>
+        <span><i style="background:var(--kdp);opacity:.32"></i>one pack only</span></div>
+    </div>
+
+    <div class="chart">
+      <h3>Where the 2026 flavour went first</h3>
+      <p class="cap">Creamy Coconut, average SKUs per chain, by group. Two is full depth.</p>
+      <div class="brow"><div class="lbl">Texas and Oklahoma<em>4 chains</em></div>
+        <div class="track"><div class="fill kdp" style="width:62.5%"></div></div><div class="val">1.25</div></div>
+      <div class="brow"><div class="lbl">Mountain West<em>4 chains</em></div>
+        <div class="track"><div class="fill kdp" style="width:62.5%"></div></div><div class="val">1.25</div></div>
+      <div class="brow"><div class="lbl">Pacific<em>3 chains</em></div>
+        <div class="track"><div class="fill kdp" style="width:33.5%"></div></div><div class="val">0.67</div></div>
+      <div class="brow"><div class="lbl">Midwest<em>5 chains</em></div>
+        <div class="track"><div class="fill kdp" style="width:30%"></div></div><div class="val">0.60</div></div>
+      <div class="brow"><div class="lbl">Southeast<em>5 chains</em></div>
+        <div class="track"><div class="fill kdp" style="width:10%"></div></div><div class="val">0.20</div></div>
+      <div class="brow"><div class="lbl">Northeast<em>4 chains</em></div>
+        <div class="track"></div><div class="val">0.00</div></div>
+      <div class="axis"><span>0</span><span>2 SKUs</span></div>
+    </div>
+
+    <div class="chart">
+      <h3>What would break it</h3>
+      <p class="cap">Fixed 17 November, before the next round is read.</p>
+      <table class="kill">
+        <thead><tr><th>Measure</th><th>Now</th><th>Breaks at</th></tr></thead>
+        <tbody>
+          <tr><td>Blackberry, chains stocking</td><td>22</td><td>below 20</td></tr>
+          <tr><td>Creamy Coconut, chains stocking</td><td>11</td><td>under 15 at the end of Q1</td></tr>
+          <tr><td>Dr Pepper 12-pack at Price Chopper</td><td>0</td><td>any appearance</td></tr>
+          <tr><td>Launches arriving as a pair</td><td>19 / 22</td><td>below 15</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="chart">
+      <h3>What this is not</h3>
+      <div class="nots">
+        <div class="not"><b>not share</b><span>Shelf width. No volume, no facings, no sell-through.</span></div>
+        <div class="not"><b>not price</b><span>At four chains Dr Pepper held list price most often. At 25 the ranking vanished.</span></div>
+        <div class="not"><b>not the multiple</b><span>Two launch SKUs cannot carry a Beverage re-rating.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">
+    <b>Counted:</b> 12-can fridge packs only, regular and zero sugar separately. Dr Pepper Blackberry and
+    Creamy Coconut, Coca-Cola Cherry Float, Pepsi Wild Cherry &amp; Cream. Found by product name, not brand name
+    &mdash; a brand search hides later pages, which cost us two SKUs at one chain before we caught it.
+    <b>Source:</b> six chains are one confirmed store on their own storefront; nineteen are chain catalogues,
+    each belonging to one region but not to a named store. Winn-Dixie would not load here.
+    <b>Next rounds:</b> 24 November and 1 December, same chains, same queries, same rule.
+  </p>
+</div>
+
+<script>
+var CH = [{"c": "Food City", "grp": "Southeast", "reg": "South", "loc": "TN VA KY GA AL", "ver": false, "bb": [["Dr Pepper Blackberry", "$12.89"], ["Blackberry Zero Sugar", "$12.89"]], "cc": [], "cf": [], "wc": [["Pepsi Wild Cherry and Cream", "$12.89"], ["Wild Cherry and Cream Zero", "$12.89"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 1, "sk": {"monster": 25, "celsius": 12, "red_bull": 24, "bloom": 12, "alani": 17, "ghost": 6, "c4": 8, "black_rifle": 2}, "url": "instacart.com/store/food-city", "flag": ""}, {"c": "Food Lion", "grp": "Southeast", "reg": "South", "loc": "NC VA SC GA TN MD DE KY WV PA", "ver": false, "bb": [["Dr Pepper Blackberry $10.99 →", "$8.99 card"]], "cc": [], "cf": [["Coca-Cola Cherry Float $10.99 →", "$8.99 card"], ["Cherry Float Zero Sugar $10.99 →", "$8.99 card"]], "wc": [["Pepsi Wild Cherry and Cream $10.98 →", "$5.49 card"], ["Wild Cherry and Cream Zero $10.98 →", "$5.49 card"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 1, "sk": {"monster": 24, "celsius": 22, "red_bull": 28, "bloom": 12, "alani": 16, "ghost": 9, "c4": 11, "black_rifle": 3}, "url": "instacart.com/store/food-lion", "flag": "Biggest footprint here; Blackberry only, no Creamy Coconut"}, {"c": "Ingles", "grp": "Southeast", "reg": "South", "loc": "NC SC GA TN VA AL", "ver": false, "bb": [["Dr Pepper Blackberry", "$11.89"], ["Blackberry Zero Sugar", "$11.89"]], "cc": [], "cf": [["Coca-Cola Cherry Float", "$12.99"]], "wc": [["Pepsi Wild Cherry and Cream", "$11.89"], ["Wild Cherry and Cream Zero", "$11.89"]], "eg": 0, "ec4": 0, "ebl": 0, "ebr": 0, "sk": {"monster": 19, "celsius": 13, "red_bull": 21, "bloom": 0, "alani": 1, "ghost": 0, "c4": 0, "black_rifle": 0}, "url": "instacart.com/store/ingles", "flag": "The only chain stocking Cherry Float at a single SKU"}, {"c": "Publix", "grp": "Southeast", "reg": "South", "loc": "FL GA AL SC NC TN VA KY", "ver": false, "bb": [["Dr Pepper Blackberry", "$12.89"], ["Blackberry Zero Sugar", "$12.89"]], "cc": [["Dr Pepper Creamy Coconut", "$12.89"]], "cf": [["Coca-Cola Cherry Float", "$12.79"], ["Cherry Float Zero Sugar", "$12.79"]], "wc": [["Wild Cherry and Cream Zero", "$12.89"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 0, "sk": {"monster": 16, "celsius": 26, "red_bull": 23, "bloom": 13, "alani": 10, "ghost": 6, "c4": 7, "black_rifle": 0}, "url": "instacart.com/store/publix", "flag": ""}, {"c": "Rouses Markets", "grp": "Southeast", "reg": "South", "loc": "LA MS AL", "ver": false, "bb": [["Dr Pepper Blackberry", "$10.20"], ["Blackberry Zero Sugar", "$10.20"]], "cc": [], "cf": [], "wc": [["Pepsi Wild Cherry and Cream", "$9.80"], ["Wild Cherry and Cream Zero", "$9.80"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 0, "sk": {"monster": 26, "celsius": 24, "red_bull": 26, "bloom": 17, "alani": 17, "ghost": 8, "c4": 14, "black_rifle": 0}, "url": "instacart.com/store/rouses", "flag": ""}, {"c": "Brookshire's", "grp": "Texas and Oklahoma", "reg": "South", "loc": "TX LA AR", "ver": false, "bb": [["Dr Pepper Blackberry", "$11.99"], ["Blackberry Zero Sugar", "$11.99"]], "cc": [["Dr Pepper Creamy Coconut", "$11.99"]], "cf": [["Coca-Cola Cherry Float", "$11.99"], ["Cherry Float Zero Sugar", "$11.99"]], "wc": [["Pepsi Wild Cherry and Cream", "$11.99"], ["Wild Cherry and Cream Zero", "$11.99"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 0, "sk": {"monster": 25, "celsius": 13, "red_bull": 26, "bloom": 11, "alani": 15, "ghost": 9, "c4": 11, "black_rifle": 0}, "url": "instacart.com/store/brookshires", "flag": ""}, {"c": "Homeland", "grp": "Texas and Oklahoma", "reg": "South", "loc": "OK", "ver": false, "bb": [["Dr Pepper Blackberry", "$11.89"], ["Blackberry Zero Sugar", "$11.89"]], "cc": [["Dr Pepper Creamy Coconut", "$11.89"]], "cf": [["Coca-Cola Cherry Float", "$11.89"], ["Cherry Float Zero Sugar", "$11.89"]], "wc": [["Pepsi Wild Cherry and Cream", "$11.29"], ["Wild Cherry and Cream Zero", "$11.29"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 1, "sk": {"monster": 25, "celsius": 24, "red_bull": 26, "bloom": 16, "alani": 19, "ghost": 16, "c4": 16, "black_rifle": 4}, "url": "instacart.com/store/homeland", "flag": ""}, {"c": "Randalls", "grp": "Texas and Oklahoma", "reg": "South", "loc": "TX", "ver": false, "bb": [["Dr Pepper Blackberry", "$13.99"], ["Blackberry Zero Sugar", "$13.99"]], "cc": [["Creamy Coconut Zero Sugar", "$13.99"]], "cf": [["Coca-Cola Cherry Float", "$13.99"], ["Cherry Float Zero Sugar", "$13.99"]], "wc": [["Pepsi Wild Cherry and Cream", "$13.99"], ["Wild Cherry and Cream Zero", "$13.99"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 1, "sk": {"monster": 27, "celsius": 21, "red_bull": 24, "bloom": 20, "alani": 13, "ghost": 14, "c4": 20, "black_rifle": 3}, "url": "instacart.com/store/randalls", "flag": ""}, {"c": "Tom Thumb", "grp": "Texas and Oklahoma", "reg": "South", "loc": "TX", "ver": false, "bb": [["Dr Pepper Blackberry", "$13.99"], ["Blackberry Zero Sugar", "$13.99"]], "cc": [["Dr Pepper Creamy Coconut", "$13.99"], ["Creamy Coconut Zero Sugar", "$13.99"]], "cf": [["Coca-Cola Cherry Float", "$13.99"], ["Cherry Float Zero Sugar", "$13.99"]], "wc": [["Pepsi Wild Cherry and Cream", "$13.99"], ["Wild Cherry and Cream Zero", "$13.99"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 1, "sk": {"monster": 27, "celsius": 23, "red_bull": 28, "bloom": 20, "alani": 18, "ghost": 12, "c4": 19, "black_rifle": 3}, "url": "instacart.com/store/tom-thumb", "flag": "All four Dr Pepper launch SKUs on shelf"}, {"c": "Market Basket", "grp": "Northeast", "reg": "Northeast", "loc": "MA NH ME RI", "ver": false, "bb": [], "cc": [], "cf": [], "wc": [], "eg": 0, "ec4": 0, "ebl": 0, "ebr": 0, "sk": {"monster": 5, "celsius": 0, "red_bull": 12, "bloom": 0, "alani": 0, "ghost": 0, "c4": 0, "black_rifle": 0}, "url": "instacart.com/store/market-basket", "flag": "Stocks none of the three companies' launches"}, {"c": "Price Chopper", "grp": "Northeast", "reg": "Northeast", "loc": "NY VT CT MA NH PA", "ver": true, "bb": [], "cc": [], "cf": [], "wc": [["Pepsi Wild Cherry and Cream", "$12.19"], ["Wild Cherry and Cream Zero", "$12.19"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 0, "sk": {"monster": 16, "celsius": 14, "red_bull": 28, "bloom": 10, "alani": 10, "ghost": 6, "c4": 7, "black_rifle": 0}, "url": "shop.pricechopper.com/store/price-chopper-ny", "flag": "Stocks no Dr Pepper 12-pack at all, in any flavour"}, {"c": "ShopRite", "grp": "Northeast", "reg": "Northeast", "loc": "NJ NY PA CT DE MD", "ver": false, "bb": [["Dr Pepper Blackberry", "$12.47"]], "cc": [], "cf": [["Coca-Cola Cherry Float", "$12.47"], ["Cherry Float Zero Sugar", "$12.47"]], "wc": [], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 0, "sk": {"monster": 16, "celsius": 21, "red_bull": 26, "bloom": 14, "alani": 5, "ghost": 10, "c4": 14, "black_rifle": 0}, "url": "instacart.com/store/shoprite", "flag": ""}, {"c": "Stop and Shop Express", "grp": "Northeast", "reg": "Northeast", "loc": "NY", "ver": true, "bb": [["Dr Pepper Blackberry", "$12.99"]], "cc": [], "cf": [["Coca-Cola Cherry Float", "$12.99"], ["Cherry Float Zero Sugar", "$12.99"]], "wc": [["Pepsi Wild Cherry and Cream", "$12.99"], ["Wild Cherry and Cream Zero", "$12.99"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 0, "sk": {"monster": 10, "celsius": 11, "red_bull": 6, "bloom": 4, "alani": 2, "ghost": 1, "c4": 1, "black_rifle": 0}, "url": "instacart.com/store/stop-shop-express", "flag": "Small-format banner — carries fewer SKUs by design"}, {"c": "Dierbergs", "grp": "Midwest", "reg": "Midwest", "loc": "MO IL", "ver": true, "bb": [["Dr Pepper Blackberry", "$9.79"], ["Blackberry Zero Sugar", "$9.79"]], "cc": [["Dr Pepper Creamy Coconut", "$9.79"], ["Creamy Coconut Zero Sugar", "$9.79"]], "cf": [["Coca-Cola Cherry Float", "$9.79"], ["Cherry Float Zero Sugar", "$9.79"]], "wc": [["Pepsi Wild Cherry and Cream", "$9.79"], ["Wild Cherry and Cream Zero", "$9.79"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 0, "sk": {"monster": 33, "celsius": 35, "red_bull": 33, "bloom": 27, "alani": 32, "ghost": 21, "c4": 17, "black_rifle": 0}, "url": "shop.dierbergs.com/store/dierbergs-markets", "flag": ""}, {"c": "Festival Foods", "grp": "Midwest", "reg": "Midwest", "loc": "WI", "ver": true, "bb": [["Dr Pepper Blackberry", "$10.99"], ["Blackberry Zero Sugar", "$10.99"]], "cc": [["Dr Pepper Creamy Coconut", "$9.99"]], "cf": [["Coca-Cola Cherry Float", "$10.99"], ["Cherry Float Zero Sugar", "$10.99"]], "wc": [["Wild Cherry and Cream Zero", "$10.99"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 1, "sk": {"monster": 34, "celsius": 25, "red_bull": 27, "bloom": 13, "alani": 17, "ghost": 10, "c4": 8, "black_rifle": 2}, "url": "shop.festfoods.com/store/festival-foods", "flag": ""}, {"c": "Hornbacher's", "grp": "Midwest", "reg": "Midwest", "loc": "ND MN", "ver": false, "bb": [["Dr Pepper Blackberry", "$9.99"], ["Blackberry Zero Sugar", "$9.99"]], "cc": [], "cf": [["Coca-Cola Cherry Float", "$10.99"], ["Cherry Float Zero Sugar", "$10.99"]], "wc": [["Pepsi Wild Cherry and Cream", "$7.99"], ["Wild Cherry and Cream Zero", "$7.99"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 1, "sk": {"monster": 25, "celsius": 24, "red_bull": 22, "bloom": 20, "alani": 14, "ghost": 10, "c4": 6, "black_rifle": 4}, "url": "instacart.com/store/hornbachers", "flag": ""}, {"c": "Hy-Vee", "grp": "Midwest", "reg": "Midwest", "loc": "IA IL KS MN MO NE SD WI", "ver": false, "bb": [["Dr Pepper Blackberry", "$9.99"], ["Blackberry Zero Sugar", "$9.99"]], "cc": [], "cf": [["Coca-Cola Cherry Float", "$9.99"], ["Cherry Float Zero Sugar", "$9.99"]], "wc": [["Pepsi Wild Cherry and Cream", "$9.49"], ["Wild Cherry and Cream Zero", "$9.49"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 0, "sk": {"monster": 24, "celsius": 23, "red_bull": 26, "bloom": 18, "alani": 24, "ghost": 15, "c4": 20, "black_rifle": 0}, "url": "instacart.com/store/hy-vee", "flag": ""}, {"c": "Meijer", "grp": "Midwest", "reg": "Midwest", "loc": "MI OH IN IL KY WI", "ver": false, "bb": [["Dr Pepper Blackberry", "$9.99"], ["Blackberry Zero Sugar", "$9.99"]], "cc": [], "cf": [["Coca-Cola Cherry Float", "$9.99"], ["Cherry Float Zero Sugar", "$9.99"]], "wc": [["Pepsi Wild Cherry and Cream", "$9.99"], ["Wild Cherry and Cream Zero", "$9.99"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 1, "sk": {"monster": 26, "celsius": 25, "red_bull": 26, "bloom": 23, "alani": 16, "ghost": 9, "c4": 10, "black_rifle": 3}, "url": "instacart.com/store/meijer", "flag": ""}, {"c": "Bashas'", "grp": "Mountain West", "reg": "West", "loc": "AZ", "ver": false, "bb": [["Dr Pepper Blackberry", "$11.99"], ["Blackberry Zero Sugar", "$11.99"]], "cc": [["Dr Pepper Creamy Coconut", "$11.99"]], "cf": [], "wc": [], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 0, "sk": {"monster": 26, "celsius": 16, "red_bull": 29, "bloom": 15, "alani": 8, "ghost": 9, "c4": 9, "black_rifle": 0}, "url": "instacart.com/store/bashas", "flag": "Dr Pepper three deep; neither rival's launch is stocked"}, {"c": "Harmons", "grp": "Mountain West", "reg": "West", "loc": "UT", "ver": true, "bb": [["Dr Pepper Blackberry", "$11.99"], ["Blackberry Zero Sugar", "$11.99"]], "cc": [["Dr Pepper Creamy Coconut", "$11.99"], ["Creamy Coconut Zero Sugar", "$11.99"]], "cf": [["Coca-Cola Cherry Float", "$11.99"], ["Cherry Float Zero Sugar", "$11.99"]], "wc": [["Pepsi Wild Cherry and Cream", "$11.99"], ["Wild Cherry and Cream Zero", "$11.99"]], "eg": 1, "ec4": 0, "ebl": 1, "ebr": 0, "sk": {"monster": 43, "celsius": 30, "red_bull": 44, "bloom": 16, "alani": 14, "ghost": 12, "c4": 0, "black_rifle": 0}, "url": "shop.harmonsgrocery.com/store/harmons", "flag": "Zero Sugar Creamy Coconut carries a best-seller tag here"}, {"c": "King Soopers", "grp": "Mountain West", "reg": "West", "loc": "CO", "ver": false, "bb": [["Dr Pepper Blackberry", "$12.99"], ["Blackberry Zero Sugar", "$12.99"]], "cc": [], "cf": [["Coca-Cola Cherry Float", "$12.99"], ["Cherry Float Zero Sugar", "$12.99"]], "wc": [], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 0, "sk": {"monster": 24, "celsius": 24, "red_bull": 0, "bloom": 21, "alani": 10, "ghost": 3, "c4": 2, "black_rifle": 0}, "url": "instacart.com/store/king-soopers", "flag": ""}, {"c": "Smith's", "grp": "Mountain West", "reg": "West", "loc": "UT NV NM ID MT WY AZ", "ver": false, "bb": [["Dr Pepper Blackberry", "$12.99"], ["Blackberry Zero Sugar", "$12.99"]], "cc": [["Dr Pepper Creamy Coconut", "$12.99"], ["Creamy Coconut Zero Sugar", "$12.99"]], "cf": [["Coca-Cola Cherry Float", "$12.99"], ["Cherry Float Zero Sugar", "$12.99"]], "wc": [["Pepsi Wild Cherry and Cream", "$12.99"], ["Wild Cherry and Cream Zero", "$12.99"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 0, "sk": {"monster": 28, "celsius": 24, "red_bull": 0, "bloom": 19, "alani": 17, "ghost": 9, "c4": 5, "black_rifle": 0}, "url": "instacart.com/store/smiths", "flag": ""}, {"c": "Foodland", "grp": "Pacific", "reg": "West", "loc": "HI", "ver": false, "bb": [["Dr Pepper Blackberry", "$14.89"], ["Blackberry Zero Sugar", "$14.89"]], "cc": [["Dr Pepper Creamy Coconut", "$14.89"], ["Creamy Coconut Zero Sugar", "$14.89"]], "cf": [["Coca-Cola Cherry Float", "$14.89"]], "wc": [["Wild Cherry and Cream Zero", "$13.29"]], "eg": 1, "ec4": 0, "ebl": 1, "ebr": 0, "sk": {"monster": 25, "celsius": 14, "red_bull": 22, "bloom": 8, "alani": 7, "ghost": 3, "c4": 0, "black_rifle": 0}, "url": "instacart.com/store/foodland", "flag": "Most expensive market in the set, and Dr Pepper's full four"}, {"c": "Fred Meyer", "grp": "Pacific", "reg": "West", "loc": "WA OR ID AK", "ver": false, "bb": [["Dr Pepper Blackberry", "$12.99"], ["Blackberry Zero Sugar", "$12.99"]], "cc": [], "cf": [["Coca-Cola Cherry Float", "$12.99"], ["Cherry Float Zero Sugar", "$12.99"]], "wc": [["Pepsi Wild Cherry and Cream", "$12.99"], ["Wild Cherry and Cream Zero", "$12.99"]], "eg": 1, "ec4": 1, "ebl": 1, "ebr": 0, "sk": {"monster": 28, "celsius": 23, "red_bull": 0, "bloom": 20, "alani": 20, "ghost": 9, "c4": 3, "black_rifle": 0}, "url": "instacart.com/store/fred-meyer", "flag": ""}, {"c": "Gelson's", "grp": "Pacific", "reg": "West", "loc": "CA", "ver": true, "bb": [], "cc": [], "cf": [], "wc": [], "eg": 0, "ec4": 1, "ebl": 1, "ebr": 0, "sk": {"monster": 6, "celsius": 8, "red_bull": 10, "bloom": 8, "alani": 3, "ghost": 0, "c4": 3, "black_rifle": 0}, "url": "shop.gelsons.com/store/gelsons", "flag": "Premium specialty grocer — no line extensions from any of the three"}];
+var SKU = {"brand": {"monster": 583, "celsius": 495, "red_bull": 537, "bloom": 357, "alani": 325, "ghost": 207, "c4": 211, "black_rifle": 24}, "sysn": {"KDP": 799, "KO": 583, "PEP": 820, "RB": 537}, "tot": 2739, "regions": {"Midwest": {"n": 5, "share": 31.6, "per": 47.2}, "South": {"n": 9, "share": 30.2, "per": 35.8}, "Northeast": {"n": 4, "share": 26.9, "per": 16.8}, "West": {"n": 7, "share": 25.7, "per": 24.9}}, "chains": [{"c": "Randalls", "reg": "South", "KDP": 57, "KO": 27, "PEP": 34, "RB": 24, "tot": 142, "share": 40.1}, {"c": "Tom Thumb", "reg": "South", "KDP": 54, "KO": 27, "PEP": 41, "RB": 28, "tot": 150, "share": 36.0}, {"c": "ShopRite", "reg": "Northeast", "KDP": 38, "KO": 16, "PEP": 26, "RB": 26, "tot": 106, "share": 35.8}, {"c": "Homeland", "reg": "South", "KDP": 52, "KO": 25, "PEP": 43, "RB": 26, "tot": 146, "share": 35.6}, {"c": "Hy-Vee", "reg": "Midwest", "KDP": 53, "KO": 24, "PEP": 47, "RB": 26, "tot": 150, "share": 35.3}, {"c": "Dierbergs", "reg": "Midwest", "KDP": 65, "KO": 33, "PEP": 67, "RB": 33, "tot": 198, "share": 32.8}, {"c": "Meijer", "reg": "Midwest", "KDP": 45, "KO": 26, "PEP": 41, "RB": 26, "tot": 138, "share": 32.6}, {"c": "Smith's", "reg": "West", "KDP": 33, "KO": 28, "PEP": 41, "RB": 0, "tot": 102, "share": 32.4}, {"c": "Hornbacher's", "reg": "Midwest", "KDP": 40, "KO": 25, "PEP": 38, "RB": 22, "tot": 125, "share": 32.0}, {"c": "Fred Meyer", "reg": "West", "KDP": 32, "KO": 28, "PEP": 43, "RB": 0, "tot": 103, "share": 31.1}, {"c": "King Soopers", "reg": "West", "KDP": 26, "KO": 24, "PEP": 34, "RB": 0, "tot": 84, "share": 31.0}, {"c": "Rouses Markets", "reg": "South", "KDP": 39, "KO": 26, "PEP": 41, "RB": 26, "tot": 132, "share": 29.5}, {"c": "Bashas'", "reg": "West", "KDP": 33, "KO": 26, "PEP": 24, "RB": 29, "tot": 112, "share": 29.5}, {"c": "Gelson's", "reg": "West", "KDP": 11, "KO": 6, "PEP": 11, "RB": 10, "tot": 38, "share": 28.9}, {"c": "Brookshire's", "reg": "South", "KDP": 31, "KO": 25, "PEP": 28, "RB": 26, "tot": 110, "share": 28.2}, {"c": "Food Lion", "reg": "South", "KDP": 35, "KO": 24, "PEP": 38, "RB": 28, "tot": 125, "share": 28.0}, {"c": "Food City", "reg": "South", "KDP": 28, "KO": 25, "PEP": 29, "RB": 24, "tot": 106, "share": 26.4}, {"c": "Publix", "reg": "South", "KDP": 26, "KO": 16, "PEP": 36, "RB": 23, "tot": 101, "share": 25.7}, {"c": "Price Chopper", "reg": "Northeast", "KDP": 23, "KO": 16, "PEP": 24, "RB": 28, "tot": 91, "share": 25.3}, {"c": "Festival Foods", "reg": "Midwest", "KDP": 33, "KO": 34, "PEP": 42, "RB": 27, "tot": 136, "share": 24.3}, {"c": "Harmons", "reg": "West", "KDP": 28, "KO": 43, "PEP": 44, "RB": 44, "tot": 159, "share": 17.6}, {"c": "Stop and Shop Express", "reg": "Northeast", "KDP": 6, "KO": 10, "PEP": 13, "RB": 6, "tot": 35, "share": 17.1}, {"c": "Foodland", "reg": "West", "KDP": 11, "KO": 25, "PEP": 21, "RB": 22, "tot": 79, "share": 13.9}, {"c": "Ingles", "reg": "South", "KDP": 0, "KO": 19, "PEP": 14, "RB": 21, "tot": 54, "share": 0.0}, {"c": "Market Basket", "reg": "Northeast", "KDP": 0, "KO": 5, "PEP": 0, "RB": 12, "tot": 17, "share": 0.0}], "beat": 19};
+
+var NAMES = {kdp:"Dr Pepper", ko:"Coca-Cola", pep:"Pepsi"};
+var LAUNCH = {bb:"Blackberry 2025", cc:"Creamy Coconut 2026", cf:"Cherry Float 2026",
+              eg:"Ghost", ec4:"C4", ebl:"Bloom", ebr:"Black Rifle"};
+function kdpAll(d){ return d.bb.concat(d.cc); }
+function colour(name){
+  if (name.indexOf("Blackberry") === 0 || name.indexOf("Dr Pepper Blackberry") === 0)
+    return name.indexOf("Zero") >= 0 ? "#241b19" : "#3b1830";
+  if (name.indexOf("Creamy Coconut") >= 0) return name.indexOf("Zero") >= 0 ? "#b8a888" : "#d8c7a3";
+  if (name.indexOf("Cherry Float") >= 0)   return name.indexOf("Zero") >= 0 ? "#2b2b2b" : "#c8342b";
+  return name.indexOf("Zero") >= 0 ? "#1f4f9c" : "#c25a72";
+}
+
+/* tabs */
+var tabs = document.querySelectorAll(".tab");
+tabs.forEach(function(t){
+  t.onclick = function(){
+    tabs.forEach(function(x){
+      x.setAttribute("aria-selected", x === t ? "true" : "false");
+      document.getElementById("p-" + x.dataset.p).hidden = (x !== t);
+    });
+    window.scrollTo({top:0, behavior:"smooth"});
+  };
+});
+
+/* the read -- replay of one measurement */
+(function(){
+  var SPON = 4, TOTAL = 28, REAL = 16.0, RATE = 2.4, POLL = 0.5;
+  var ARRIVE = [];                       /* real-second arrival of each tile */
+  var i;
+  for (i = 0; i < SPON; i++) ARRIVE.push(0.6);
+  for (i = 0; i < TOTAL - SPON; i++) ARRIVE.push(9.5 + 3.0 * (i / (TOTAL - SPON - 1)));
+
+  function countAt(t){ var c = 0; for (var j = 0; j < TOTAL; j++) if (t >= ARRIVE[j]) c++; return c; }
+
+  var grid = document.getElementById("rpgrid");
+  var tiles = [];
+  for (i = 0; i < TOTAL; i++) {
+    var t = document.createElement("div");
+    t.className = "rp-t" + (i < SPON ? " sp" : "");
+    t.innerHTML = "<i></i><u></u>";
+    grid.appendChild(t); tiles.push(t);
+  }
+  var dots = document.getElementById("rpdots");
+  for (i = 0; i < 4; i++) dots.appendChild(document.createElement("b"));
+  var dotEls = dots.querySelectorAll("b");
+
+  var go = document.getElementById("rpgo"), clock = document.getElementById("rpclock"),
+      prog = document.getElementById("rpprog"), now = document.getElementById("rpnow"),
+      bad = document.getElementById("rpbad"), good = document.getElementById("rpgood"),
+      say = document.getElementById("rpsay"), dotlab = document.getElementById("rpdotlab");
+  var raf = null, t0 = 0, stable = 0, locked = false, snapped = false;
+
+  var SCRIPT = [
+    [0.0, "", "Page opens. Nothing on screen yet."],
+    [0.7, "", "Four tiles. They are the sponsored row, and they arrive together."],
+    [3.0, "", "Still four. The page looks finished. It is not."],
+    [8.4, "hot", "This is where the first pass stopped scrolling and wrote down its number."],
+    [9.6, "hot", "The organic grid starts to render."],
+    [12.8, "", "Count climbing. Nothing about the page said it was going to do this."],
+    [13.6, "done", "Four identical reads, and above the floor of 20. Stop here."]
+  ];
+
+  function reset(){
+    if (raf) cancelAnimationFrame(raf);
+    tiles.forEach(function(t){ t.classList.remove("in"); });
+    dotEls.forEach(function(d){ d.classList.remove("on"); });
+    prog.style.width = "0%"; clock.textContent = "0.0s";
+    now.textContent = "0"; bad.innerHTML = "&mdash;"; good.innerHTML = "&mdash;";
+    stable = 0; locked = false; snapped = false;
+    dotlab.textContent = "waiting for the count to stop moving";
+    say.className = "rp-say";
+  }
+
+  function frame(ts){
+    if (!t0) t0 = ts;
+    var rt = Math.min(REAL, (ts - t0) / 1000 * RATE);
+    clock.textContent = rt.toFixed(1) + "s";
+    prog.style.width = (100 * rt / REAL).toFixed(1) + "%";
+
+    var n = 0;
+    for (var i = 0; i < TOTAL; i++) {
+      if (rt >= ARRIVE[i]) { tiles[i].classList.add("in"); n++; }
+    }
+    now.textContent = n;
+
+    if (rt >= 8.4 && !snapped) { snapped = true; bad.textContent = SPON; }
+
+    var p = Math.floor(rt / POLL), np = countAt(p * POLL);
+    stable = 0;
+    for (var k = p; k >= 0 && stable < 4; k--) {
+      if (countAt(k * POLL) !== np) break;
+      stable++;
+    }
+    for (var d = 0; d < 4; d++) dotEls[d].classList.toggle("on", d < stable && np >= 20);
+    if (np < 20 && stable >= 4) dotlab.textContent = "steady, but only " + np + " \u2014 under the floor of 20";
+    else if (stable >= 4 && np >= 20) dotlab.textContent = "steady and above the floor \u2014 this is the number";
+    else dotlab.textContent = "waiting for the count to stop moving";
+
+    if (!locked && stable >= 4 && np >= 20) { locked = true; good.textContent = np; }
+
+    var line = SCRIPT[0];
+    for (var k = 0; k < SCRIPT.length; k++) if (rt >= SCRIPT[k][0]) line = SCRIPT[k];
+    say.className = "rp-say " + line[1];
+    say.textContent = line[2];
+
+    if (rt < REAL) { raf = requestAnimationFrame(frame); }
+    else {
+      go.disabled = false; go.innerHTML = "\u21bb&nbsp; Play again";
+      say.className = "rp-say done";
+      say.textContent = "4 against 28. Not off by a little \u2014 the early read was looking at a different page.";
+    }
+  }
+
+  go.onclick = function(){
+    reset(); go.disabled = true; go.innerHTML = "&#9654;&nbsp; Reading\u2026";
+    t0 = 0; raf = requestAnimationFrame(frame);
+  };
+  reset();
+})();
+
+/* depth */
+if (typeof SKU !== "undefined" && SKU) {
+  var SYS = [["KDP","Keurig Dr Pepper","kdp"],["PEP","Pepsi system","pep"],
+             ["KO","Coca-Cola system","ko"],["RB","Red Bull","rb"]];
+  var dbar = function(lbl, sub, cls, w, val){
+    return '<div class="brow"><div class="lbl">' + lbl +
+      (sub ? '<em>' + sub + '</em>' : '') + '</div><div class="track">' +
+      (w > 0 ? '<div class="fill ' + cls + '" style="width:' + w.toFixed(1) + '%"></div>' : '') +
+      '</div><div class="val">' + val + '</div></div>';
+  };
+  var sv = SYS.map(function(x){ return [x[1], SKU.sysn[x[0]], x[2]]; })
+              .sort(function(a,b){ return b[1] - a[1]; });
+  var smax = sv[0][1];
+  document.getElementById("dsys").innerHTML = sv.map(function(x){
+    return dbar(x[0], (100 * x[1] / SKU.tot).toFixed(1) + "% of " + SKU.tot, x[2],
+                100 * x[1] / smax, x[1]);
+  }).join("");
+  document.getElementById("dsysmax").textContent = smax + " products";
+
+  var BL = [["monster","Monster","ko","Coca-Cola distributes"],
+            ["red_bull","Red Bull","rb","independent"],
+            ["celsius","Celsius","pep","Pepsi distributes"],
+            ["bloom","Bloom","kdp","Keurig Dr Pepper"],
+            ["alani","Alani Nu","pep","Pepsi system"],
+            ["c4","C4","kdp","Keurig Dr Pepper"],
+            ["ghost","Ghost","kdp","Keurig Dr Pepper"],
+            ["black_rifle","Black Rifle","kdp","Keurig Dr Pepper"]];
+  var bv = BL.map(function(x){ return [x[1], SKU.brand[x[0]], x[2], x[3]]; })
+             .sort(function(a,b){ return b[1] - a[1]; });
+  var bmax = bv[0][1];
+  document.getElementById("dbrand").innerHTML = bv.map(function(x){
+    return dbar(x[0], x[3], x[2], 100 * x[1] / bmax, x[1]);
+  }).join("");
+  document.getElementById("dbrandmax").textContent = bmax + " products";
+
+  document.getElementById("dreg").innerHTML = Object.keys(SKU.regions).map(function(g){
+    var r = SKU.regions[g];
+    return dbar(g, r.n + " chains &middot; " + r.per + " per chain", "kdp",
+                100 * r.share / 40, r.share + "%");
+  }).join("");
+
+  document.getElementById("dchains").innerHTML = SKU.chains.map(function(c){
+    var seg = SYS.map(function(x){
+      var v = c[x[0]];
+      return v > 0 ? '<div class="fill ' + x[2] + '" style="width:' +
+                     (100 * v / c.tot).toFixed(2) + '%"></div>' : '';
+    }).join("");
+    return '<div class="brow tight"><div class="lbl">' + c.c +
+      '<em>' + c.reg + ' &middot; ' + c.tot + ' products</em></div>' +
+      '<div class="track">' + (c.tot ? seg : '') + '</div>' +
+      '<div class="val">' + (c.tot ? c.share + "%" : "\u2014") + '</div></div>';
+  }).join("");
+}
+
+/* guess */
+var OPTIONS = ["Texas and Oklahoma","The Southeast","The Mountain West","The Northeast"];
+var MATCH = {"Texas and Oklahoma":"Texas and Oklahoma","The Southeast":"Southeast",
+             "The Mountain West":"Mountain West","The Northeast":"Northeast"};
+var groups = {};
+CH.forEach(function(d){ (groups[d.grp] = groups[d.grp] || []).push(d); });
+var ranking = Object.keys(groups).map(function(g){
+  var ds = groups[g];
+  return {g:g, n:ds.length, mean:ds.reduce(function(a,d){return a + d.cc.length}, 0) / ds.length};
+}).sort(function(a,b){ return b.mean - a.mean; });
+
+var choicesEl = document.getElementById("choices"), revealEl = document.getElementById("reveal");
+choicesEl.innerHTML = OPTIONS.map(function(o){
+  return '<button class="choice" data-o="' + o + '">' + o + '</button>';
+}).join("");
+choicesEl.onclick = function(e){
+  var b = e.target.closest(".choice"); if (!b) return;
+  var mine = MATCH[b.dataset.o], max = ranking[0].mean;
+  var se = 0; ranking.forEach(function(r,i){ if (r.g === "Southeast") se = i + 1; });
+  revealEl.innerHTML = ranking.map(function(r){
+    return '<div class="rankrow' + (r.g === mine ? ' you' : '') + '">' +
+      '<div><b>' + r.g + '</b><small>' + r.n + (r.n === 1 ? ' chain' : ' chains') + '</small></div>' +
+      '<div><span class="bar" style="width:' + Math.max(3, r.mean / max * 100) + '%"></span></div>' +
+      '<div class="num">' + r.mean.toFixed(2) + '</div>' +
+      '<div class="tag">' + (r.g === mine ? 'your guess' : '') + '</div></div>';
+  }).join("") +
+  '<p class="verdict">Texas and Oklahoma and the Mountain West are level at the front. The Southeast &mdash; ' +
+  'where Dr Pepper is supposed to be strongest &mdash; comes ' + se + 'th of ' + ranking.length +
+  '. Not one of the four Northeast chains carries it at all. The flavour is moving outward from the brand’s ' +
+  'own ground, not landing everywhere at once.</p><button class="again" id="again">Pick again</button>';
+  revealEl.hidden = false; choicesEl.hidden = true;
+  document.getElementById("again").onclick = function(){ revealEl.hidden = true; choicesEl.hidden = false; };
+};
+
+/* map */
+var GRID = [
+ ["AK",1,1],["ME",1,12],["VT",2,11],["NH",2,12],
+ ["WA",3,2],["ID",3,3],["MT",3,4],["ND",3,5],["MN",3,6],["WI",3,7],["MI",3,8],["NY",3,10],["RI",3,11],["MA",3,12],
+ ["OR",4,2],["NV",4,3],["WY",4,4],["SD",4,5],["IA",4,6],["IL",4,7],["IN",4,8],["OH",4,9],["PA",4,10],["NJ",4,11],["CT",4,12],
+ ["CA",5,2],["UT",5,3],["CO",5,4],["NE",5,5],["MO",5,6],["KY",5,7],["WV",5,8],["VA",5,9],["MD",5,10],["DE",5,11],
+ ["AZ",6,3],["NM",6,4],["KS",6,5],["AR",6,6],["TN",6,7],["NC",6,8],["SC",6,9],["DC",6,10],
+ ["HI",7,1],["OK",7,5],["LA",7,6],["MS",7,7],["AL",7,8],["GA",7,9],
+ ["TX",8,5],["FL",8,10]
+];
+var byState = {};
+CH.forEach(function(d){ d.loc.split(" ").forEach(function(s){ (byState[s] = byState[s] || []).push(d); }); });
+
+var MAXV = {bb:2, cc:2, cf:2, eg:1, ec4:1, ebl:1, ebr:1};
+var SCALE = {bb:"2 SKUs", cc:"2 SKUs", cf:"2 SKUs", eg:"stocked", ec4:"stocked", ebl:"stocked", ebr:"stocked"};
+function val(d, k){ var v = d[k]; return Array.isArray(v) ? v.length : (v || 0); }
+var mapKey = "bb", mapEl = document.getElementById("map");
+function drawMap(){
+  document.getElementById("scalemax").textContent = SCALE[mapKey];
+  mapEl.innerHTML = GRID.map(function(g){
+    var s = g[0], pos = 'grid-row:' + g[1] + ';grid-column:' + g[2], ds = byState[s];
+    if (!ds) return '<div class="st" style="' + pos + '">' + s + '</div>';
+    var m = ds.reduce(function(a,d){ return a + val(d, mapKey); }, 0) / ds.length;
+    var t = Math.round(m / MAXV[mapKey] * 4);
+    if (!(t >= 0 && t <= 4)) t = 0;
+    return '<button class="st on' + (t <= 1 ? ' lt' : '') + '" data-s="' + s + '" style="' + pos +
+      ';background:var(--d' + t + ')" aria-label="' + s + ', ' + m.toFixed(1) + ' SKUs on average">' + s + '</button>';
+  }).join("");
+}
+document.getElementById("mapsw").onclick = function(e){
+  var b = e.target.closest(".sw"); if (!b) return;
+  mapKey = b.dataset.k;
+  this.querySelectorAll(".sw").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+  drawMap();
+};
+mapEl.onclick = function(e){ var b = e.target.closest(".st.on"); if (b) stateDrawer(b.dataset.s); };
+drawMap();
+
+function bay(d, b){
+  var list = b === "kdp" ? kdpAll(d) : (b === "ko" ? d.cf : d.wc);
+  var max = b === "kdp" ? 4 : 2, cans = "";
+  for (var i = 0; i < max; i++) cans += '<i class="can' + (i < list.length ? " on" : "") + '"></i>';
+  return '<button class="bay" data-b="' + b + '" data-c="' + d.c + '" aria-label="' + NAMES[b] +
+    ' at ' + d.c + ', ' + list.length + ' of ' + max + '"><span class="cans">' + cans + '</span>' +
+    '<span class="n' + (list.length === 0 ? " zero" : "") + '">' + list.length + '</span></button>';
+}
+var rowsEl = document.getElementById("rows"), html = "", seen = null;
+CH.forEach(function(d){
+  if (d.reg !== seen){ seen = d.reg; html += '<div class="reg">' + d.reg + '</div>'; }
+  html += '<div class="row"><div class="chain"><b>' + d.c + '</b><small>' + d.loc + '</small>' +
+    (d.flag ? '<span class="flag">' + d.flag + '</span>' : '') + '</div>' +
+    bay(d,"kdp") + bay(d,"ko") + bay(d,"pep") + '</div>';
+});
+rowsEl.innerHTML = html;
+rowsEl.onclick = function(e){ var b = e.target.closest(".bay"); if (b) skuDrawer(b.dataset.c, b.dataset.b); };
+
+/* energy matrix */
+var EB = [["eg","Ghost"],["ec4","C4"],["ebl","Bloom"],["ebr","Black\u00a0Rifle"]];
+var mxEl = document.getElementById("mx");
+if (mxEl){
+  var h = '<div></div>' + EB.map(function(b){ return '<div class="h">' + b[1] + '</div>'; }).join("");
+  var reg = null;
+  CH.forEach(function(d){
+    if (d.reg !== reg){ reg = d.reg; h += '<div class="rg">' + reg + '</div>'; }
+    h += '<div class="cn">' + d.c + '</div>' +
+      EB.map(function(b){
+        return '<div class="dot' + (d[b[0]] ? ' on' : '') + '" title="' + d.c + ' \u00b7 ' + b[1] +
+          ' \u00b7 ' + (d[b[0]] ? 'stocked' : 'not stocked') + '"></div>';
+      }).join("");
+  });
+  mxEl.innerHTML = h;
+}
+
+/* drawers */
+function canSVG(fill){
+  return '<svg width="34" height="56" viewBox="0 0 34 56" aria-hidden="true">' +
+    '<rect x="2" y="4" width="30" height="48" rx="5" fill="' + fill + '"></rect>' +
+    '<rect x="2" y="4" width="30" height="7" rx="3.5" fill="#b9b2ac"></rect>' +
+    '<rect x="2" y="45" width="30" height="7" rx="3.5" fill="#b9b2ac"></rect>' +
+    '<rect x="6" y="20" width="22" height="3" rx="1.5" fill="#ffffff" opacity=".55"></rect></svg>';
+}
+function openDrawer(inner){
+  var scrim = document.createElement("div"); scrim.className = "scrim";
+  var dr = document.createElement("div"); dr.className = "drawer";
+  dr.setAttribute("role","dialog"); dr.setAttribute("aria-modal","true");
+  dr.innerHTML = inner + '<button class="close">Close</button>';
+  document.body.appendChild(scrim); document.body.appendChild(dr);
+  function shut(){ scrim.remove(); dr.remove(); }
+  scrim.onclick = shut; dr.querySelector(".close").onclick = shut; dr.querySelector(".close").focus();
+  document.addEventListener("keydown", function esc(ev){
+    if (ev.key === "Escape"){ shut(); document.removeEventListener("keydown", esc); }
+  });
+}
+function skuDrawer(cName, brand){
+  var d = null; CH.forEach(function(x){ if (x.c === cName) d = x; });
+  var list = brand === "kdp" ? kdpAll(d) : (brand === "ko" ? d.cf : d.wc);
+  var packs = list.length ? '<div class="packs">' + list.map(function(s){ return canSVG(colour(s[0])); }).join("") + '</div>' : "";
+  var skus = list.length
+    ? list.map(function(s){ return '<div class="sku"><span>' + s[0] + '</span><span>' + s[1] + '</span></div>'; }).join("")
+    : '<p class="none">None of this company’s recent launches were stocked here.</p>';
+  openDrawer('<h3>' + NAMES[brand] + ' · ' + d.c + '</h3><p class="sub">' + d.loc +
+    (d.ver ? " · one confirmed store" : " · chain catalogue") + '</p>' + packs + skus +
+    '<div class="src"><b>Source</b>' + d.url + '<br>read 17 Nov 2026</div>');
+}
+function stateDrawer(s){
+  var ds = byState[s];
+  var rows = ds.map(function(d){
+    return '<div class="sku"><span>' + d.c + '</span><span>' + d.bb.length + ' BB · ' +
+      d.cc.length + ' CC · ' + d.cf.length + ' CF</span></div>';
+  }).join("");
+  var m = ds.reduce(function(a,d){ return a + val(d, mapKey); }, 0) / ds.length;
+  openDrawer('<h3>' + s + '</h3><p class="sub">' + LAUNCH[mapKey] + ' · ' + ds.length +
+    (ds.length === 1 ? ' chain sampled' : ' chains sampled') + ' · ' + m.toFixed(2) +
+    ' on average</p>' + rows +
+    '<div class="src"><b>Note</b>BB Blackberry · CC Creamy Coconut · CF Cherry Float. ' +
+    'The average of the chains sampled in ' + s + ', not a measure of the state. ' +
+    'A state with one chain rests on one reading.</div>');
+}
+</script>
+
+</body></html>

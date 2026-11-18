@@ -1,0 +1,244 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>失敗パターンから作る機能リスト</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: single reading column; each failure pattern is a two-part block (evidence → feature) */
+:root{
+  --bg:#f3f5f7;--surface:#ffffff;--ink:#14191f;--muted:#5d6874;--line:#dfe4ea;
+  --accent:#0d5f66;--accentbg:#dcefef;
+  --good:#1d7a4f;--goodbg:#e0f2e8;--mid:#946200;--midbg:#f9eed2;--bad:#b0362f;--badbg:#f8e1df;
+  --display:"IBM Plex Sans Condensed","Noto Sans JP",system-ui,sans-serif;
+  --body:"Noto Sans JP",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12161a;--surface:#1b2026;--ink:#e8ecf0;--muted:#9aa6b2;--line:#2c333b;
+  --accent:#6cc4c9;--accentbg:#173336;
+  --good:#6fd0a0;--goodbg:#173326;--mid:#e6bd5f;--midbg:#382e17;--bad:#f08a80;--badbg:#3b2120;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161a;--surface:#1b2026;--ink:#e8ecf0;--muted:#9aa6b2;--line:#2c333b;
+  --accent:#6cc4c9;--accentbg:#173336;
+  --good:#6fd0a0;--goodbg:#173326;--mid:#e6bd5f;--midbg:#382e17;--bad:#f08a80;--badbg:#3b2120;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.75}
+.wrap{max-width:880px;margin:0 auto;padding-block:32px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.35}
+h1{font-size:1.7rem;margin:.2em 0 .4em}
+h2{font-size:1.2rem;margin:2.6em 0 .6em;padding-top:.8em;border-top:1px solid var(--line)}
+h3{font-size:1.02rem;margin:0}
+p{margin:.5em 0}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;color:var(--accent);text-transform:uppercase}
+.lead{color:var(--muted);max-width:44em}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.pos{color:var(--good)}.neg{color:var(--bad)}
+.note{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:12px 14px;font-size:.85rem;color:var(--muted)}
+.note b{color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:20px 0}
+.stat{border-top:3px solid var(--accent);background:var(--surface);padding:10px 12px}
+.stat .v{font-family:var(--mono);font-size:1.5rem;font-weight:500;line-height:1.2}
+.stat .l{font-size:.76rem;color:var(--muted)}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.funds{width:100%;border-collapse:collapse;font-size:.84rem}
+.funds th,.funds td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.funds th{font-weight:500;color:var(--muted);font-size:.76rem}
+.funds td.r,.funds th.r{text-align:right}
+.scroll{overflow-x:auto}
+/* layered bars */
+.layers{display:grid;gap:10px;margin:14px 0}
+.layer{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px;align-items:center;font-size:.84rem}
+.stack{display:flex;height:22px;border-radius:4px;overflow:hidden;background:var(--line)}
+.stack span{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.72rem;color:var(--ink)}
+.s-y{background:var(--goodbg)}.s-p{background:var(--midbg)}.s-n{background:var(--badbg)}.s-na{background:var(--line)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.76rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+/* verdict tiles */
+.verdicts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.vt{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.vt .k{font-size:.76rem;color:var(--muted)}
+.vt .v{font-family:var(--mono);font-size:1.25rem}
+@media(max-width:560px){.verdicts{grid-template-columns:1fr}}
+/* pattern → feature */
+.pf{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:14px 0;overflow:hidden}
+.pf .head{display:flex;gap:12px;align-items:baseline;justify-content:space-between;flex-wrap:wrap;padding:14px 16px 4px}
+.pf .tag{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+.pf .ev{padding:0 16px 12px;font-size:.88rem}
+.pf .ev .row{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.8rem;color:var(--muted);margin:4px 0 6px}
+.pf .feat{background:var(--accentbg);padding:12px 16px;font-size:.88rem}
+.pf .feat h4{font-family:var(--display);font-size:.95rem;margin:0 0 4px;color:var(--accent)}
+.pf .feat ul{margin:4px 0 0;padding-left:1.2em}
+.chip{display:inline-block;font-family:var(--mono);font-size:.74rem;padding:0 6px;border-radius:4px;margin:2px 2px 2px 0;border:1px solid var(--line)}
+.chip.g{background:var(--goodbg);border-color:transparent;color:var(--good)}
+.chip.b{background:var(--badbg);border-color:transparent;color:var(--bad)}
+.chip.m{background:var(--midbg);border-color:transparent;color:var(--mid)}
+.prio{font-family:var(--mono);font-size:.72rem;padding:1px 7px;border-radius:999px;background:var(--accent);color:var(--surface);white-space:nowrap}
+.prio.p2{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+/* what works */
+.works{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.works>div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:.86rem;min-width:0}
+@media(max-width:640px){.works{grid-template-columns:1fr}}
+/* data table */
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.filters button{font:inherit;font-size:.8rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:3px 10px;border-radius:999px;cursor:pointer}
+.filters button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.filters button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#tbl td:nth-child(7){min-width:260px;color:var(--muted)}
+.sources{font-size:.76rem;color:var(--muted);padding-left:1.2em}
+.sources a{color:var(--accent);word-break:break-all}
+details summary{cursor:pointer;color:var(--accent);font-size:.86rem}
+</style>
+
+<div class="wrap">
+<div class="eyebrow">Alpha Challenge 2026 judges · thesis audit</div>
+<h1>ジャッジのファンドの「失敗の型」から、プロダクトの機能を決める</h1>
+<p class="lead">2026年Alpha Challengeでジャッジを務める6つの運用会社が、2022年前後に新規で組み入れた59銘柄を調べました。対象は、公開レターで「なぜ買ったか」を説明している銘柄です。その仮説を、その後に実際に起きたことと照らし合わせています。外れ方に共通する型を見つけ、それぞれの型を防ぐ機能に落としました。</p>
+
+<div class="note"><b>読むときの前提：</b>買値は新規組み入れを開示した四半期の末日の終値、現在値は2026年11月13日前後の終値、比較対象はS&amp;P 500（価格指数）です。配当は含みません。売買の正確な日付とポジションサイズは公開情報では分からないため、すべて「買ってから持ち続けた」と仮定しています。<b>ファンドの実際の成績ではありません。</b>仮説の抜き出しと判定はClaudeによる試作です。59銘柄は統計的な検定には少なく、ここでは機能の優先順位を決める材料として使っています。</div>
+
+<div class="stats">
+  <div class="stat"><div class="v">59</div><div class="l">銘柄（6社）</div></div>
+  <div class="stat"><div class="v">19 / 59</div><div class="l">S&amp;P 500を上回った銘柄</div></div>
+  <div class="stat"><div class="v neg">−34pt</div><div class="l">対S&amp;P 500の超過リターン（中央値）</div></div>
+  <div class="stat"><div class="v">24</div><div class="l">「部分的に当たり」の銘柄（最多）。そのうち勝ちは3つ</div></div>
+</div>
+
+<h2>対象にしたファンド</h2>
+<p style="font-size:.88rem">2026年のジャッジ86人が所属する会社のうち、銘柄ごとの投資理由を公開している投信系の6社です。ヘッジファンド系は投資理由を公開していないため外しました。</p>
+<div class="scroll"><table class="funds">
+<thead><tr><th>運用会社（ファンド）</th><th>スタイル</th><th class="r">銘柄数</th><th class="r">勝ち</th><th class="r">超過（中央値）</th><th>データの注意点</th></tr></thead>
+<tbody id="fundrows"></tbody></table></div>
+
+<h2>いちばん大きな発見：業績は当たっても、株価で負ける</h2>
+<p>仮説を「業績」「評価倍率」「触媒」の3つに分けて、それぞれ当たったかを判定しました。業績の予想が当たったのは約半分です。外れが最も多かったのは評価倍率で、市場が想定どおりに再評価しなかったケースです。</p>
+<div class="layers" id="layers"></div>
+<div class="legend"><span><i class="s-y"></i>当たり</span><span><i class="s-p"></i>部分的</span><span><i class="s-n"></i>外れ</span><span><i class="s-na"></i>該当なし（触媒を挙げていない）</span></div>
+<div class="verdicts">
+  <div class="vt"><div class="k">仮説がほぼ当たった（22銘柄）</div><div class="v pos">16勝 · 中央値 +84pt</div></div>
+  <div class="vt"><div class="k">部分的に当たった・理由が違った（24銘柄）</div><div class="v neg">3勝 · 中央値 −62pt</div></div>
+  <div class="vt"><div class="k">外れた（13銘柄）</div><div class="v neg">0勝 · 中央値 −105pt</div></div>
+</div>
+<p style="font-size:.88rem">「部分的に当たった」は、ほとんど勝てていません。リターンだけを見るレビューでは、この24銘柄は「負け」とひとまとめにされます。しかし実際には、業績は当たったのに倍率で負けた、書いていない要因で負けた、など外れ方がそれぞれ違います。<b>主張を1つずつ分けて採点すること</b>が、このプロダクトのいちばん基本的な機能になります。</p>
+
+<h2>失敗の型 → 機能</h2>
+<p class="lead" style="font-size:.88rem">複数のファンドで繰り返し出てきた型だけを採用しました。チップの色は仮説の判定（緑＝当たり、黄＝部分的、赤＝外れ）、数字は対S&amp;P 500の超過リターン（%ポイント）です。</p>
+<div id="patterns"></div>
+
+<h2>うまくいった型（伸ばしたいもの）</h2>
+<div class="works">
+  <div><h3>自社の努力による改善を、数字で書いた仮説</h3><p>PH、PHM、UBER、SAPなど。7戦4勝、中央値 +51pt。「何が起きれば正しいか」がKPIで書かれていて、会社自身がコントロールできる変化に賭けています。</p></div>
+  <div><h3>市場全体が売られた局面で、長期成長企業を買った</h3><p>GOOGL（2社）、TSM、PANW、AAPL、NVDA（2社）。7件すべてが勝ちです。懸念は一時的、事業の強さは構造的、という切り分けが当たっていました。</p></div>
+  <div><h3>サイクルの賭けでも、数字の裏付けがあれば勝てる</h3><p>FTI（受注と価格のKPI）、MU、RYCEY。サイクルの賭けは12戦3勝と分が悪く、勝つときは極端に大きく勝ちます。勝った3件は、回復を測る指標を持っていました。</p></div>
+  <div><h3>同じ「懸念で割安」でも、結果が分かれる</h3><p>成長企業に対する一時的な懸念（TSM、EHC）は勝ち、成熟企業や構造問題を抱える企業に対する懸念（GPN、OTEX、WMG、CTSH）は負け。この切り分けを入力させることが、機能1と機能3の中心です。</p></div>
+</div>
+
+<h2>機能の優先順位（MVPの範囲）</h2>
+<div class="scroll"><table class="funds">
+<thead><tr><th>優先度</th><th>機能</th><th>根拠になった型</th><th>必要なデータ</th></tr></thead>
+<tbody>
+<tr><td><span class="prio">MVP</span></td><td>主張ごとの3層採点（業績・倍率・触媒）</td><td>部分的な当たり 24件中3勝</td><td>メモ、決算KPI、株価</td></tr>
+<tr><td><span class="prio">MVP</span></td><td>逆風タイマー</td><td>「一時的な逆風」23件、期限の記載0件</td><td>メモ、マクロ・業績指標</td></tr>
+<tr><td><span class="prio">MVP</span></td><td>書かれていないリスクのスキャン</td><td>書いていないリスクで負けた11件中1勝</td><td>メモ、ニュース、同業データ</td></tr>
+<tr><td><span class="prio">MVP</span></td><td>撤退条件と売却メモ</td><td>撤退条件の記載0件、売却判断のミス4件</td><td>メモ、売買履歴</td></tr>
+<tr><td><span class="prio p2">次</span></td><td>触媒の依存先アラート</td><td>人物や案件が触媒の仮説 6戦0勝</td><td>メモ、経営陣の異動・M&amp;Aニュース</td></tr>
+<tr><td><span class="prio p2">次</span></td><td>サイクル位置と新規銘柄の偏りチェック</td><td>2022年のエネルギー9件 0勝</td><td>売買履歴、ファクター・商品価格</td></tr>
+<tr><td><span class="prio p2">次</span></td><td>勝ち筋の照合（運か実力か）</td><td>想定外の経路で実現した7件</td><td>メモ、M&amp;A・事業の出来事</td></tr>
+</tbody></table></div>
+
+<h2>この分析の限界</h2>
+<div class="note">
+<p><b>サンプルの偏り：</b>59銘柄・6社と少なく、Yacktmanの5銘柄は同じエネルギー仮説なので実質1件です。William BlairとT. Rowe Priceは新規組み入れを明示しないため、保有明細の比較で特定し、理由は後の号から補いました。</p>
+<p><b>市場環境：</b>2022〜2026年は、AI関連の超大型株が時価総額加重のS&amp;P 500を押し上げた時期です。中小型やバリューの銘柄が市場平均に勝ちにくい環境で、勝率が低い一因です。</p>
+<p><b>判定の性質：</b>仮説のタイプ分けと各項目の判定は、ファンドごとに別のAIエージェントが行いました。たとえばEOGはファンドによって「マクロ回復型」と「長期成長型」に分かれています。株価のおよそ4割は概算です。</p>
+<p><b>対外レターである点：</b>「撤退条件の記載0件」「期限の記載0件」は、対外向けのレターだから書いていないだけかもしれません。社内メモには書いてある可能性があります。逆に言えば、これは<b>社内メモで確かめるべき仮説</b>そのものです。</p>
+<p><b>ジャッジに見せるとき：</b>個別ファンドの採点ではなく、業界共通の型として匿名化した集計で見せることを勧めます。</p>
+</div>
+
+<h2>59銘柄のデータ</h2>
+<details><summary>一覧を開く</summary>
+<div class="filters" id="filters">
+  <button type="button" data-f="all" class="on">すべて</button>
+  <button type="button" data-f="g">当たり</button>
+  <button type="button" data-f="m">部分的</button>
+  <button type="button" data-f="b">外れ</button>
+</div>
+<div class="scroll"><table class="funds" id="tbl">
+<thead><tr><th>ファンド</th><th>銘柄</th><th>組入</th><th>タイプ</th><th>判定</th><th class="r">超過</th><th>何が起きたか（エージェントのメモ・英語）</th></tr></thead>
+<tbody></tbody></table></div>
+<p style="font-size:.76rem;color:var(--muted)">タイプ：A 自社努力 / B マクロ・サイクル回復 / C 懸念で割安 / D 経営陣・案件が触媒 / E 資産価値 / F 長期成長</p>
+</details>
+
+<h2>出典</h2>
+<ol class="sources" id="sources"></ol>
+</div>
+
+<script>
+const DATA=[{"ticker": "QRVO", "quarter": "2022Q1", "type": "C", "thesis_verdict": "b", "ret": -8, "spx": 67, "excess": -75, "fundamentals_right": "n", "multiple_right": "n", "catalyst_right": "n", "failure_pattern": "peak-cycle 'normalized' earnings; customer concentration (Apple) risk unwritten", "f": "brandes"}, {"ticker": "WTW", "quarter": "2022Q1", "type": "A", "thesis_verdict": "g", "ret": 42, "spx": 67, "excess": -25, "fundamentals_right": "y", "multiple_right": "p", "catalyst_right": "y", "failure_pattern": "self-help KPIs hit but defensive name lagged a tech-led bull market", "f": "brandes"}, {"ticker": "GTES", "quarter": "2021Q4", "type": "C", "thesis_verdict": "g", "ret": 60, "spx": 59, "excess": 1, "fundamentals_right": "p", "multiple_right": "p", "catalyst_right": "y", "failure_pattern": "overhang removal + margin self-help worked; volume recovery never came", "f": "brandes"}, {"ticker": "OTEX", "quarter": "2022Q2", "type": "D", "thesis_verdict": "b", "ret": -34, "spx": 100, "excess": -134, "fundamentals_right": "n", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "serial acquirer's next deal was too big; thesis rested on management capital-allocation track record", "f": "brandes"}, {"ticker": "SNY", "quarter": "2022Q4", "type": "C", "thesis_verdict": "m", "ret": 0, "spx": 97, "excess": -97, "fundamentals_right": "p", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "feared risk (litigation) resolved but an unwritten risk (margin target abandoned, pipeline) capped returns", "f": "brandes"}, {"ticker": "FISV", "quarter": "2021Q3", "type": "C", "thesis_verdict": "m", "ret": -41, "spx": 76, "excess": -117, "fundamentals_right": "p", "multiple_right": "n", "catalyst_right": "y", "failure_pattern": "thesis worked for 3 years then reversed; no exit discipline as quality of growth (Clover) deteriorated and CEO left", "f": "brandes"}, {"ticker": "SAP", "quarter": "2022Q2", "type": "A", "thesis_verdict": "g", "ret": 159, "spx": 100, "excess": 59, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "worked: transition-cost trough correctly identified", "f": "brandes"}, {"ticker": "RYCEY", "quarter": "2022Q2", "type": "B", "thesis_verdict": "g", "ret": 1554, "spx": 100, "excess": 1454, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "worked, amplified by an unforeseen new-CEO self-help program beyond the cycle thesis", "f": "brandes"}, {"ticker": "GOOGL", "quarter": "2022Q3", "type": "F", "thesis_verdict": "g", "ret": 209, "spx": 111, "excess": 98, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "worked: quality compounder bought on market-wide multiple compression", "f": "brandes"}, {"ticker": "TSM", "quarter": "2022Q4", "type": "C", "thesis_verdict": "g", "ret": 435, "spx": 97, "excess": 338, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "worked: cyclical fear on a secular winner", "f": "brandes"}, {"ticker": "MU", "quarter": "2022Q4", "type": "B", "thesis_verdict": "g", "ret": 1457, "spx": 97, "excess": 1360, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "worked: cycle-bottom call plus far larger AI demand than imagined", "f": "brandes"}, {"ticker": "CTSH", "quarter": "2022Q4", "type": "C", "thesis_verdict": "m", "ret": 10, "spx": 97, "excess": -87, "fundamentals_right": "p", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "temporary headwind lasted 3+ years; unwritten risk (AI disruption of IT services)", "f": "brandes"}, {"ticker": "PPRUY", "quarter": "2022Q4", "type": "C", "thesis_verdict": "b", "ret": -60, "spx": 97, "excess": -157, "fundamentals_right": "n", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "macro headwind blamed; real problem was brand-specific decline at the main brand (concentration)", "f": "brandes"}, {"ticker": "ABEV", "quarter": "2023Q1", "type": "A", "thesis_verdict": "m", "ret": -2, "spx": 84, "excess": -86, "fundamentals_right": "p", "multiple_right": "n", "catalyst_right": "p", "failure_pattern": "local-currency improvement erased by FX and EM de-rating", "f": "brandes"}, {"ticker": "KMX", "quarter": "2022Q1", "type": "F", "thesis_verdict": "b", "ret": -45, "spx": 67, "excess": -112, "fundamentals_right": "n", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "competitive advantage eroded by disruptor (Carvana); cyclical affordability squeeze unaddressed", "f": "cooke_bieler"}, {"ticker": "GOOGL", "quarter": "2022Q2", "type": "F", "thesis_verdict": "g", "ret": 171, "spx": 100, "excess": 71, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "moat held through AI scare; rerated 2025", "f": "cooke_bieler"}, {"ticker": "HAS", "quarter": "2022Q2", "type": "B", "thesis_verdict": "m", "ret": 47, "spx": 100, "excess": -53, "fundamentals_right": "p", "multiple_right": "p", "catalyst_right": "na", "failure_pattern": "temporary headwind lasted 2+ years; recovery came from different segment", "f": "cooke_bieler"}, {"ticker": "SYF", "quarter": "2022Q2", "type": "C", "thesis_verdict": "m", "ret": 162, "spx": 100, "excess": 62, "fundamentals_right": "p", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "fund exited on regulatory fear that later reversed (CFPB late-fee rule vacated 2025)", "f": "cooke_bieler"}, {"ticker": "CBRE", "quarter": "2022Q3", "type": "C", "thesis_verdict": "g", "ret": 97, "spx": 111, "excess": -14, "fundamentals_right": "y", "multiple_right": "p", "catalyst_right": "na", "failure_pattern": "thesis right, roughly doubled but S&P doubled too", "f": "cooke_bieler"}, {"ticker": "EOG", "quarter": "2022Q3", "type": "F", "thesis_verdict": "g", "ret": 42, "spx": 111, "excess": -69, "fundamentals_right": "y", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "KPI hit but commodity price set the return; price-only metric omits ~3-5%/yr dividends", "f": "cooke_bieler"}, {"ticker": "OTEX", "quarter": "2022Q3", "type": "C", "thesis_verdict": "b", "ret": -6, "spx": 111, "excess": -117, "fundamentals_right": "n", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "named concern was the real risk; big leveraged deal right after entry", "f": "cooke_bieler"}, {"ticker": "WMG", "quarter": "2022Q4", "type": "C", "thesis_verdict": "m", "ret": -8, "spx": 97, "excess": -105, "fundamentals_right": "y", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "KPI hit but no rerating (multiple compressed on AI/streaming-maturity fears)", "f": "cooke_bieler"}, {"ticker": "BAC", "quarter": "2023Q1", "type": "C", "thesis_verdict": "g", "ret": 78, "spx": 84, "excess": -6, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "fear-driven entry worked, but only matched index", "f": "cooke_bieler"}, {"ticker": "DFS", "quarter": "2023Q1", "type": "F", "thesis_verdict": "m", "ret": 103, "spx": 45, "excess": 58, "fundamentals_right": "p", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "compliance scandal and CEO exit; rescued by takeover premium", "f": "cooke_bieler"}, {"ticker": "LKQ", "quarter": "2023Q1", "type": "F", "thesis_verdict": "b", "ret": -66, "spx": 84, "excess": -150, "fundamentals_right": "n", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "unwritten risk: falling repairable claims + European execution (ERP) failure", "f": "cooke_bieler"}, {"ticker": "PH", "quarter": "2022Q2", "type": "A", "thesis_verdict": "g", "ret": 288, "spx": 100, "excess": 188, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "y", "failure_pattern": "self-help KPIs all delivered", "f": "oakmark"}, {"ticker": "UBER", "quarter": "2022Q3", "type": "A", "thesis_verdict": "g", "ret": 162, "spx": 111, "excess": 51, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "y", "failure_pattern": "competition rationalized, margins up", "f": "oakmark"}, {"ticker": "PHM", "quarter": "2022Q1", "type": "A", "thesis_verdict": "g", "ret": 203, "spx": 67, "excess": 136, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "conservative base case, upside surprise", "f": "oakmark"}, {"ticker": "AMZN", "quarter": "2022Q1", "type": "C", "thesis_verdict": "g", "ret": 63, "spx": 67, "excess": -4, "fundamentals_right": "y", "multiple_right": "p", "catalyst_right": "na", "failure_pattern": "thesis right but already priced", "f": "oakmark"}, {"ticker": "WBD", "quarter": "2022Q3", "type": "E", "thesis_verdict": "m", "ret": 170, "spx": 111, "excess": 59, "fundamentals_right": "p", "multiple_right": "p", "catalyst_right": "n", "failure_pattern": "value realized via takeover, not operations", "f": "oakmark"}, {"ticker": "ORCL", "quarter": "2022Q2", "type": "D", "thesis_verdict": "m", "ret": 84, "spx": 100, "excess": -16, "fundamentals_right": "y", "multiple_right": "p", "catalyst_right": "n", "failure_pattern": "right result, different reason (AI cloud not Cerner)", "f": "oakmark"}, {"ticker": "CRM", "quarter": "2022Q1", "type": "D", "thesis_verdict": "m", "ret": 3, "spx": 67, "excess": -64, "fundamentals_right": "p", "multiple_right": "n", "catalyst_right": "n", "failure_pattern": "catalyst person left; activists did it", "f": "oakmark"}, {"ticker": "DIS", "quarter": "2022Q2", "type": "D", "thesis_verdict": "m", "ret": 26, "spx": 100, "excess": -74, "fundamentals_right": "p", "multiple_right": "n", "catalyst_right": "y", "failure_pattern": "unwritten risk (linear TV decline)", "f": "oakmark"}, {"ticker": "PINS", "quarter": "2022Q1", "type": "C", "thesis_verdict": "m", "ret": -21, "spx": 67, "excess": -88, "fundamentals_right": "y", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "KPI hit but no rerating", "f": "oakmark"}, {"ticker": "ADBE", "quarter": "2022Q4", "type": "C", "thesis_verdict": "m", "ret": -28, "spx": 97, "excess": -125, "fundamentals_right": "y", "multiple_right": "n", "catalyst_right": "y", "failure_pattern": "unwritten risk (AI disruption) derated", "f": "oakmark"}, {"ticker": "MAS", "quarter": "2022Q2", "type": "A", "thesis_verdict": "m", "ret": 66, "spx": 100, "excess": -34, "fundamentals_right": "y", "multiple_right": "p", "catalyst_right": "na", "failure_pattern": "KPI hit but rerating too small", "f": "oakmark"}, {"ticker": "GPN", "quarter": "2022Q1", "type": "C", "thesis_verdict": "b", "ret": -33, "spx": 67, "excess": -100, "fundamentals_right": "n", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "value trap: low P/E stayed low", "f": "oakmark"}, {"ticker": "EFX", "quarter": "2022Q1", "type": "B", "thesis_verdict": "b", "ret": -1, "spx": 67, "excess": -68, "fundamentals_right": "n", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "temporary headwind lasted 3+ years", "f": "oakmark"}, {"ticker": "FBIN", "quarter": "2022Q3", "type": "B", "thesis_verdict": "b", "ret": 6, "spx": 111, "excess": -105, "fundamentals_right": "n", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "temporary headwind lasted 3+ years", "f": "oakmark"}, {"ticker": "MGA", "quarter": "2022Q4", "type": "B", "thesis_verdict": "b", "ret": 10, "spx": 97, "excess": -87, "fundamentals_right": "n", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "macro recovery never came", "f": "oakmark"}, {"ticker": "ETSY", "quarter": "2022Q2", "type": "C", "thesis_verdict": "b", "ret": 21, "spx": 100, "excess": -79, "fundamentals_right": "n", "multiple_right": "p", "catalyst_right": "na", "failure_pattern": "growth runway assumption failed", "f": "oakmark"}, {"ticker": "AAPL", "quarter": "2022Q1", "type": "F", "thesis_verdict": "g", "ret": 104, "spx": 67, "excess": 37, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "worked: quality compounder bought on transitory fear; services mix shift + rerating", "f": "trowe"}, {"ticker": "NVDA", "quarter": "2022Q1", "type": "F", "thesis_verdict": "g", "ret": 497, "spx": 67, "excess": 430, "fundamentals_right": "y", "multiple_right": "p", "catalyst_right": "na", "failure_pattern": "worked: secular driver (AI) far exceeded expectations; earnings, not multiple, drove it", "f": "trowe"}, {"ticker": "NXPI", "quarter": "2022Q2", "type": "F", "thesis_verdict": "m", "ret": 79, "spx": 100, "excess": -21, "fundamentals_right": "n", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "secular content story overwhelmed by auto/industrial inventory cycle; revenue below entry-year level 3 years later", "f": "trowe"}, {"ticker": "TXN", "quarter": "2022Q2", "type": "F", "thesis_verdict": "b", "ret": 98, "spx": 100, "excess": -2, "fundamentals_right": "n", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "'short-term' headwind lasted 3 years + unwritten risk (capex cycle crushed FCF); multiple expansion rescued market-level return", "f": "trowe"}, {"ticker": "EOG", "quarter": "2022Q2", "type": "F", "thesis_verdict": "m", "ret": 43, "spx": 100, "excess": -57, "fundamentals_right": "y", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "unwritten risk: bought near commodity price peak (WTI ~$105 at entry); operator quality could not offset oil/gas price decline", "f": "trowe"}, {"ticker": "PXD", "quarter": "2022Q2", "type": "D", "thesis_verdict": "g", "ret": 21, "spx": 34, "excess": -13, "fundamentals_right": "y", "multiple_right": "p", "catalyst_right": "y", "failure_pattern": "catalyst came true but after the fund exited, and the takeout price was below the 2022 commodity-peak valuation (price-only; large variable dividends excluded)", "f": "trowe"}, {"ticker": "COP", "quarter": "2022Q4", "type": "F", "thesis_verdict": "m", "ret": 21, "spx": 97, "excess": -76, "fundamentals_right": "p", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "unwritten risk: commodity price decline after the 2022 spike; qualitative quality thesis with no valuation or price view", "f": "trowe"}, {"ticker": "NVDA", "quarter": "2023Q2", "type": "F", "thesis_verdict": "g", "ret": 285, "spx": 70, "excess": 215, "fundamentals_right": "y", "multiple_right": "p", "catalyst_right": "y", "failure_pattern": "worked: secular demand thesis; earnings growth outran a compressing multiple. Note round-trip: sold in 2022 near the lows, re-bought ~2.8x higher", "f": "william_blair"}, {"ticker": "FTI", "quarter": "2022Q3", "type": "B", "thesis_verdict": "g", "ret": 683, "spx": 111, "excess": 572, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "y", "failure_pattern": "worked: cycle thesis backed by measurable order/pricing KPIs; earnings growth plus multiple expansion (rerating magnitude approx)", "f": "william_blair"}, {"ticker": "WMS", "quarter": "2022Q2", "type": "F", "thesis_verdict": "m", "ret": 39, "spx": 100, "excess": -61, "fundamentals_right": "p", "multiple_right": "n", "catalyst_right": "na", "failure_pattern": "KPI hit (margins) but volume growth stalled; growth-compounder label on a housing-sensitive industrial", "f": "william_blair"}, {"ticker": "PANW", "quarter": "2022Q4", "type": "F", "thesis_verdict": "g", "ret": 362, "spx": 97, "excess": 265, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "worked: bought a quality compounder during a sentiment dip (sales-cycle worries); revenue doubled and multiple expanded", "f": "william_blair"}, {"ticker": "EHC", "quarter": "2022Q3", "type": "C", "thesis_verdict": "g", "ret": 212, "spx": 111, "excess": 101, "fundamentals_right": "y", "multiple_right": "y", "catalyst_right": "na", "failure_pattern": "worked: regulatory fear overdone; post-spin pure-play rerated", "f": "william_blair"}, {"ticker": "GTLS", "quarter": "2022Q4", "type": "D", "thesis_verdict": "m", "ret": 82, "spx": 96, "excess": -14, "fundamentals_right": "y", "multiple_right": "p", "catalyst_right": "p", "failure_pattern": "deal-integration thesis right but leverage overhang capped the multiple; takeout below index return", "f": "william_blair"}, {"ticker": "COP", "quarter": "2022Q3", "type": "B", "thesis_verdict": "m", "ret": 39, "spx": 111, "excess": -72, "fundamentals_right": "p", "multiple_right": "n", "catalyst_right": "n", "failure_pattern": "macro supply/demand call wrong; capital discipline delivered but no rerating, lagged AI-led index", "f": "yacktman"}, {"ticker": "EOG", "quarter": "2022Q3", "type": "B", "thesis_verdict": "m", "ret": 42, "spx": 111, "excess": -69, "fundamentals_right": "p", "multiple_right": "n", "catalyst_right": "n", "failure_pattern": "macro supply/demand call wrong; capital discipline delivered but no rerating, lagged AI-led index", "f": "yacktman"}, {"ticker": "DVN", "quarter": "2022Q3", "type": "B", "thesis_verdict": "b", "ret": -23, "spx": 111, "excess": -134, "fundamentals_right": "n", "multiple_right": "n", "catalyst_right": "n", "failure_pattern": "peak-cycle variable payout shrank; well-productivity misses; strategy changed to a merger", "f": "yacktman"}, {"ticker": "FANG", "quarter": "2022Q3", "type": "B", "thesis_verdict": "m", "ret": 53, "spx": 111, "excess": -58, "fundamentals_right": "p", "multiple_right": "n", "catalyst_right": "n", "failure_pattern": "positive return driven by consolidation (Endeavor deal), still lagged index; macro call wrong", "f": "yacktman"}, {"ticker": "PXD", "quarter": "2022Q3", "type": "B", "thesis_verdict": "m", "ret": 25, "spx": 41, "excess": -16, "fundamentals_right": "p", "multiple_right": "p", "catalyst_right": "n", "failure_pattern": "exited via all-stock Exxon takeover (unplanned path); still lagged S&P to deal date", "f": "yacktman"}];
+const SOURCES=[["Oakmark", "https://oakmark.com/news-insights/oakmark-fund-first-quarter-2022/"], ["Oakmark", "https://oakmark.com/news-insights/oakmark-fund-fourth-quarter-2022/"], ["前回のデモ", "https://claude.ai/artifact/2omcEWESD46Abqvm1L1QSU"], ["2026年ジャッジ一覧", "https://www.kenan-flagler.unc.edu/alpha-challenge-2/judges/"], ["2026年スポンサー一覧", "https://www.kenan-flagler.unc.edu/alpha-challenge-2/sponsors/"], ["S&P 500 終値（2026年11月13日）", "https://www.foxbusiness.com/quote?stockTicker=SP500"], ["Brandes", "https://www.sec.gov/Archives/edgar/data/926678/000119312522166903/d366662dncsrs.htm"], ["Brandes", "https://www.sec.gov/Archives/edgar/data/926678/000119312522299437/d370875dncsr.htm"], ["Brandes", "https://www.sec.gov/Archives/edgar/data/926678/000119312521346861/d229311dncsr.htm"], ["Brandes", "https://web.archive.org/web/20220930185233/https://www.brandes.com/docs/librariesprovider6/default-library/publication/commentary/brandes-u-s-value-fund-quarterly-commentary-mutual-funds.pdf?sfvrsn=ee492235_6"], ["Brandes", "https://web.archive.org/web/20221201092324/https://www.brandes.com/docs/librariesprovider6/default-library/publication/commentary/brandes-u-s-value-fund-quarterly-commentary-mutual-funds.pdf?sfvrsn=ee492235_8"], ["Brandes", "https://web.archive.org/web/20230326150009/https://www.brandes.com/docs/librariesprovider6/default-library/publication/commentary/brandes-u-s-value-fund-quarterly-commentary-mutual-funds.pdf?sfvrsn=ee492235_14"], ["Brandes", "https://web.archive.org/web/20220930193500/https://www.brandes.com/docs/librariesprovider6/default-library/publication/commentary/brandes-global-equity-fund-quarterly-commentary-mutual-funds.pdf?sfvrsn=8f38109d_4"], ["Brandes", "https://web.archive.org/web/20221201092252/https://www.brandes.com/docs/librariesprovider6/default-library/publication/commentary/brandes-global-equity-fund-quarterly-commentary-mutual-funds.pdf?sfvrsn=8f38109d_6"], ["Brandes", "https://web.archive.org/web/20230326142935/https://www.brandes.com/docs/librariesprovider6/default-library/publication/commentary/brandes-global-equity-fund-quarterly-commentary-mutual-funds.pdf?sfvrsn=8f38109d_12"], ["Brandes", "https://web.archive.org/web/20230529191311/https://www.brandes.com/docs/librariesprovider6/default-library/publication/commentary/brandes-global-equity-fund-quarterly-commentary-mutual-funds.pdf?sfvrsn=8f38109d_14"], ["Brandes", "https://www.brandes.com/docs/default-source/default-document-library/publication/commentary/brandes-letter-february-2023.pdf?sfvrsn=abea391d_0"], ["Brandes", "https://www.brandes.com/strategy/us-value-equity"], ["Cooke & Bieler", "https://www.cooke-bieler.com/uploads/pdf/large-cap-value-3Q2021-commentary.pdf"], ["Cooke & Bieler", "https://www.cooke-bieler.com/uploads/pdf/large-cap-value-4Q2021-commentary.pdf"], ["Cooke & Bieler", "https://www.cooke-bieler.com/uploads/pdf/large-cap-value-1Q2022-commentary.pdf"], ["Cooke & Bieler", "https://www.cooke-bieler.com/uploads/pdf/large-cap-value-2Q2022-commentary.pdf"], ["Cooke & Bieler", "https://www.cooke-bieler.com/uploads/pdf/large-cap-value-3Q2022-commentary.pdf"], ["Cooke & Bieler", "https://www.cooke-bieler.com/uploads/pdf/large-cap-value-4Q2022-commentary.pdf"], ["Cooke & Bieler", "https://www.cooke-bieler.com/uploads/pdf/large-cap-value-1Q2023-commentary.pdf"], ["Cooke & Bieler", "https://www.cooke-bieler.com/uploads/pdf/large-cap-value-2Q2023-commentary.pdf"], ["T. Rowe Price", "https://www.sec.gov/Archives/edgar/data/793347/000120677422002226/srcaf_ncsrs.htm"], ["T. Rowe Price", "https://www.sec.gov/Archives/edgar/data/793347/000119312523044695/d395981dncsr.htm"], ["T. Rowe Price", "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000793347&type=NPORT-P"], ["T. Rowe Price", "https://stockanalysis.com/stocks/nvda/history/"], ["William Blair", "https://www.sec.gov/Archives/edgar/data/822632/000093041323000480/c104712_ncsrs.htm"], ["William Blair", "https://www.sec.gov/Archives/edgar/data/822632/000093041323002025/c106307_ncsrs.htm"], ["William Blair", "https://www.sec.gov/Archives/edgar/data/822632/000093041324000736/c107400_ncsr.htm"], ["William Blair", "https://www.sec.gov/Archives/edgar/data/822632/000093041322001534/c103898_ncsrs.htm"], ["William Blair", "https://www.sec.gov/Archives/edgar/data/822632/000093041322000356/c102689_ncsr.htm"], ["William Blair", "https://web.archive.org/web/20230603223023/https://sicav.williamblair.com/resources/docs/funds/reviews/2022-12-31/review-1000.pdf"], ["William Blair", "https://web.archive.org/web/20230530211951/https://sicav.williamblair.com/resources/docs/WB%20US%20SMID%20Growth%20Monthly%20Update%20202302.pdf"], ["William Blair", "https://web.archive.org/web/20230324100057/https://sicav.williamblair.com/resources/docs/WB%20US%20Smid%20Growth%20Monthly%20Update%20202211.pdf"], ["William Blair", "https://web.archive.org/web/2023/https://www.williamblairfunds.com/resources/docs/funds/commentaries/2022-12-31/commentary-fundid-8.pdf"], ["William Blair", "https://web.archive.org/web/2023/https://www.williamblairfunds.com/resources/docs/funds/commentaries/2022-12-31/commentary-fundid-12.pdf"], ["William Blair", "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000822632&type=NPORT-P"], ["Yacktman", "https://www.sec.gov/Archives/edgar/data/1089951/000119312523061360/d441260dncsr.htm"], ["Yacktman", "https://www.sec.gov/Archives/edgar/data/1089951/000119312522236520/d396895dncsrs.htm"], ["Yacktman", "https://www.sec.gov/Archives/edgar/data/1089951/000119312522068175/d290288dncsr.htm"], ["Yacktman", "https://www.sec.gov/Archives/edgar/data/1089951/000119312523230698/d670806dncsrs.htm"], ["Yacktman", "https://www.sec.gov/Archives/edgar/data/1089951/000119312524062150/d722403dncsr.htm"], ["Yacktman", "https://www.gurufocus.com/news/1911351"]];
+const FUNDS=[
+ {k:"oakmark",n:"Harris Associates（Oakmark Fund）",s:"バリュー",c:"前回のデモの16銘柄"},
+ {k:"brandes",n:"Brandes（U.S. Value / Global Equity）",s:"バリュー",c:"米国戦略のアーカイブは2023年以降のみ。グローバルファンドの米国上場・ADR銘柄で補完"},
+ {k:"cooke_bieler",n:"Cooke & Bieler（Large Cap Value）",s:"バリュー",c:"四半期レターの新規組み入れ欄。2023年Q1の3銘柄を追加"},
+ {k:"trowe",n:"T. Rowe Price（Capital Appreciation）",s:"バランス型",c:"レターに出てくる新規組み入れが少ない"},
+ {k:"william_blair",n:"William Blair（US Growth各ファンド）",s:"グロース",c:"新規組み入れを明示しないため保有明細から特定"},
+ {k:"yacktman",n:"Yacktman（AMG Yacktman Fund）",s:"バリュー",c:"5銘柄とも同じエネルギー仮説で実質1件"}
+];
+const ex=s=>typeof s.excess==="number"?s.excess:s.ret-s.spx;
+const med=a=>{const b=[...a].sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
+const sign=v=>(v>0?"+":"")+Math.round(v);
+document.getElementById("fundrows").innerHTML=FUNDS.map(f=>{
+  const g=DATA.filter(s=>s.f===f.k),w=g.filter(s=>ex(s)>0).length,m=med(g.map(ex));
+  return `<tr><td>${f.n}</td><td>${f.s}</td><td class="r num">${g.length}</td><td class="r num">${w}</td><td class="r num ${m>=0?"pos":"neg"}">${sign(m)}pt</td><td style="color:var(--muted)">${f.c}</td></tr>`}).join("");
+const L=[["業績",'fundamentals_right'],["評価倍率",'multiple_right'],["触媒",'catalyst_right']];
+document.getElementById("layers").innerHTML=L.map(([lab,k])=>{
+  const c={y:0,p:0,n:0,na:0};DATA.forEach(s=>c[s[k]||"na"]++);
+  const seg=["y","p","n","na"].filter(x=>c[x]).map(x=>`<span class="s-${x}" style="width:${c[x]/DATA.length*100}%">${c[x]}</span>`).join("");
+  return `<div class="layer"><span>${lab}</span><div class="stack" role="img" aria-label="${lab}: 当たり${c.y}、部分的${c.p}、外れ${c.n}、該当なし${c.na}">${seg}</div></div>`}).join("");
+const chip=t=>{const s=DATA.find(d=>d.ticker===t.split(":")[0]&&(!t.includes(":")||d.f===t.split(":")[1]));return s?`<span class="chip ${s.thesis_verdict}">${s.ticker} ${sign(ex(s))}</span>`:""};
+const P=[
+ {t:"「一時的な逆風」が3年以上続いた",tag:"23件 · 7勝 · 中央値 −53pt",
+  ev:"逆風を「短期的」「一時的」と書いた仮説が59件中23件ありました。<b>いつまでに回復するかの期限を書いたものは1件もありません。</b>住宅（EFX、FBIN）、自動車生産（MGA）、半導体の在庫調整（NXPI、TXN）、ITサービス（CTSH）、ラグジュアリー（Kering）など、業種もファンドもまたがって同じ外れ方をしています。",
+  ch:["EFX","FBIN","MGA","CTSH","NXPI","TXN","HAS","PPRUY","QRVO"],
+  f:"逆風タイマー",fl:["メモの中の「一時的」「短期的」「サイクル的」という表現をAIが検出し、回復の期限とその判定に使う指標（例：住宅着工、在庫日数）の入力を求める","期限が来たら、指標の実績と並べて「仮説を維持するか、書き換えるか」を判断させる","過去の同じ型の結果（この分析では中央値 −53pt）を入力時に表示する"]},
+ {t:"業績は当たったのに、評価倍率が上がらなかった",tag:"業績○・倍率×の14件 · 2勝",
+  ev:"PINS、WMG、MAS、CBRE、WTW、BACなど。業績の予想は当たったのに、株価は市場平均に届きませんでした。どの倍率で評価されるべきか、なぜ再評価されるのかを書いた仮説は23件だけです。",
+  ch:["PINS","WMG","MAS","CBRE","WTW","BAC","AMZN","GTLS"],
+  f:"主張ごとの3層採点",fl:["仮説を業績・評価倍率・触媒の主張に分けて保存し、それぞれを決算と株価で自動採点する","「業績は計画どおりなのに倍率が動かない」状態が一定期間続いたら知らせ、再評価が起きない理由を書かせる","入力時に「目標とする倍率と、その根拠（同業比較、過去レンジ）」を必須にする"]},
+ {t:"書いていなかったリスクで負けた",tag:"11件 · 1勝 · 中央値 −76pt",
+  ev:"生成AIによる競争環境の変化（ADBE、CTSH）、新興の競合（KMXに対するCarvana）、商品価格（COP、EOG）、特定顧客への依存（QRVOとApple）、為替（ABEV）、テレビ事業の縮小（DIS）。どれも仮説に書かれていませんでした。主要リスクを書いた仮説は18件中9勝（中央値 −2pt）、書かなかった仮説は41件中10勝（中央値 −64pt）です。ただし、リスクをよく書くファンドがもともと好成績だった影響も混ざっています。",
+  ch:["LKQ","ADBE","KMX","CTSH","QRVO","DIS","ABEV","SNY"],
+  f:"書かれていないリスクのスキャン",fl:["入力された仮説に対して、AIが反対の立場からリスクを列挙する。分類は、技術の破壊、新しい競合、顧客の集中、商品価格、為替、規制","選んだリスクごとに監視するニュースと指標を設定し、動きがあったら知らせる","「市場の懸念は一時的か構造的か」を自分の判断として記録させる"]},
+ {t:"撤退条件がなく、売るときの判断がぶれた",tag:"撤退条件の記載 0 / 59件",
+  ev:"撤退条件を書いた仮説はありませんでした。売却の判断ミスは4件あります。NVDAは2022年の安値近くで売り、約2.8倍の水準で買い直し（William Blair）。SYFは規制への懸念で売却したが、その規制は2025年に無効になった（Cooke &amp; Bieler）。PXDは売却した後にExxonの買収提案が出た（T. Rowe Price）。FISVは成長の質が落ち、CEOが去っても売らなかった（Brandes）。",
+  ch:["NVDA:william_blair","SYF","PXD:trowe","FISV"],
+  f:"撤退条件と売却メモ",fl:["入力時に撤退条件（どの数字がどうなったら間違いか）を必須にする","売却時には「なぜ売るか」をメモとして残させ、売却後の株価もそのまま追跡する","売った理由が実際に当たったかを、買った理由と同じように採点する"]},
+ {t:"人物や個別案件に頼った触媒が崩れた",tag:"6件 · 0勝 · 中央値 −40pt",
+  ev:"CRMは新CEOのTaylor氏が退任。OTEXは買収（Micro Focus）が大きすぎ、2社とも負け。FISVとDFSはCEOが退任。ORCLは成長したが、理由はCernerではなくAI向けクラウドでした。",
+  ch:["CRM","OTEX:brandes","ORCL","DIS","GTLS","DFS"],
+  f:"触媒の依存先アラート",fl:["触媒が特定の人物や案件に依存しているかを自動でタグ付けする","経営陣の異動やM&Aのニュースを監視し、該当する仮説を見直す対象に入れる","触媒が崩れた場合の代わりの経路を書かせる"]},
+ {t:"サイクルの天井で、同じテーマに集中して買った",tag:"エネルギー9件 · 0勝 · 中央値 −69pt",
+  ev:"2022年、原油価格の高値圏で3社（Yacktman、T. Rowe Price、Cooke &amp; Bieler）が石油・ガス株を新規に買いました。どれも経営の質は評価どおりでしたが、すべて市場平均に負けています。Yacktmanは5銘柄すべてが同じ仮説でした。QRVOの「正常化利益」も、実際にはサイクルの天井の利益でした。",
+  ch:["DVN","COP:yacktman","EOG:yacktman","FANG","PXD:yacktman","EOG:trowe","COP:trowe","EOG:cooke_bieler"],
+  f:"サイクル位置と新規銘柄の偏りチェック",fl:["買った時点の利益が、過去のサイクルの中でどの位置にあるかを表示する","同じ四半期に新しく買った銘柄が、同じ要因（原油、金利、住宅）に偏っていないかを警告する"]},
+ {t:"勝ったが、書いた理由とは別の経路だった",tag:"7件",
+  ev:"WBD、DFS、PXD、FANG、GTLSは買収で価値が実現しました。RYCEYは想定していなかった新CEOの改革で大きく伸びています。結果だけで集計すると、これらは「実力の勝ち」に数えられてしまいます。",
+  ch:["WBD","DFS","FANG","RYCEY","ORCL","GTLS"],
+  f:"勝ち筋の照合（運か実力か）",fl:["実際にリターンを生んだ要因を、仮説に書いたドライバーと照合する","理由が違った勝ちには「別の経路」とタグを付け、勝率の集計を実力と運に分けて出す"]}
+];
+document.getElementById("patterns").innerHTML=P.map((p,i)=>`<div class="pf">
+ <div class="head"><h3>${i+1}. ${p.t}</h3><span class="tag">${p.tag}</span></div>
+ <div class="ev"><p>${p.ev}</p><div>${p.ch.map(chip).join("")}</div></div>
+ <div class="feat"><h4>→ 機能：${p.f}</h4><ul>${p.fl.map(x=>`<li>${x}</li>`).join("")}</ul></div></div>`).join("");
+const fname={oakmark:"Oakmark",brandes:"Brandes",cooke_bieler:"Cooke & Bieler",trowe:"T. Rowe Price",william_blair:"William Blair",yacktman:"Yacktman"};
+const vj={g:"当たり",m:"部分的",b:"外れ"};
+function table(f){
+  document.querySelector("#tbl tbody").innerHTML=DATA.filter(s=>f==="all"||s.thesis_verdict===f).sort((a,b)=>ex(a)-ex(b)).map(s=>{
+   const e=ex(s);return `<tr><td>${fname[s.f]}</td><td class="num">${s.ticker}</td><td class="num">${s.quarter}</td><td>${s.type}</td><td><span class="chip ${s.thesis_verdict}">${vj[s.thesis_verdict]}</span></td><td class="r num ${e>=0?"pos":"neg"}">${sign(e)}</td><td>${s.failure_pattern||""}</td></tr>`}).join("");
+}
+document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+ document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("on",x===b));table(b.dataset.f)});
+table("all");
+document.getElementById("sources").innerHTML=SOURCES.map(([lab,u])=>`<li>${lab}：<a href="${u}" target="_blank" rel="noopener">${u}</a></li>`).join("");
+</script>
+
+</body></html>

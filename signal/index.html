@@ -1,0 +1,942 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>MKSI Signal Watch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky band of tabs over a ground-station console; one view at a time, image + timeline as the hero of the Fabs view */
+:root{
+  --bg:#EEF2F1; --surface:#FFFFFF; --sunk:#E3E9E7; --ink:#13201F; --muted:#56676A; --line:#D2DBD9;
+  --accent:#0A6C6C; --accent-ink:#FFFFFF; --good:#2E7A4C; --watch:#A86400; --bad:#B03838; --method:#45538F;
+  --img-bg:#0D1413;
+  --s0:#C9D6D3; --s1:#A9C3BE; --s2:#7FA9A3; --s3:#548E88; --s4:#2F716C; --s5:#155651; --s6:#063D3A;
+  --f-display:"Space Grotesk",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0C1312; --surface:#141E1D; --sunk:#1B2726; --ink:#E4EDEB; --muted:#93A4A1; --line:#283634;
+  --accent:#3DB2AC; --accent-ink:#06201F; --good:#62C089; --watch:#E2A23C; --bad:#E57373; --method:#9CA8E8; --img-bg:#050908;
+  --s0:#2A3A38; --s1:#2F5551; --s2:#3A6F6A; --s3:#4A8C86; --s4:#5FA8A1; --s5:#7FC6BF; --s6:#A7E3DC; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1312; --surface:#141E1D; --sunk:#1B2726; --ink:#E4EDEB; --muted:#93A4A1; --line:#283634;
+  --accent:#3DB2AC; --accent-ink:#06201F; --good:#62C089; --watch:#E2A23C; --bad:#E57373; --method:#9CA8E8; --img-bg:#050908;
+  --s0:#2A3A38; --s1:#2F5551; --s2:#3A6F6A; --s3:#4A8C86; --s4:#5FA8A1; --s5:#7FC6BF; --s6:#A7E3DC; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.hrow{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:12px 0}
+.brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.brand h1{font:700 22px/1.1 var(--f-display);margin:0;letter-spacing:-.01em}
+.brand .tick{font:500 12px var(--f-mono);color:var(--accent);border:1px solid var(--accent);padding:1px 6px;border-radius:4px}
+.asof{margin-left:auto;font:12px var(--f-mono);color:var(--muted)}
+nav{display:flex;gap:4px;overflow-x:auto;padding-block:8px 0;scrollbar-width:none}
+nav a{font:600 14px var(--f-display);color:var(--muted);text-decoration:none;padding:9px 14px 11px;border-bottom:3px solid transparent;white-space:nowrap}
+nav a[aria-current="page"]{color:var(--ink);border-color:var(--accent)}
+nav a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{padding-block:20px 48px}
+.view[hidden]{display:none!important}
+h2{font:700 24px/1.2 var(--f-display);margin:0 0 4px;text-wrap:balance}
+.lede{color:var(--muted);margin:0 0 18px;max-width:72ch}
+.mono{font-family:var(--f-mono)}
+.eyebrow{font:500 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* chain */
+.chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;margin:0 0 20px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.chain div{background:var(--surface);padding:10px 12px;min-width:0}
+.chain b{display:block;font:600 14px var(--f-display)}
+.chain span{font-size:12.5px;color:var(--muted)}
+.chain .n{font:500 11px var(--f-mono);color:var(--accent)}
+
+/* signals */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{font:500 13px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer;min-height:36px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--c)}
+.card[data-v="Supports"]{--c:var(--good)}.card[data-v="Watch"]{--c:var(--watch)}.card[data-v="Against"]{--c:var(--bad)}.card[data-v="Method"]{--c:var(--method)}
+.meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{font:600 11.5px var(--f-mono);padding:2px 8px;border-radius:4px;border:1px solid var(--c);color:var(--c);display:inline-flex;gap:5px;align-items:center}
+.pill i{font-style:normal}
+.tag{font:500 11.5px var(--f-mono);color:var(--muted);background:var(--sunk);padding:2px 8px;border-radius:4px}
+.card h3{font:600 17px/1.3 var(--f-display);margin:0;text-wrap:balance}
+.big{font:600 28px/1 var(--f-display);letter-spacing:-.01em}
+.big small{font:400 13px var(--f-body);color:var(--muted);margin-left:6px;letter-spacing:0}
+.card p{margin:0;font-size:14px}
+.ai{background:var(--sunk);border-radius:8px;padding:10px 12px;font-size:13.5px}
+.ai b{font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:2px}
+.card .go{margin-top:auto;align-self:flex-start;font:600 13px var(--f-display);color:var(--accent);background:none;border:0;padding:4px 0;cursor:pointer}
+
+/* fabs */
+.fabs{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px}
+.sitelist{display:flex;flex-direction:column;gap:6px}
+.site{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;color:var(--ink);font:inherit}
+.site b{font:600 14px var(--f-display);display:block}
+.site span{font-size:12px;color:var(--muted)}
+.site[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.stage-panel{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;align-items:start}
+.viewer{background:var(--img-bg);border-radius:10px;overflow:hidden;position:relative;aspect-ratio:1/1;max-width:100%;touch-action:pan-y}
+.viewer img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}
+.viewer .top{clip-path:inset(0 0 0 var(--cut,0%))}
+.viewer .divider{position:absolute;top:0;bottom:0;left:var(--cut,0%);width:2px;background:#fff;box-shadow:0 0 0 1px #0006}
+.viewer .lbl{position:absolute;top:10px;font:500 12px var(--f-mono);color:#fff;background:#000a;padding:3px 7px;border-radius:4px}
+.viewer .lbl.l{left:10px}.viewer .lbl.r{right:10px}
+.viewer svg.ann{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.viewer svg.ann rect.box{fill:none;stroke:#FF3B30;stroke-width:2.5;vector-effect:non-scaling-stroke}
+.viewer svg.ann rect.box.dash{stroke-dasharray:7 5}
+.viewer .cap{position:absolute;left:0;right:0;bottom:0;padding:22px 12px 9px;background:linear-gradient(transparent,#000d 45%);font:600 14px/1.3 var(--f-display);color:#fff}
+.viewer .cap:empty{display:none}
+.evs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.evs span{font:500 12.5px var(--f-body);color:#fff;background:#1E5FA8;padding:4px 9px;border-radius:5px}
+.evs span.plan{background:var(--muted)}
+.viewer .credit{position:absolute;top:10px;left:10px;font:10px var(--f-mono);color:#fffc;background:#0008;padding:2px 6px;border-radius:3px}
+.controls{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.btn{font:600 14px var(--f-display);background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:10px 16px;cursor:pointer;min-height:42px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+input[type=range]{flex:1;min-width:140px;accent-color:var(--accent);height:32px}
+.date{font:500 15px var(--f-mono);min-width:92px}
+.timeline{margin-top:12px}
+.timeline svg{width:100%;height:auto;display:block}
+.facts{display:flex;flex-direction:column;gap:12px;min-width:0}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.fact h4{margin:0 0 6px;font:600 15px var(--f-display)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px}
+.kv dt{color:var(--muted)}.kv dd{margin:0}
+.stage-now{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
+.legend span{display:inline-flex;gap:5px;align-items:center}
+.airesult{font-size:14px;white-space:pre-wrap}
+.airesult .k{font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.note{font-size:12.5px;color:var(--muted)}
+
+.mapgrid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+.map svg{width:100%;height:auto;display:block}
+.map .land{fill:var(--sunk);stroke:var(--line);stroke-width:.6}
+.map .pin{cursor:pointer}
+.map .pin text{font:600 11.5px var(--f-display);fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:3.5px;stroke-linejoin:round}
+.map .pin text.yr{font:500 10.5px var(--f-mono);fill:var(--muted)}
+.map .pin.on circle,.map .pin.on rect{stroke:var(--ink);stroke-width:2.5}
+.y26{--y:var(--s2)}.y27{--y:var(--s3)}.y28{--y:var(--s4)}.y29{--y:var(--s6)}
+.wall .chart svg{width:100%;height:auto;display:block}
+.wkey svg{flex:none}
+.wall text{font:11px var(--f-mono);fill:var(--muted)}
+.wall .rl{font:500 12.5px var(--f-body);fill:var(--ink)}
+.wall .row{cursor:pointer}
+.wall .row:hover rect.bg,.wall .row.on rect.bg{fill:var(--sunk)}
+.counts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.counts div{background:var(--surface);padding:10px 12px}
+.counts b{font:700 30px/1 var(--f-display);display:block}
+.counts span{font-size:12.5px;color:var(--muted)}
+.counts .yr{font:500 12px var(--f-mono);color:var(--muted)}
+.counts .hot b{color:var(--accent)}
+.wkey{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.wkey span{display:inline-flex;gap:6px;align-items:center}
+@media (max-width:980px){.mapgrid{grid-template-columns:1fr}}
+@media (max-width:640px){.counts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* charts */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.panel h3{font:600 17px/1.3 var(--f-display);margin:0 0 2px}
+.panel .sub{font-size:13px;color:var(--muted);margin:0 0 10px}
+.chart{position:relative}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart text{font:11px var(--f-mono);fill:var(--muted)}
+.chart .ann{fill:var(--ink);font-weight:500}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);font:12px var(--f-mono);padding:5px 8px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.stack{display:flex;flex-direction:column;gap:14px}
+.callout{border-left:3px solid var(--method);padding:4px 0 4px 12px;font-size:14px;margin:10px 0 0}
+
+/* ask */
+.ask{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px}
+.chat{display:flex;flex-direction:column;gap:12px}
+.msg{padding:12px 14px;border-radius:10px;max-width:100%;white-space:pre-wrap;font-size:14.5px}
+.msg.u{background:var(--ink);color:var(--surface);align-self:flex-end;max-width:85%}
+.msg.a{background:var(--surface);border:1px solid var(--line)}
+.compose{display:flex;gap:8px;margin-top:12px}
+textarea{flex:1;font:15px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:10px;min-height:46px;resize:vertical}
+.empty{color:var(--muted);font-size:14px;padding:14px;border:1px dashed var(--line);border-radius:10px}
+
+@media (max-width:980px){.fabs{grid-template-columns:1fr}.sitelist{flex-direction:row;overflow-x:auto;padding-bottom:4px}.site{min-width:190px}.stage-panel{grid-template-columns:1fr}.ask{grid-template-columns:1fr}}
+@media (max-width:640px){.chain{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.asof{margin-left:0}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header>
+  <div class="wrap">
+    <div class="hrow">
+      <div class="brand"><h1>Signal Watch</h1><span class="tick">MKSI</span></div>
+      <div class="asof">Data as of Nov 16, 2026 · Sentinel-2 · HS 8486 · MOPS</div>
+    </div>
+    <nav aria-label="Views">
+      <a href="#signals" data-v="signals">Signals</a>
+      <a href="#wave" data-v="wave">Tool wave</a>
+      <a href="#fabs" data-v="fabs">Fabs from space</a>
+      <a href="#imports" data-v="imports">Tool imports</a>
+      <a href="#boards" data-v="boards">Board makers</a>
+      <a href="#ask" data-v="ask">Ask the analyst</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- SIGNALS -->
+  <section class="view" id="v-signals">
+    <h2>Is 2028 really the peak? We check from orbit and the customs desk.</h2>
+    <p class="lede">AI capex reaches MKS in sequence. Each step leaves a trace we can measure before MKS reports it. Every signal below says which thesis it tests and whether it supports or challenges our long.</p>
+    <div class="chain" aria-label="Sequence">
+      <div><span class="n">01</span><b>Fab building</b><span>Sentinel-2 satellite, 10 m</span></div>
+      <div><span class="n">02</span><b>Tools arrive</b><span>HS 8486 customs imports</span></div>
+      <div><span class="n">03</span><b>Boards ramp</b><span>Taiwan PCB monthly revenue</span></div>
+      <div><span class="n">04</span><b>MKS revenue</b><span>Power, plasma, chemistry</span></div>
+    </div>
+    <div class="filters" role="group" aria-label="Filter signals">
+      <button class="chip" data-f="all" aria-pressed="true">All</button>
+      <button class="chip" data-f="Thesis 1" aria-pressed="false">Thesis 1 · Chemistry</button>
+      <button class="chip" data-f="Thesis 2" aria-pressed="false">Thesis 2 · 2028 not the peak</button>
+      <button class="chip" data-f="Thesis 3" aria-pressed="false">Thesis 3 · NAND share</button>
+      <button class="chip" data-f="Against" aria-pressed="false">Against us</button>
+    </div>
+    <div class="grid" id="cards"></div>
+  </section>
+
+  <!-- WAVE -->
+  <section class="view" id="v-wave" hidden>
+    <h2>Tool move-in does not stop after 2028</h2>
+    <p class="lede">When each new fab takes its tools, from company schedules, filings and press, our satellite stage calls and the 4-month ruler. The market prices 2027 as the peak; the fab calendar says otherwise. 2029 counts only what is announced today: companies name fab dates two to three years ahead.</p>
+    <div class="filters" role="group" aria-label="Which plants to count"><span class="chip" aria-pressed="true" style="cursor:default" id="wave-n"></span><button class="chip" data-wave="pkg" aria-pressed="false">Add HBM and packaging plants</button><button class="chip" data-wave="cn" aria-pressed="true">Include China (mostly local tools)</button></div>
+    <div class="counts" id="counts"></div>
+    <div class="panel" style="margin-bottom:14px">
+      <h3>Fabs taking tools, by year and region</h3>
+      <p class="sub">Same plants as the wall below. Follows the buttons above. Hover a block for the plant names.</p>
+      <div class="chart" id="ybars"></div>
+    </div>
+    <div class="panel wall">
+      <h3>The 2029 wall</h3>
+      <p class="sub">Estimated tool move-in window per fab, sorted by start. Hover for the source; tap a row with ◉ to see it from space.</p>
+      <div class="chart" id="wall"></div>
+      <div class="wkey">
+        <span><svg width="26" height="10" aria-hidden="true"><rect width="26" height="10" rx="3" fill="var(--s4)"/></svg>Tool move-in window</span>
+        <span><svg width="26" height="10" aria-hidden="true"><defs><pattern id="hk" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.2" height="5" fill="var(--watch)"/></pattern></defs><rect width="26" height="10" rx="3" fill="url(#hk)"/></svg>Could slip</span>
+        <span><b style="color:var(--accent)">◉</b> Seen by satellite</span>
+        <span><b style="color:var(--muted)">○</b> Company or press date only</span>
+        <span><svg width="26" height="10" aria-hidden="true"><rect x="1" y="1" width="24" height="8" rx="3" fill="var(--s4)" fill-opacity=".55" stroke="var(--s4)" stroke-dasharray="3 2"/></svg>Our estimate (no tool date given)</span>
+        <span>* China: tools mostly local</span>
+      </div>
+      <p class="note" style="margin-top:8px">Counts plants, not dollars: a megafab like Micron Clay takes far more tools than a mid-size fab. Windows can move by a quarter or more. Not counted: plants with no date (TI Sherman SM2 and Lehi LFAB2, paced to demand), unconfirmed plans (Rapidus fab 2, Sony–TSMC Koshi) and cancelled ones (Intel Magdeburg).</p>
+    </div>
+    <div class="mapgrid" style="margin-top:14px">
+      <div class="panel map"><h3>East Asia</h3><p class="sub">Pin colour = year tools start going in</p><div id="map-asia"></div></div>
+      <div class="panel map"><h3>United States</h3><p class="sub">Pin colour = year tools start going in</p><div id="map-us"></div></div>
+    </div>
+    <div class="wkey" id="mapkey"></div>
+    <p class="note" id="map-note"></p>
+  </section>
+
+  <!-- FABS -->
+  <section class="view" id="v-fabs" hidden>
+    <h2 id="fab-title">Fabs from space</h2>
+    <p class="lede" id="fab-lede"></p>
+    <div class="fabs">
+      <div class="sitelist" id="sitelist" role="group" aria-label="Sites"></div>
+      <div class="stage-panel">
+        <div>
+          <div class="viewer" id="viewer">
+            <img class="base" id="img-base" alt="">
+            <img class="top" id="img-top" alt="">
+            <div class="divider" id="divider" hidden></div>
+            <svg class="ann" id="ann" aria-hidden="true"></svg>
+            <div class="cap" id="cap"></div>
+            <span class="lbl l" id="lbl-l" hidden style="top:34px"></span>
+            <span class="lbl r" id="lbl-r"></span>
+            <span class="credit">Contains modified Copernicus Sentinel data</span>
+          </div>
+          <div class="evs" id="evs"></div>
+          <div class="controls">
+            <button class="btn ghost" id="play" aria-label="Play time-lapse">Play</button>
+            <input type="range" id="slider" min="0" max="0" value="0" aria-label="Image date">
+            <span class="date" id="date"></span>
+          </div>
+          <div class="controls">
+            <button class="btn ghost" id="lab" aria-pressed="true">Labels on</button>
+            <button class="btn ghost" id="cmp" aria-pressed="false">Compare with first image</button>
+            <input type="range" id="cut" min="0" max="100" value="50" aria-label="Compare divider" hidden>
+          </div>
+          <div class="timeline" id="timeline"></div>
+          <div class="legend" id="legend"></div>
+        </div>
+        <div class="facts">
+          <div class="fact" id="fact-site"></div>
+          <div class="fact" id="fact-stage"></div>
+          <div class="fact">
+            <h4>AI reads this image</h4>
+            <p class="note" style="margin:0 0 10px">Claude compares the first and the selected image, calls the construction stage, and we check it against the team's own call.</p>
+            <button class="btn" id="ai-read">Read the selected image</button>
+            <div class="airesult" id="ai-out" style="margin-top:10px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IMPORTS -->
+  <section class="view" id="v-imports" hidden>
+    <h2>Tools show up at customs about four months after the building is done</h2>
+    <p class="lede">HS 8486 is the customs code for chip-making tools. We measured the lag once, at a fab we can see finish, and use it as a ruler for the fabs still being built.</p>
+    <div class="stack">
+      <div class="panel">
+        <h3>Kyushu tool imports vs JASM fab 1</h3>
+        <p class="sub">HS 8486 imports cleared at Moji Customs (Kyushu, incl. Fukuoka Airport), JPY bn per month. Shaded: JASM exterior finished, seen by satellite.</p>
+        <div class="chart" id="ch-kyushu"></div>
+        <p class="callout">Exterior done Feb to May 2023. Imports' 3-month average passes 2x the 2022 level in Sep 2023 and peaks in Nov 2023 at ¥28.4bn. That gap, about 4 months, is our ruler: <b>tools go in ≈ building done + 4 months</b>.</p>
+      </div>
+      <div class="panel">
+        <h3>One fab, three clocks: JASM fab 1</h3>
+        <p class="sub">The same fab seen three ways: the building from orbit, MKS's revenue from Japan (10-Q), and tools arriving at Kyushu customs. Tap a bar for the number.</p>
+        <div class="chart" id="ch-clocks"></div>
+        <div class="two" style="margin-top:12px">
+          <div>
+            <p class="callout" style="border-color:var(--good)"><b>The order holds.</b> Building shell done Feb to May 2023 → tool imports jump Sep to Dec 2023 → fab opens Feb 2024 → mass production Dec 2024.</p>
+            <p class="callout" style="border-color:var(--good)"><b>MKS Japan held up while the cycle fell.</b> In 2023 MKS semiconductor revenue fell 28%, but its Japan revenue rose 6% to $280m. Japan's share of MKS revenue rose from 7.4% to 7.7%, and was 8.1% in 4Q23.</p>
+          </div>
+          <div>
+            <p class="callout" style="border-color:var(--watch)"><b>Quarter by quarter, it does not line up.</b> MKS Japan revenue and Kyushu imports show no correlation at a 0 to 2 quarter lead (about −0.2 to 0). MKS books revenue where its customer, the toolmaker, takes delivery, not at the fab. Japan also includes chemistry, and a ransomware attack pushed 1Q23 shipments into 2Q23.</p>
+            <p class="callout" style="border-color:var(--method)"><b>Now:</b> MKS Japan revenue is rising again, $91m in 3Q26 (+62% y/y), while JASM fab 2's frame goes up. Worth watching, not yet proof.</p>
+          </div>
+        </div>
+        <p class="note">Sources: MKS 10-Qs and 10-Ks, geographic revenue by shipped-to location (recast basis from 2Q24; 2023 quarters from 2024 10-Q comparatives; 1Q and 4Q derived from year-to-date totals). Japan Customs via e-Stat. Copernicus Sentinel-2.</p>
+      </div>
+      <div class="two" id="ch-countries"></div>
+      <p class="note">Sources: Japan Customs via e-Stat (JPY, Sep 2026 provisional); UN Comtrade public API (USD). Taiwan is not a Comtrade reporter, so its line is exports to Taiwan reported by the US, Netherlands, Japan, Korea, Singapore and Germany. Korea's 2026 months are not yet published.</p>
+    </div>
+  </section>
+
+  <!-- BOARDS -->
+  <section class="view" id="v-boards" hidden>
+    <h2>Board makers lead MKS chemistry by a quarter or two</h2>
+    <p class="lede">MKS sells plating chemistry to the makers of AI server boards and substrates. Five Taiwan board makers report revenue every month, so we see their volume long before MKS reports.</p>
+    <div class="stack">
+      <div class="panel">
+        <h3>Taiwan board makers vs MKS chemistry, year-on-year growth</h3>
+        <p class="sub">Bars: Unimicron, Zhen Ding, Kinsus, Nan Ya PCB and Tripod combined revenue (MOPS). Dots: MKS E&amp;P chemistry, excluding FX and palladium (earnings calls).</p>
+        <div class="chart" id="ch-boards"></div>
+        <div class="legend"><span><i class="sw" style="background:var(--s3)"></i>Taiwan 5 board makers</span><span><i class="sw" style="background:var(--watch);border-radius:50%"></i>MKS chemistry</span></div>
+        <p class="callout">Correlation over 11 quarters: 0.69. Chemistry is smoother (std dev 9.7 pts vs 12.4). Board makers grew +32% in 2Q26 and +46.5% in 3Q26, the fastest in the series. That points to strong chemistry in 2H26.</p>
+      </div>
+      <div class="two">
+        <div class="panel"><h3>2023 downturn test</h3><p class="sub">Full-year growth</p><div class="chart" id="ch-down"></div><p class="note">Chemistry fell, but about half as much as board makers and far less than MKS semiconductor. We say "less cyclical", not "recession-proof".</p></div>
+        <div class="panel"><h3>Board makers' revenue, NT$ bn per quarter</h3><p class="sub">Sum of the five companies</p><div class="chart" id="ch-rev"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ASK -->
+  <section class="view" id="v-ask" hidden>
+    <h2>Ask the analyst</h2>
+    <p class="lede">Claude answers from the signals in this app only: the satellite stage calls, the import series, the board-maker data and our thesis. Try a judge's question.</p>
+    <div class="ask">
+      <div>
+        <div class="chat" id="chat"><div class="empty" id="chat-empty">Pick a question on the right, or type your own. Answers stream in here.</div></div>
+        <form class="compose" id="compose">
+          <label for="q" class="eyebrow" hidden>Question</label>
+          <textarea id="q" rows="2" placeholder="e.g. What would prove us wrong about 2028?"></textarea>
+          <button class="btn" id="send" type="submit">Ask</button>
+        </form>
+        <p class="note" id="ask-note"></p>
+      </div>
+      <div class="stack" id="suggest"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const RAW = {"imgs": {"micron_clay": ["2023-02-14", "2023-04-13", "2023-08-31", "2024-02-04", "2024-06-28", "2024-08-15", "2024-10-19", "2025-03-18", "2025-05-12", "2025-08-02", "2025-10-01", "2026-03-25", "2026-06-03", "2026-08-09", "2026-10-24"], "skh_yongin": ["2023-01-12", "2023-04-02", "2023-09-09", "2023-10-29", "2024-01-12", "2024-05-31", "2024-09-23", "2024-11-12", "2025-03-22", "2025-04-26", "2025-07-10", "2025-11-12", "2026-02-25", "2026-05-31", "2026-10-08", "2026-11-07"], "skh_m17_area": ["2023-01-12", "2023-04-02", "2023-09-09", "2023-12-08", "2024-06-10", "2024-08-14", "2024-11-22", "2025-03-22", "2025-04-26", "2025-07-25", "2025-12-12", "2026-01-31", "2026-05-31", "2026-09-08", "2026-10-08"], "jasm_kumamoto": ["2021-07-30", "2021-10-03", "2022-01-01", "2022-06-30", "2022-12-27", "2023-01-31", "2023-05-01", "2023-11-02", "2024-01-26", "2024-05-10", "2024-09-17", "2024-10-12", "2025-02-14", "2025-06-04", "2025-07-29", "2025-11-23", "2026-01-30", "2026-05-10", "2026-09-22", "2026-10-02", "2026-11-11"], "tsmc_az": ["2021-03-08", "2021-05-12", "2021-07-11", "2021-11-28", "2022-03-03", "2022-05-17", "2022-09-04", "2022-11-13", "2023-01-27", "2023-04-17", "2023-07-01", "2023-10-19", "2024-03-02", "2024-05-26", "2024-07-10", "2024-10-03", "2025-02-25", "2025-05-21", "2025-07-10", "2025-10-23", "2026-01-31", "2026-05-26", "2026-07-10", "2026-10-03", "2026-11-02", "2026-11-07"], "samsung_taylor": ["2023-01-26", "2023-06-20", "2023-09-08", "2023-10-16", "2024-02-13", "2024-04-03", "2024-09-30", "2024-10-10", "2025-03-14", "2025-04-10", "2025-09-10", "2025-12-19", "2026-03-19", "2026-05-28", "2026-08-26", "2026-10-10"], "micron_boise": ["2023-02-25", "2023-04-28", "2023-08-14", "2023-10-08", "2024-03-16", "2024-04-20", "2024-07-04", "2024-10-07", "2025-03-26", "2025-06-19", "2025-07-06", "2025-11-01", "2026-03-18", "2026-06-11", "2026-08-10", "2026-10-07", "2026-10-24", "2026-11-06"], "gz_yunpu": ["2024-01-19", "2024-09-30", "2024-12-19", "2025-03-24", "2025-04-03", "2025-07-07", "2025-11-29", "2026-02-02", "2026-07-12", "2026-10-07"], "samsung_pyeongtaek": ["2023-04-02", "2024-09-23", "2025-04-26", "2025-07-10", "2025-11-12", "2026-10-08"], "tsmc_taichung": ["2023-01-30", "2023-05-05", "2023-07-04", "2023-11-21", "2024-02-14", "2024-04-04", "2024-08-22", "2024-12-05", "2025-02-28", "2025-05-14", "2025-08-22", "2025-11-22", "2026-01-14", "2026-04-14", "2026-09-06", "2026-11-17"], "tsmc_kaohsiung": ["2023-03-01", "2023-07-04", "2023-11-26", "2024-01-05", "2024-04-04", "2024-07-03", "2024-12-20", "2025-03-25", "2025-05-14", "2025-12-30", "2026-01-04", "2026-04-14", "2026-09-18", "2026-10-31"], "gf_malta": ["2023-05-30", "2023-07-11", "2023-10-04", "2024-02-04", "2024-06-28", "2024-09-03", "2024-10-18", "2025-03-27", "2025-04-29", "2025-09-10", "2025-10-06", "2026-03-10", "2026-06-03", "2026-07-08", "2026-10-18"], "skh_indiana": ["2023-01-10", "2023-05-05", "2023-07-11", "2023-10-02", "2024-02-14", "2024-06-13", "2024-09-11", "2024-10-06", "2025-02-25", "2025-05-18", "2025-09-15", "2025-11-02", "2026-06-02", "2026-07-13", "2026-10-06"], "intel_ohio": ["2023-03-30", "2023-04-09", "2023-09-01", "2023-12-15", "2024-03-24", "2024-06-12", "2024-09-05", "2024-10-20", "2025-03-09", "2025-04-23", "2025-08-01", "2025-10-05", "2026-03-09", "2026-05-28", "2026-09-25", "2026-10-30"], "samsung_yongin_nat": ["2023-01-12", "2023-04-02", "2023-09-09", "2023-10-29", "2024-01-12", "2024-05-31", "2024-09-23", "2024-11-12", "2025-03-22", "2025-04-26", "2025-07-10", "2025-11-12", "2026-02-25", "2026-05-31", "2026-10-08"], "kioxia_kitakami": ["2023-03-08", "2023-05-12", "2023-09-24", "2023-12-08", "2024-06-20", "2024-12-02", "2025-05-28", "2025-09-28", "2025-10-03", "2026-03-12", "2026-05-16", "2026-10-23"]}, "obs": [{"fab": "TSMC Arizona fab 1 (running)", "date": "2021-03-08", "stage": "Before construction", "evidence": "Undisturbed desert, dirt tracks only."}, {"fab": "TSMC Arizona fab 1 (running)", "date": "2021-05-12", "stage": "Land cleared", "evidence": "Rectangular graded pads; no structures."}, {"fab": "TSMC Arizona fab 1 (running)", "date": "2021-11-28", "stage": "Frame going up", "evidence": "Dark/grey structures in the east-central block; site fully graded; no continuous roof."}, {"fab": "TSMC Arizona fab 1 (running)", "date": "2022-05-17", "stage": "Roof on", "evidence": "First large bright uniform roof (east-central block) appears."}, {"fab": "TSMC Arizona fab 1 (running)", "date": "2022-11-13", "stage": "Roof on", "evidence": "Two large bright roof blocks; south-east utility yard (dark panels) still being built."}, {"fab": "TSMC Arizona fab 1 (running)", "date": "2023-01-27", "stage": "Exterior finished", "evidence": "Main blocks fully roofed and unchanged after this date; dark-panel yard to the south complete. Exterior finished between 2022-11-13 and 2023-01-27 (TSMC first tool-in ceremony 2022-12-06)."}, {"fab": "TSMC Arizona fab 1 (running)", "date": "2023-10-19", "stage": "Support buildings and utilities in place", "evidence": "Support buildings, ponds and roads around the main blocks complete."}, {"fab": "TSMC Arizona fab 2", "date": "2024-03-02", "stage": "Exterior finished (campus level)", "evidence": "Second large roofed block next to fab 1 unchanged since mid 2023; a new dark-roofed block appears north-east. Fab 2 vs fab 1 cannot be separated at 10 m."}, {"fab": "TSMC Arizona fab 2", "date": "2025-10-23", "stage": "Support buildings and utilities in place", "evidence": "New support/utility structures on the west side of the campus."}, {"fab": "TSMC Arizona fab 2", "date": "2026-11-07", "stage": "Support buildings and utilities in place", "evidence": "No change to main roofs; new cleared pad north of the campus (next phase). TSMC Q3 2026 call (2026-10-15): fab 2 construction complete, tool move-in under way."}, {"fab": "JASM Kumamoto fab 1 (running)", "date": "2021-10-03", "stage": "Before construction", "evidence": "Farm fields."}, {"fab": "JASM Kumamoto fab 1 (running)", "date": "2022-01-01", "stage": "Land cleared", "evidence": "Fields stripped to bare soil inside a new perimeter road (TSMC: construction began Apr 2022)."}, {"fab": "JASM Kumamoto fab 1 (running)", "date": "2022-06-30", "stage": "Frame going up", "evidence": "Bright construction pad with first structures; no roof."}, {"fab": "JASM Kumamoto fab 1 (running)", "date": "2022-12-27", "stage": "Roof on", "evidence": "Large dark/grey roof sections over most of the main footprint."}, {"fab": "JASM Kumamoto fab 1 (running)", "date": "2023-05-01", "stage": "Exterior finished", "evidence": "Main building fully bright and uniform; unchanged afterwards. Exterior finished between 2023-01-31 and 2023-05-01."}, {"fab": "JASM Kumamoto fab 1 (running)", "date": "2023-11-02", "stage": "Support buildings and utilities in place", "evidence": "Adjacent support buildings and parking complete (opening ceremony 2024-02-24)."}, {"fab": "JASM Kumamoto fab 2", "date": "2024-09-17", "stage": "Land cleared", "evidence": "Farmland east of fab 1 stripped to brown soil."}, {"fab": "JASM Kumamoto fab 2", "date": "2025-07-29", "stage": "Land cleared", "evidence": "Large bright excavated pad, no structures."}, {"fab": "JASM Kumamoto fab 2", "date": "2026-01-30", "stage": "Frame going up", "evidence": "Pad with first grey structures (foundations or early frame); no roof."}, {"fab": "JASM Kumamoto fab 2", "date": "2026-10-02", "stage": "Frame going up", "evidence": "Grey structures across part of the pad; no continuous roof yet. Latest clear date."}, {"fab": "Samsung Taylor fab", "date": "2023-01-26", "stage": "Frame going up", "evidence": "Large structures with partial roofs in the main block."}, {"fab": "Samsung Taylor fab", "date": "2023-06-20", "stage": "Roof on", "evidence": "Main block covered by continuous bright roof."}, {"fab": "Samsung Taylor fab", "date": "2024-02-13", "stage": "Exterior finished", "evidence": "Main building envelope unchanged; work moves to surrounding pads."}, {"fab": "Samsung Taylor fab", "date": "2025-12-19", "stage": "Support buildings and utilities in place", "evidence": "South-west support complex and utility yards built out; parking and roads complete."}, {"fab": "Samsung Taylor fab", "date": "2026-10-10", "stage": "Support buildings and utilities in place", "evidence": "No visible change to the main building; latest clear date. Samsung Q3 2026 release: operations begin."}, {"fab": "SK hynix Yongin fab 1 (Y1)", "date": "2023-04-02", "stage": "Land cleared", "evidence": "Forested hills being cut; bare soil."}, {"fab": "SK hynix Yongin fab 1 (Y1)", "date": "2024-05-31", "stage": "Land cleared", "evidence": "Whole cluster graded flat; no buildings."}, {"fab": "SK hynix Yongin fab 1 (Y1)", "date": "2025-07-10", "stage": "Frame going up", "evidence": "Long linear foundations/structures in the north-west of the platform."}, {"fab": "SK hynix Yongin fab 1 (Y1)", "date": "2025-11-12", "stage": "Frame going up", "evidence": "Large dark structure (steel/concrete frame) north-west of the platform."}, {"fab": "SK hynix Yongin fab 1 (Y1)", "date": "2026-02-25", "stage": "Frame going up", "evidence": "Two large dark blocks, partial cover."}, {"fab": "SK hynix Yongin fab 1 (Y1)", "date": "2026-11-07", "stage": "Roof on", "evidence": "Main block now covered by a continuous roof (dark and yellow sections); exterior not yet uniform; rest of platform still bare. SK hynix: first cleanroom Feb 2027."}, {"fab": "SK hynix Yongin Y2", "date": "2026-11-07", "stage": "Land cleared", "evidence": "Rest of the graded platform is bare (groundbreaking Jul 2027 per SK hynix 2026-08-07 release). Y2 plot not individually identified."}, {"fab": "Micron Boise ID1", "date": "2023-04-28", "stage": "Land cleared", "evidence": "Large graded area east of the existing campus."}, {"fab": "Micron Boise ID1", "date": "2024-07-04", "stage": "Frame going up", "evidence": "First structures in the centre of the pad."}, {"fab": "Micron Boise ID1", "date": "2025-03-26", "stage": "Roof on", "evidence": "Long building with roof (bright/blue sections)."}, {"fab": "Micron Boise ID1", "date": "2025-06-19", "stage": "Exterior finished", "evidence": "Uniform bright roof over the full building; envelope unchanged afterwards."}, {"fab": "Micron Boise ID1", "date": "2026-10-07", "stage": "Exterior finished", "evidence": "Dark support/utility structures east of ID1 still being added; not yet called complete. Micron: ID1 output mid 2027."}, {"fab": "Micron Boise ID2", "date": "2024-07-04", "stage": "Land cleared", "evidence": "Large graded rectangle south of ID1."}, {"fab": "Micron Boise ID2", "date": "2026-08-10", "stage": "Land cleared", "evidence": "Regular grid pattern on the pad (foundation work); no frame visible."}, {"fab": "Micron Boise ID2", "date": "2026-10-07", "stage": "Land cleared", "evidence": "Foundation grid; no structure above ground visible at 10 m. Latest clear date."}, {"fab": "SK hynix Cheongju M17", "date": null, "stage": "Not classified", "evidence": "Groundbreaking Feb 2027 per SK hynix release 2026-08-07; nothing to see yet."}, {"fab": "TSMC Tainan 3nm fab A", "date": null, "stage": "Not classified", "evidence": "Plot not confirmed. TSMC Q3 2026 call: construction on schedule for 1H27 volume production."}, {"fab": "TSMC Tainan 3nm fab B", "date": null, "stage": "Not classified", "evidence": "Plot not confirmed. Announced on TSMC Q3 2026 call (1H28 volume production)."}, {"fab": "Micron Hiroshima DRAM", "date": null, "stage": "Not classified", "evidence": "Crops saved (sentinel2/micron_hiroshima_unconfirmed); a plot in the park was cleared in 2025 and roofed by late 2025, but it is not confirmed to be Micron's."}, {"fab": "Micron Singapore NAND", "date": null, "stage": "Not classified", "evidence": "Plot not located; cloud cover."}], "trade": {"us": [["2022-01", 0.947], ["2022-02", 0.897], ["2022-03", 1.212], ["2022-04", 0.939], ["2022-05", 0.855], ["2022-06", 1.058], ["2022-07", 0.977], ["2022-08", 0.964], ["2022-09", 0.969], ["2022-10", 0.964], ["2022-11", 0.946], ["2022-12", 1.108], ["2023-01", 0.774], ["2023-02", 0.843], ["2023-03", 1.08], ["2023-04", 1.258], ["2023-05", 1.151], ["2023-06", 0.856], ["2023-07", 0.735], ["2023-08", 0.835], ["2023-09", 0.963], ["2023-10", 0.787], ["2023-11", 0.892], ["2023-12", 0.848], ["2024-01", 0.907], ["2024-02", 1.092], ["2024-03", 0.967], ["2024-04", 0.958], ["2024-05", 1.067], ["2024-06", 0.996], ["2024-07", 1.174], ["2024-08", 1.129], ["2024-09", 1.352], ["2024-10", 1.757], ["2024-11", 1.147], ["2024-12", 1.156], ["2025-01", 1.319], ["2025-02", 0.854], ["2025-03", 1.311], ["2025-04", 1.338], ["2025-05", 1.215], ["2025-06", 1.179], ["2025-07", 1.033], ["2025-08", 1.064], ["2025-09", 0.886], ["2025-10", 0.859], ["2025-11", 0.705], ["2025-12", 1.097], ["2026-01", 0.853], ["2026-02", 0.872], ["2026-03", 1.235], ["2026-04", 1.557], ["2026-05", 1.329], ["2026-06", 1.276], ["2026-07", 1.374], ["2026-08", 2.301]], "korea": [["2022-01", 1.475], ["2022-02", 1.544], ["2022-03", 1.72], ["2022-04", 1.595], ["2022-05", 1.994], ["2022-06", 1.864], ["2022-07", 1.706], ["2022-08", 1.761], ["2022-09", 1.358], ["2022-10", 1.322], ["2022-11", 1.546], ["2022-12", 2.257], ["2023-01", 1.207], ["2023-02", 1.216], ["2023-03", 1.915], ["2023-04", 2.027], ["2023-05", 1.749], ["2023-06", 1.78], ["2023-07", 1.336], ["2023-08", 1.033], ["2023-09", 1.224], ["2023-10", 1.012], ["2023-11", 1.049], ["2023-12", 1.787], ["2024-01", 1.472], ["2024-02", 1.432], ["2024-03", 1.482], ["2024-04", 1.327], ["2024-05", 1.343], ["2024-06", 1.496], ["2024-07", 1.268], ["2024-08", 1.033], ["2024-09", 1.992], ["2024-10", 1.54], ["2024-11", 1.95], ["2024-12", 2.326], ["2025-01", 1.385], ["2025-02", 1.785], ["2025-03", 2.759], ["2025-04", 1.57], ["2025-05", 1.498], ["2025-06", 1.915], ["2025-07", 1.635], ["2025-08", 1.182], ["2025-09", 2.28], ["2025-10", 1.687], ["2025-11", 1.829], ["2025-12", 2.233]], "japan": [["2022-01", 0.387], ["2022-02", 0.333], ["2022-03", 0.429], ["2022-04", 0.457], ["2022-05", 0.456], ["2022-06", 0.36], ["2022-07", 0.446], ["2022-08", 0.598], ["2022-09", 0.632], ["2022-10", 0.58], ["2022-11", 0.419], ["2022-12", 0.408], ["2023-01", 0.29], ["2023-02", 0.332], ["2023-03", 0.391], ["2023-04", 0.3], ["2023-05", 0.406], ["2023-06", 0.364], ["2023-07", 0.432], ["2023-08", 0.358], ["2023-09", 0.453], ["2023-10", 0.609], ["2023-11", 0.725], ["2023-12", 0.591], ["2024-01", 0.329], ["2024-02", 0.304], ["2024-03", 0.37], ["2024-04", 0.295], ["2024-05", 0.309], ["2024-06", 0.412], ["2024-07", 0.487], ["2024-08", 0.386], ["2024-09", 0.368], ["2024-10", 0.478], ["2024-11", 0.496], ["2024-12", 1.027], ["2025-01", 1.036], ["2025-02", 0.614], ["2025-03", 0.527], ["2025-04", 0.434], ["2025-05", 0.313], ["2025-06", 0.698], ["2025-07", 0.471], ["2025-08", 0.387], ["2025-09", 0.381], ["2025-10", 0.555], ["2025-11", 0.555], ["2025-12", 1.138], ["2026-01", 0.497], ["2026-02", 0.348], ["2026-03", 0.619], ["2026-05", 0.588], ["2026-06", 0.684], ["2026-07", 0.635], ["2026-08", 0.485]], "taiwan": [["2022-01", 1.704], ["2022-02", 1.47], ["2022-03", 2.279], ["2022-04", 2.285], ["2022-05", 2.045], ["2022-06", 2.635], ["2022-07", 2.524], ["2022-08", 2.248], ["2022-09", 2.623], ["2022-10", 2.853], ["2022-11", 2.655], ["2022-12", 3.325], ["2023-01", 1.812], ["2023-02", 2.024], ["2023-03", 2.22], ["2023-04", 1.659], ["2023-05", 1.591], ["2023-06", 1.619], ["2023-07", 1.502], ["2023-08", 0.948], ["2023-09", 0.88], ["2023-10", 1.194], ["2023-11", 1.286], ["2023-12", 1.255], ["2024-01", 0.865], ["2024-02", 0.676], ["2024-03", 1.158], ["2024-04", 1.915], ["2024-05", 1.236], ["2024-06", 1.468], ["2024-07", 1.583], ["2024-08", 1.318], ["2024-09", 1.239], ["2024-10", 1.527], ["2024-11", 1.559], ["2024-12", 1.969], ["2025-01", 1.609], ["2025-02", 2.154], ["2025-03", 2.425], ["2025-04", 2.877], ["2025-05", 1.665], ["2025-06", 2.829], ["2025-07", 2.798], ["2025-08", 2.077], ["2025-09", 2.293], ["2025-10", 2.583], ["2025-11", 1.932], ["2025-12", 2.53]], "kyushu": [["2022-01", 1.77], ["2022-02", 1.29], ["2022-03", 1.87], ["2022-04", 1.48], ["2022-05", 1.85], ["2022-06", 1.89], ["2022-07", 1.8], ["2022-08", 1.51], ["2022-09", 1.69], ["2022-10", 2.2], ["2022-11", 2.15], ["2022-12", 2.48], ["2023-01", 2.23], ["2023-02", 1.79], ["2023-03", 1.9], ["2023-04", 1.08], ["2023-05", 1.27], ["2023-06", 2.65], ["2023-07", 3.49], ["2023-08", 3.79], ["2023-09", 4.18], ["2023-10", 12.37], ["2023-11", 28.45], ["2023-12", 15.78], ["2024-01", 4.36], ["2024-02", 4.34], ["2024-03", 4.19], ["2024-04", 3.48], ["2024-05", 9.99], ["2024-06", 18.72], ["2024-07", 9.51], ["2024-08", 9.4], ["2024-09", 11.02], ["2024-10", 15.05], ["2024-11", 25.18], ["2024-12", 23.08], ["2025-01", 9.06], ["2025-02", 12.21], ["2025-03", 4.48], ["2025-04", 3.58], ["2025-05", 4.05], ["2025-06", 4.06], ["2025-07", 4.61], ["2025-08", 3.86], ["2025-09", 4.23], ["2025-10", 21.88], ["2025-11", 3.94], ["2025-12", 45.15], ["2026-01", 4.36], ["2026-02", 3.46], ["2026-03", 5.2], ["2026-04", 5.05], ["2026-05", 4.23], ["2026-06", 24.01], ["2026-07", 4.9], ["2026-08", 5.79], ["2026-09", 5.16]]}, "pcb": [["2018Q1", null, 62.2], ["2018Q2", null, 63.5], ["2018Q3", null, 86.1], ["2018Q4", null, 87.0], ["2019Q1", -3.6, 60.0], ["2019Q2", 8.4, 68.9], ["2019Q3", 2.3, 88.1], ["2019Q4", 7.7, 93.7], ["2020Q1", 6.1, 63.6], ["2020Q2", 11.9, 77.1], ["2020Q3", 0.1, 88.2], ["2020Q4", 18.9, 111.4], ["2021Q1", 29.2, 82.2], ["2021Q2", 16.8, 90.1], ["2021Q3", 24.5, 109.8], ["2021Q4", 15.3, 128.4], ["2022Q1", 29.7, 106.6], ["2022Q2", 25.9, 113.4], ["2022Q3", 21.5, 133.4], ["2022Q4", 2.3, 131.4], ["2023Q1", -13.9, 91.8], ["2023Q2", -30.5, 78.8], ["2023Q3", -24.3, 101.0], ["2023Q4", -14.8, 112.0], ["2024Q1", -3.8, 88.3], ["2024Q2", 16.1, 91.5], ["2024Q3", 16.2, 117.4], ["2024Q4", 5.8, 118.5], ["2025Q1", 18.2, 104.4], ["2025Q2", 17.7, 107.7], ["2025Q3", 4.0, 122.1], ["2025Q4", 11.8, 132.5], ["2026Q1", 16.3, 121.4], ["2026Q2", 32.1, 142.2], ["2026Q3", 46.5, 178.9]], "chem": [["2023Q1", -13, -13.9], ["2024Q1", 15, -3.8], ["2024Q2", 19, 16.1], ["2024Q3", 7, 16.3], ["2024Q4", 9, 5.8], ["2025Q1", 8, 18.2], ["2025Q2", 10, 17.7], ["2025Q3", 10, 4.0], ["2025Q4", 16, 11.9], ["2026Q1", 22, 16.3], ["2026Q2", 21, 32.1], ["FY2023", -10, -20.9], ["FY2024", 12, 8.4], ["FY2025", 11, 12.3]]};
+
+const STAGES=["Before construction","Land cleared","Foundations","Frame going up","Roof on","Exterior finished","Support buildings and utilities in place"];
+const SHORT=["Before","Cleared","Foundations","Frame","Roof","Exterior done","Utilities"];
+const stageIdx=s=>{s=String(s||"");if(s.startsWith("Exterior finished"))return 5;const i=STAGES.indexOf(s);return i<0?0:i};
+
+const SITES={
+ micron_clay:{name:"Micron · Clay, New York",short:"Micron Clay NY",product:"DRAM",thesis:"Thesis 2",schedule:"Ground broken Jan 2026; first concrete Jul 2026; initial wafer output 2030 (Micron 10-K)",tools:"Late 2028, ramping through 2029",why:"The biggest new US memory fab. If its tools go in during 2029, new-fab demand does not stop after 2028.",fabs:["Micron Clay"]},
+ skh_yongin:{name:"SK hynix · Yongin cluster",short:"SK hynix Yongin",product:"DRAM / HBM",thesis:"Thesis 2",schedule:"Y1 first cleanroom Feb 2027. Y2 groundbreaking Jul 2027, first cleanroom Jun 2029 (release Aug 7, 2026)",tools:"Y1: 2027 · Y2: 2H 2029 onward",why:"A whole hillside graded for several fabs. Y1 has a roof; the rest of the platform, where Y2 goes, is bare.",fabs:["SK hynix Yongin fab 1 (Y1)","SK hynix Yongin Y2"]},
+ skh_m17_area:{name:"SK hynix · Cheongju M17 area",short:"SK hynix M17",product:"NAND",thesis:"Thesis 3",schedule:"Groundbreaking Feb 2027; first cleanroom Dec 2028 (release Aug 7, 2026)",tools:"2029",why:"A new NAND fab. NAND is where MKS lost share in 2023 to 2025, so this is the Thesis 3 site to watch. Exact plot not confirmed.",fabs:["SK hynix M17"]},
+ jasm_kumamoto:{name:"TSMC JASM · Kumamoto, Japan",short:"JASM Kumamoto",product:"Logic (foundry)",thesis:"Method",schedule:"Fab 1: opened Feb 2024, mass production Dec 2024. Fab 2: frame going up",tools:"Fab 1 tools from Sep 2023 (imports) · Fab 2 later",why:"Our ruler. We saw fab 1's exterior finish from orbit, then saw tool imports jump in Kyushu about four months later.",fabs:["JASM Kumamoto fab 1 (running)","JASM Kumamoto fab 2"]},
+ tsmc_az:{name:"TSMC · Phoenix, Arizona",short:"TSMC Arizona",product:"Logic (foundry)",thesis:"Thesis 2",schedule:"Fab 1 high-volume production Q4 2024. Fab 2 construction complete, tool move-in under way (Q3 2026 call)",tools:"Fab 2: now",why:"Fab 1 gives a second lag measurement. Fab 2 tools are moving in now: 2026 to 2027 demand.",fabs:["TSMC Arizona fab 1 (running)","TSMC Arizona fab 2"]},
+ samsung_taylor:{name:"Samsung · Taylor, Texas",short:"Samsung Taylor",product:"Logic (foundry)",thesis:"Against",schedule:"Operations begin (Samsung Q3 2026 release)",tools:"2026 to 2027",why:"The warning case: the building was done in early 2024 and sat without tools for about two and a half years. A finished shell does not guarantee orders.",fabs:["Samsung Taylor fab"]},
+ micron_boise:{name:"Micron · Boise, Idaho",short:"Micron Boise",product:"DRAM",thesis:"Thesis 2",schedule:"ID1 output mid 2027. ID2: foundation grid on the pad",tools:"ID1: 2026 to 2027 · ID2: 2028, could slip to 2029",why:"ID1 is a 2027 fab with its building finished. ID2 is a 2028 fab still at foundations.",fabs:["Micron Boise ID1","Micron Boise ID2"]},
+ samsung_pyeongtaek:{name:"Samsung · Pyeongtaek, Korea",short:"Samsung Pyeongtaek",product:"DRAM / HBM",thesis:"Thesis 2",schedule:"P4 phase 2/4 tool orders issued 2026; P5 fab 1 tool install May–Jun 2027, mass production late 2028; P5 fab 2 in 2029 (press)",tools:"P4: 2026–27 · P5 fab 1: 2027–28 · P5 fab 2: 2028–29",why:"Samsung's main memory campus. The pad west of the running fabs is filling with new structures: the next DRAM and HBM capacity.",fabs:["Samsung Pyeongtaek P4/P5 area"]},
+ tsmc_taichung:{name:"TSMC · Taichung Fab 25, Taiwan",short:"TSMC Taichung",product:"Logic A14",thesis:"Thesis 2",schedule:"Construction confirmed Sep 2026; risk production end-2027, volume 2H28 (press)",tools:"P1: 2027–28 · P2–P4: 2028–29",why:"TSMC's A14 fab. A golf course and woods in 2023, now a cleared pad with foundations next to the running Fab 15.",fabs:["TSMC Fab 25"]},
+ tsmc_kaohsiung:{name:"TSMC · Kaohsiung Fab 22, Taiwan",short:"TSMC Kaohsiung",product:"Logic 2nm / A16",thesis:"Thesis 2",schedule:"P1 volume 2H25; P2 tools in 2025–26; all five phases operating by Q4 2027 (press)",tools:"2026 to 2027",why:"TSMC's 2nm campus. The early phases are built and running; later phases fill the rest of the site through 2027.",fabs:["TSMC Fab 22"]},
+ gf_malta:{name:"GlobalFoundries · Malta, New York",short:"GF Malta",product:"Specialty logic",thesis:"Thesis 2",schedule:"New fab announced Oct 2026, groundbreaking about Nov 13, online 2029 (press)",tools:"2028 to 2029",why:"Woods south-east of Fab 8 have been cleared since 2025. GlobalFoundries announced the new fab in October 2026.",fabs:["GF Malta new fab"]},
+ skh_indiana:{name:"SK hynix · West Lafayette, Indiana",short:"SK hynix Indiana",product:"HBM packaging",thesis:"Thesis 2",schedule:"Ground broken Aug 27, 2026; cleanroom Oct 2028; mass production 2H 2029 (press)",tools:"Late 2028 to 2029",why:"SK hynix's first US plant: HBM packaging. A field in Purdue Research Park, cleared since the August groundbreaking.",fabs:["SK hynix West Lafayette"]},
+ intel_ohio:{name:"Intel · New Albany, Ohio",short:"Intel Ohio",product:"Logic",thesis:"Thesis 2",schedule:"Construction complete 2030, operating 2030–31 (Intel); first structural truss Oct 2026",tools:"2029 to 2030",why:"Intel slowed Ohio in 2025 and has restarted. Tools here are a 2029–30 story. The plot is our best reading of the imagery.",fabs:["Intel Ohio fab 1"]},
+ samsung_yongin_nat:{name:"Samsung · Yongin national complex, Korea",short:"Samsung Yongin",product:"Memory",thesis:"Thesis 2",schedule:"State developer starts site work Oct 2026; fab construction by 2028; operations 2029 (press)",tools:"2029, at risk",why:"Samsung's six-fab memory complex. Today it is hills, a reservoir and villages: the earliest stage there is.",fabs:["Samsung Yongin national complex"]},
+ kioxia_kitakami:{name:"Kioxia · Kitakami, Japan",short:"Kioxia Kitakami",product:"NAND",thesis:"Thesis 3",schedule:"Fab2 (K2) running since Sep 2025; Fab3 site preparation started, operation FY2029 (Kioxia, Aug 2026)",tools:"Fab3: late 2028 to 2029",why:"A NAND site, so it tests Thesis 3. K1 and K2 are visible; the Fab3 plot could not be pinned down at 10 m.",fabs:["Kioxia Kitakami"]},
+ gz_yunpu:{name:"MKS · Guangzhou equipment plant",short:"MKS Guangzhou",product:"Plating equipment",thesis:"Thesis 1",schedule:"Phase 2 ground broken Oct 29, 2026; completion Q3 2027 (MKS release Nov 2, 2026)",tools:"Doubles plating-line capacity in Q3 2027",why:"MKS's own factory for the plating lines that later consume its chemistry. Each $100m of equipment brings $20m to $40m of chemistry a year.",fabs:["MKS Guangzhou Phase 2"]},
+};
+// observations: team stage calls (fab_stages.xlsx) plus Thesis 1/2 findings
+const OBS=RAW.obs.map(o=>({...o}));
+OBS.push(
+ {fab:"Samsung Pyeongtaek P4/P5 area",date:"2023-04-02",stage:"Land cleared",evidence:"Graded pad with one roofed block (P4 phase 1); rest of the pad bare."},
+ {fab:"Samsung Pyeongtaek P4/P5 area",date:"2025-04-26",stage:"Foundations",evidence:"Foundations and early structures across the pad."},
+ {fab:"Samsung Pyeongtaek P4/P5 area",date:"2025-11-12",stage:"Frame going up",evidence:"Grey structures rising across the middle of the pad."},
+ {fab:"Samsung Pyeongtaek P4/P5 area",date:"2026-10-08",stage:"Frame going up",evidence:"More blocks framed and partly roofed; P4 phases and P5 cannot be told apart at 10 m."},
+ {fab:"TSMC Fab 25",date:"2023-01-30",stage:"Before construction",evidence:"Golf course and woods."},
+ {fab:"TSMC Fab 25",date:"2025-08-22",stage:"Land cleared",evidence:"First strip of the site cleared."},
+ {fab:"TSMC Fab 25",date:"2026-11-17",stage:"Foundations",evidence:"Whole plot cleared to orange soil with piling and foundation work; no frame yet."},
+ {fab:"TSMC Fab 22",date:"2023-03-01",stage:"Land cleared",evidence:"Graded pads across the former refinery site."},
+ {fab:"TSMC Fab 22",date:"2024-04-04",stage:"Frame going up",evidence:"First large blocks rising."},
+ {fab:"TSMC Fab 22",date:"2026-10-31",stage:"Exterior finished",evidence:"Several large roofed blocks; later phases cannot be separated at 10 m."},
+ {fab:"GF Malta new fab",date:"2024-06-28",stage:"Before construction",evidence:"Woods south-east of Fab 8."},
+ {fab:"GF Malta new fab",date:"2025-09-10",stage:"Land cleared",evidence:"First clearing inside the woods."},
+ {fab:"GF Malta new fab",date:"2026-10-18",stage:"Land cleared",evidence:"Large cleared area next to Fab 8; plot matches the expansion area but is not confirmed."},
+ {fab:"SK hynix West Lafayette",date:"2023-01-10",stage:"Before construction",evidence:"Fields."},
+ {fab:"SK hynix West Lafayette",date:"2026-10-06",stage:"Land cleared",evidence:"Pad cleared with first foundation work, matching the Aug 2026 groundbreaking."},
+ {fab:"Intel Ohio fab 1",date:"2023-03-30",stage:"Land cleared",evidence:"Large graded pad."},
+ {fab:"Intel Ohio fab 1",date:"2024-06-13",stage:"Foundations",evidence:"Foundation grid across the pad."},
+ {fab:"Intel Ohio fab 1",date:"2026-10-30",stage:"Frame going up",evidence:"Structures rising on the pad; Intel reports its first structural truss in Oct 2026."},
+ {fab:"Samsung Yongin national complex",date:"2023-01-12",stage:"Before construction",evidence:"Hills, a reservoir and villages."},
+ {fab:"Samsung Yongin national complex",date:"2026-10-08",stage:"Before construction",evidence:"No site work visible yet; the state developer starts in Oct 2026."},
+ {fab:"Kioxia Kitakami",date:"2023-03-08",stage:"Roof on",evidence:"K2 building roofed next to K1."},
+ {fab:"Kioxia Kitakami",date:"2026-10-23",stage:"Support buildings and utilities in place",evidence:"K1 and K2 complete; Fab3 plot not identified."},
+ {fab:"Micron Clay",date:"2025-10-01",stage:"Before construction",evidence:"Fields and woods."},
+ {fab:"Micron Clay",date:"2026-03-25",stage:"Land cleared",evidence:"Land cleared across the site."},
+ {fab:"Micron Clay",date:"2026-06-03",stage:"Foundations",evidence:"Grey foundation pads appear (Jun to Aug 2026)."},
+ {fab:"Micron Clay",date:"2026-10-24",stage:"Foundations",evidence:"Foundations across the site; no frame or roof."},
+ {fab:"SK hynix M17",date:"2026-10-08",stage:"Before construction",evidence:"Area 2 to 3 km north of M15 unchanged farmland since 2023. Fits a Feb 2027 groundbreaking. Plot not confirmed."},
+ {fab:"MKS Guangzhou Phase 2",date:"2026-10-07",stage:"Before construction",evidence:"Last clear image before ground was broken on Oct 29. Nothing built yet on the reserved land; the plot is only about 300 pixels at 10 m. Recheck Dec 2026 to Mar 2027."}
+);
+const SIGNALS=[
+ {id:"wave",thesis:"Thesis 2",v:"Supports",title:"Tool move-in does not stop after 2028",big:"21 fabs",bigNote:"taking tools in 2028; 14 to 16 already announced for 2029",body:"39 new fabs worldwide, dated from company schedules, filings, press and our satellite stage calls. 2028 is as busy as 2027 (22) by fab count.",ai:"The market prices 2027 as the peak. The fab calendar says the wave rolls through 2029. Counts fabs, not dollars.",go:"wave"},
+ {id:"clay",thesis:"Thesis 2",v:"Supports",title:"New fabs keep tools moving in through 2029",big:"Woods → foundations",bigNote:"Micron Clay, Oct 2025 to Oct 2026",body:"Micron's New York DRAM fab went from woods to foundations in a year. SK hynix's Yongin platform is graded and waiting for Y2.",ai:"Building done ≈ 1H to mid 2028, plus our 4-month ruler, puts tools in late 2028 through 2029. New-fab demand does not stop after 2028.",go:"fabs",site:"micron_clay"},
+ {id:"ruler",thesis:"Thesis 2",v:"Method",title:"A 4-month ruler from building to tools",big:"≈ 4 months",bigNote:"JASM exterior → Kyushu imports",body:"JASM fab 1's exterior finished Feb to May 2023 (satellite). Kyushu tool imports passed 2x the 2022 level from Sep 2023 and peaked in Nov 2023.",ai:"One measured lag, at one mid-size fab. Treat dates from it as ± one quarter.",go:"imports"},
+ {id:"imports",thesis:"Thesis 2",v:"Supports",title:"Tool imports are still rising in 2026",big:"+15.9%",bigNote:"US, Jan to Aug 2026",body:"Japan +9.1% (JPY, Jan to Sep). Taiwan +8.4% (mirror data). Japanese tool exports to Korea +26.2%.",ai:"We set the test before looking: flat or falling Korea and Taiwan imports would count against us. It did not happen where we could test. Korea's own 2026 data is still missing.",go:"imports"},
+ {id:"boards",thesis:"Thesis 1",v:"Supports",title:"Board makers just had their fastest quarter",big:"+46.5%",bigNote:"Taiwan 5 board makers, 3Q26 y/y",body:"Their revenue tracks MKS chemistry growth (correlation 0.69 over 11 quarters) and reports months earlier.",ai:"Points to strong MKS chemistry in 2H26. MKS reported +22% and +21% in 1Q and 2Q26; 3Q26 chemistry growth is not yet in our files.",go:"boards"},
+ {id:"m17",thesis:"Thesis 3",v:"Watch",title:"Next NAND fab: SK hynix M17 breaks ground Feb 2027",big:"Farmland",bigNote:"as of Oct 8, 2026",body:"First cleanroom Dec 2028, so NAND tools go in during 2029. NAND is where MKS lost share in 2023 to 2025.",ai:"Watch for earthworks from Feb 2027. A delay would weaken the NAND share-recovery case.",go:"fabs",site:"skh_m17_area"},
+ {id:"gz",thesis:"Thesis 1",v:"Watch",title:"Guangzhou Phase 2 is an equipment plant, not visible yet",big:"Q3 2027",bigNote:"completion, pulled in from Q4",body:"It doubles MKS's plating-line factory. It is not chemistry capacity, so we corrected the deck.",ai:"Ground broken Oct 29, after the last clear image. Recheck Dec 2026 to Mar 2027. More lines installed means more chemistry for the life of each line.",go:"fabs",site:"gz_yunpu"},
+ {id:"cyc",thesis:"Thesis 1",v:"Against",title:"Chemistry is less cyclical, not recession-proof",big:"−10%",bigNote:"chemistry in 2023 vs −28% MKS semi",body:"In the 2023 board downturn MKS chemistry fell 10%, about half the board makers' −20.9%.",ai:"Keeps us honest: the slide says 'less cyclical'. The re-rating case rests on lower volatility, not zero.",go:"boards"},
+ {id:"china",thesis:"Thesis 1",v:"Against",title:"Some China lines switch to local chemistry",big:"2–3% a year",bigNote:"of Atotech's high-end China lines",body:"A Chinese rival's IPO prospectus lists 11 high-end lines that moved from Atotech in 2019 to 2022.",ai:"Switching costs are real but not a lock-in, and they do not give pricing power. Ready for Q&A.",go:"ask"},
+ {id:"taylor",thesis:"Thesis 2",v:"Against",title:"A finished building is not the same as tools",big:"≈ 2.5 years",bigNote:"Samsung Taylor shell without tools",body:"Taylor's exterior was done in early 2024 and only now begins operations. JASM fab 2 and Micron ID2 could slip into 2029.",ai:"This is why we pair satellite with customs data: the building shows capacity, imports show commitment.",go:"fabs",site:"samsung_taylor"},
+];
+
+/* ---------- annotations: boxes in image pixels, placed by eye on the latest clear image ---------- */
+const PHRASE=["Nothing built yet","Land cleared","Foundations poured","Steel frame going up","Roof on","Building shell finished","Utilities in, site complete"];
+const BOXES={
+ micron_clay:[{label:"Fab site",fabs:["Micron Clay"],r:[118,62,402,445]}],
+ skh_yongin:[{label:"Y1",fabs:["SK hynix Yongin fab 1 (Y1)"],r:[265,112,428,206]},{label:"Y2 area",fabs:["SK hynix Yongin Y2"],r:[190,212,420,482],dash:1}],
+ skh_m17_area:[{label:"M17, reported area",fabs:["SK hynix M17"],r:[170,95,350,200],dash:1}],
+ jasm_kumamoto:[{label:"Fab 1",fabs:["JASM Kumamoto fab 1 (running)"],r:[158,245,280,304]},{label:"Fab 2",fabs:["JASM Kumamoto fab 2"],r:[232,160,390,242]}],
+ tsmc_az:[{label:"Fab 1 + 2",fabs:["TSMC Arizona fab 1 (running)","TSMC Arizona fab 2"],r:[160,232,352,364]},{label:"New pad",fabs:[],r:[135,55,238,128],from:"2026-11-01",fixed:"Cleared for the next phase"}],
+ samsung_taylor:[{label:"Fab",fabs:["Samsung Taylor fab"],r:[183,128,370,354]}],
+ micron_boise:[{label:"ID1",fabs:["Micron Boise ID1"],r:[226,128,472,316]},{label:"ID2",fabs:["Micron Boise ID2"],r:[290,340,508,508]}],
+ samsung_pyeongtaek:[{"label": "P4 / P5 area", "fabs": ["Samsung Pyeongtaek P4/P5 area"], "r": [156, 188, 385, 397]}],
+ tsmc_taichung:[{"label": "Fab 25", "fabs": ["TSMC Fab 25"], "r": [198, 130, 416, 369]}],
+ tsmc_kaohsiung:[{"label": "Fab 22 campus", "fabs": ["TSMC Fab 22"], "r": [130, 156, 420, 385]}],
+ gf_malta:[{"label": "Fab 8 (running)", "fabs": [], "r": [142, 94, 294, 239], "fixed": "Running fab"},{"label": "New fab site", "fabs": ["GF Malta new fab"], "r": [254, 218, 406, 468], "dash": 1}],
+ skh_indiana:[{"label": "HBM plant", "fabs": ["SK hynix West Lafayette"], "r": [146, 238, 333, 414]}],
+ intel_ohio:[{"label": "Intel site (approx.)", "fabs": ["Intel Ohio fab 1"], "r": [286, 209, 515, 438], "dash": 1}],
+ samsung_yongin_nat:[{"label": "Planned complex (approx.)", "fabs": ["Samsung Yongin national complex"], "r": [114, 110, 406, 388], "dash": 1}],
+ kioxia_kitakami:[{"label": "K1 / K2 (running)", "fabs": ["Kioxia Kitakami"], "r": [146, 218, 354, 435]}],
+ gz_yunpu:[{label:"Phase 2, approx. plot",fabs:["MKS Guangzhou Phase 2"],r:[96,96,190,190],dash:1}],
+};
+// what satellites cannot see: company and customs events, shown in blue; plans in grey
+const EVENTS={
+ "JASM Kumamoto fab 1 (running)":[["2023-09-01","Tools arriving: Kyushu imports more than double"],["2024-02-24","Fab opened"],["2024-12-01","Mass production"]],
+ "JASM Kumamoto fab 2":[["2024-09-01","Plan: production 2027 or later",1]],
+ "TSMC Arizona fab 1 (running)":[["2022-12-06","First tools moved in (TSMC ceremony)"],["2024-10-01","High-volume production"]],
+ "TSMC Arizona fab 2":[["2026-10-15","Tools moving in now (TSMC Q3 call)"]],
+ "Samsung Taylor fab":[["2024-02-13","Shell done, no tools yet"],["2026-10-01","Operations begin (Samsung Q3)"]],
+ "Micron Boise ID1":[["2025-06-19","Plan: output mid 2027",1]],
+ "Micron Boise ID2":[["2024-07-04","Plan: a 2028 fab, could slip to 2029",1]],
+ "Micron Clay":[["2026-01-01","Plan: tools late 2028 to 2029 (our estimate)",1]],
+ "SK hynix Yongin fab 1 (Y1)":[["2025-07-10","Plan: first cleanroom Feb 2027",1]],
+ "SK hynix Yongin Y2":[["2026-08-07","Plan: groundbreaking Jul 2027, tools 2H 2029",1]],
+ "SK hynix M17":[["2026-08-07","Plan: groundbreaking Feb 2027, tools 2029",1]],
+ "Samsung Pyeongtaek P4/P5 area":[["2027-05-01", "Plan: P5 fab 1 tools May–Jun 2027 (press)", 1]],
+ "TSMC Fab 25":[["2026-09-09", "Plan: risk production end-2027, volume 2H28 (press)", 1]],
+ "TSMC Fab 22":[["2025-08-01", "Not visible from space: P2 tools moved in Aug 2025 (press)"]],
+ "GF Malta new fab":[["2026-10-14", "Plan: new fab online 2029 (press)", 1]],
+ "SK hynix West Lafayette":[["2026-08-27", "Plan: cleanroom Oct 2028, production 2H 2029 (press)", 1]],
+ "Intel Ohio fab 1":[["2026-10-01", "Plan: operating 2030–31 (Intel)", 1]],
+ "Samsung Yongin national complex":[["2026-10-01", "Plan: operations 2029 (press), at risk", 1]],
+ "Kioxia Kitakami":[["2026-08-27", "Plan: Fab3 operation FY2029 (Kioxia)", 1]],
+ "MKS Guangzhou Phase 2":[["2026-06-25","Plan: ground broken Oct 29, done Q3 2027",1]],
+};
+let showLabels=true;
+function stageAt(fabs,d){let best=null;OBS.forEach(o=>{if(fabs.includes(o.fab)&&o.date<=d&&(!best||o.date>=best.date))best=o});return best}
+function drawAnn(d){
+  const svg=$("#ann"),cap=$("#cap"),img=$("#img-top");
+  svg.replaceChildren();cap.replaceChildren();$("#evs").replaceChildren();
+  if(!showLabels||cmp)return;
+  const W=img.naturalWidth||520,H=img.naturalHeight||520;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.setAttribute("preserveAspectRatio","xMidYMid meet");
+  const lines=[],evs=[];
+  (BOXES[cur]||[]).forEach(b=>{
+    if(b.from&&d<b.from)return;
+    const [x0,y0,x1,y1]=b.r;
+    svg.append(sv("rect",{class:"box"+(b.dash?" dash":""),x:x0,y:y0,width:x1-x0,height:y1-y0,rx:3}));
+    const o=b.fabs.length?stageAt(b.fabs,d):null;
+    const phrase=b.fixed||(o?PHRASE[stageIdx(o.stage)]:PHRASE[0]);
+    const tag=sv("text",{x:x0+2,y:Math.max(14,y0-6),style:"font:700 15px var(--f-display);fill:#fff;paint-order:stroke;stroke:#FF3B30;stroke-width:5px;stroke-linejoin:round"});
+    tag.textContent=b.label;svg.append(tag);
+    lines.push(`${b.label}: ${phrase}`);
+    b.fabs.forEach(f=>{const e=(EVENTS[f]||[]).filter(x=>x[0]<=d).at(-1);if(e)evs.push(e)});
+  });
+  if(lines.length)cap.textContent=lines.join("  ·  ");
+  [...new Map(evs.map(e=>[e[1],e])).values()].forEach(e=>$("#evs").append(el("span",{class:e[2]?"plan":""},e[2]?e[1]:"Not visible from space: "+e[1])));
+}
+
+/* ---------- tool wave ---------- */
+// k: fab = wafer fab, pkg = HBM / advanced packaging plant. cn: China fab (mostly local tools). sat: stage checked by satellite. est: window is our estimate (no company tool date).
+const WAVE=[
+ {f:"SK hynix M15X",p:"DRAM / HBM",c:"KR",cy:"Cheongju",a:"2026-01",b:"2026-12",src:"Tools in from Jan 2026, full capacity end-2026 (press; SK hynix Q3 2026 call)",ll:[36.65,127.42]},
+ {f:"TSMC Fab 22, Kaohsiung P3–P5",sat:1,site:"tsmc_kaohsiung",p:"Logic 2nm / A16",c:"TW",cy:"Kaohsiung",a:"2026-03",b:"2027-09",src:"All five phases operating by Q4 2027 (press)",ll:[22.73,120.31]},
+ {f:"YMTC Wuhan phase 3",p:"NAND",c:"CN",cy:"Wuhan",cn:1,a:"2026-03",b:"2027-06",src:"Tools going in, over half Chinese-made; operations late 2026 (press)",ll:[30.46,114.56]},
+ {f:"Samsung Taylor fab 1",p:"Logic",c:"US",cy:"Taylor",a:"2026-04",b:"2027-03",sat:1,site:"samsung_taylor",src:"Tools moving in from Apr 2026 (press); ramp into 2027 (Samsung Q3 2026)",ll:[30.54,-97.455]},
+ {f:"Rapidus IIM-1, Chitose",p:"Logic 2nm",c:"JP",cy:"Chitose",a:"2026-04",b:"2027-09",src:"Pilot line 2025; mass production 2H FY2027 (Rapidus)",ll:[42.82,141.69]},
+ {f:"Micron Tongluo (ex-PSMC)",p:"DRAM / HBM",c:"TW",cy:"Miaoli",a:"2026-04",b:"2027-06",src:"Bought Mar 2026; meaningful output 2H CY27 (Micron)",ll:[24.50,120.80]},
+ {f:"Samsung Pyeongtaek P4 ph 2/4",sat:1,site:"samsung_pyeongtaek",p:"DRAM",c:"KR",cy:"Pyeongtaek",a:"2026-06",b:"2027-06",est:1,src:"Front-end tool orders issued in 2026 (press)",ll:[37.02,127.05]},
+ {f:"TSMC Tainan 3nm fab A",p:"Logic",c:"TW",cy:"Tainan",a:"2026-07",b:"2027-03",src:"Volume production 1H27 (TSMC Q3 2026 call)",ll:[23.10,120.27]},
+ {f:"Intel Fab 62, Chandler",p:"Logic",c:"US",cy:"Chandler",a:"2026-07",b:"2027-12",src:"Tool installation under way; operations around 2028 (Intel, Oct 2026)",ll:[33.27,-111.89]},
+ {f:"CXMT Shanghai",p:"DRAM",c:"CN",cy:"Shanghai",cn:1,a:"2026-07",b:"2027-06",src:"Tools 2H26, production 2027 (press)",ll:[31.10,121.75]},
+ {f:"VSMC Singapore",p:"Analog / mixed-signal",c:"SG",cy:"Singapore",a:"2026-07",b:"2028-12",src:"Opened Sep 2026; volume 2027, full capacity 2029 (VSMC)",ll:[1.37,103.93]},
+ {f:"Micron Boise ID1",p:"DRAM",c:"US",cy:"Boise",a:"2026-09",b:"2027-06",sat:1,site:"micron_boise",src:"Exterior finished Jun 2025 (satellite); output mid 2027 (Micron)",ll:[43.52,-116.14]},
+ {f:"TSMC Arizona fab 2",p:"Logic",c:"US",cy:"Phoenix",a:"2026-10",b:"2027-06",sat:1,site:"tsmc_az",src:"Tools moving in; volume production 3Q27 (TSMC Q3 2026 call)",ll:[33.78,-112.16]},
+ {f:"Nanya Fab 5A, New Taipei",p:"DRAM",c:"TW",cy:"New Taipei",a:"2027-01",b:"2029-06",src:"Tools from 1Q27, ramp to 2029 (press; Nanya board Aug 2026)",ll:[25.05,121.43]},
+ {f:"SK hynix Yongin Y1",p:"DRAM / HBM",c:"KR",cy:"Yongin",a:"2027-02",b:"2027-12",sat:1,site:"skh_yongin",src:"Roof on Nov 2026 (satellite); first cleanroom Feb 2027 (SK hynix)",ll:[37.152,127.315]},
+ {f:"TSMC Fab 25, Taichung P1",sat:1,site:"tsmc_taichung",p:"Logic A14",c:"TW",cy:"Taichung",a:"2027-04",b:"2028-03",src:"Risk production end-2027, volume 2H28 (press)",ll:[24.21,120.61]},
+ {f:"Samsung Pyeongtaek P5 fab 1",sat:1,site:"samsung_pyeongtaek",p:"DRAM / HBM",c:"KR",cy:"Pyeongtaek",a:"2027-05",b:"2028-06",src:"Tool install May–Jun 2027, mass production late 2028 (press)",ll:[37.02,127.05]},
+ {f:"TSMC Tainan 3nm fab B",p:"Logic",c:"TW",cy:"Tainan",a:"2027-07",b:"2028-03",src:"Volume production 1H28 (TSMC Q3 2026 call)",ll:[23.10,120.27]},
+ {f:"TSMC JASM fab 2",p:"Logic",c:"JP",cy:"Kumamoto",a:"2027-07",b:"2028-06",slip:"2029-03",sat:1,site:"jasm_kumamoto",src:"Frame going up Oct 2026 (satellite); our build pace + 4 months; could slip",ll:[32.888,130.843]},
+ {f:"TSMC Arizona fab 3",p:"Logic",c:"US",cy:"Phoenix",a:"2027-07",b:"2028-09",est:1,src:"Ground broken Apr 2025; production by end of decade (TSMC); press says 2027–28",ll:[33.78,-112.16]},
+ {f:"TSMC Fab 20, Hsinchu P3/P4",p:"Logic A14",c:"TW",cy:"Hsinchu",a:"2027-07",b:"2028-09",est:1,src:"Civil works under way; A14 volume 2028 (press)",ll:[24.76,121.03]},
+ {f:"ESMC Dresden",p:"Logic 28–12nm",c:"DE",cy:"Dresden",a:"2027-07",b:"2028-06",src:"Topped out Sep 2026; first tool install 2H 2027 (ESMC)",ll:[51.13,13.72]},
+ {f:"Tata Dholera",p:"Mature logic",c:"IN",cy:"Dholera",a:"2027-07",b:"2028-06",src:"Commercial operations mid-2028 (Indian government, Jul 2026)",ll:[22.25,72.18]},
+ {f:"Micron Boise ID2",p:"DRAM",c:"US",cy:"Boise",a:"2028-01",b:"2028-12",slip:"2029-06",sat:1,site:"micron_boise",src:"Foundations Aug 2026 (satellite); output late CY2028 (Micron); could slip",ll:[43.52,-116.14]},
+ {f:"Micron Singapore NAND",p:"NAND",c:"SG",cy:"Singapore",a:"2028-01",b:"2028-09",src:"Operational 2H 2028 (Micron 10-K)",ll:[1.44,103.80]},
+ {f:"TSMC new Tainan fab (STSP A)",p:"Logic",c:"TW",cy:"Tainan",a:"2028-03",b:"2028-12",est:1,src:"Environmental review 2026; completion 2028 (press)",ll:[23.10,120.27]},
+ {f:"TSMC Fab 25, Taichung P2–P4",sat:1,site:"tsmc_taichung",p:"Logic A14",c:"TW",cy:"Taichung",a:"2028-04",b:"2029-12",est:1,src:"Later phases after P1 (press); our estimate",ll:[24.21,120.61]},
+ {f:"Micron Hiroshima",p:"DRAM / HBM",c:"JP",cy:"Hiroshima",a:"2028-07",b:"2029-03",src:"Ground broken Jul 2026; tools from 2H28; output late 2028 (Micron, press)",ll:[34.466,132.842]},
+ {f:"TSMC Arizona fab 4",p:"Logic",c:"US",cy:"Phoenix",a:"2028-07",b:"2029-06",est:1,src:"Construction began early 2026 (TSMC); no tool date, our estimate",ll:[33.78,-112.16]},
+ {f:"Samsung Pyeongtaek P5 fab 2",sat:1,site:"samsung_pyeongtaek",p:"Memory",c:"KR",cy:"Pyeongtaek",a:"2028-07",b:"2029-06",est:1,src:"Piling under way; fab 2 in 2029 (press)",ll:[37.02,127.05]},
+ {f:"GlobalFoundries Malta",sat:1,site:"gf_malta",p:"Specialty logic",c:"US",cy:"Malta",a:"2028-07",b:"2029-06",src:"Announced Oct 2026; online 2029 (press)",ll:[42.97,-73.76]},
+ {f:"Micron Clay, New York",p:"DRAM",c:"US",cy:"Clay",a:"2028-09",b:"2029-12",sat:1,site:"micron_clay",src:"Foundations Oct 2026 (satellite); output CY2030 (Micron)",ll:[43.23,-76.15]},
+ {f:"Kioxia Kitakami Fab3",sat:0,site:"kioxia_kitakami",p:"NAND",c:"JP",cy:"Kitakami",a:"2028-10",b:"2029-09",src:"Site preparation started; operation FY2029 (Kioxia, Aug 2026)",ll:[39.30,141.07]},
+ {f:"SK hynix Cheongju M17",p:"NAND",c:"KR",cy:"Cheongju",a:"2028-12",b:"2029-09",sat:1,site:"skh_m17_area",src:"Farmland Oct 2026 (satellite); cleanroom Dec 2028, operations 1H29 (SK hynix)",ll:[36.64,127.44]},
+ {f:"Samsung Taylor fab 2",p:"Logic 2nm",c:"US",cy:"Taylor",a:"2029-01",b:"2029-12",src:"Groundbreaking by end-2026, mass production 2030 (Samsung Q2 2026 call)",ll:[30.54,-97.455]},
+ {f:"Samsung Yongin national complex fab 1",sat:1,site:"samsung_yongin_nat",p:"Memory",c:"KR",cy:"Yongin",a:"2029-01",b:"2029-12",slip:"2030-06",src:"Operations 2029 (press); state developer says construction by 2028, so at risk",ll:[37.13,127.21]},
+ {f:"Winbond Kaohsiung fab 2",p:"DRAM",c:"TW",cy:"Kaohsiung",a:"2029-01",b:"2029-09",src:"Mass production 4Q29 (press; Winbond board Aug 2026)",ll:[22.85,120.26]},
+ {f:"SK hynix Yongin Y2",p:"DRAM / HBM",c:"KR",cy:"Yongin",a:"2029-07",b:"2030-06",open:1,sat:1,site:"skh_yongin",src:"Y2 area bare (satellite); first cleanroom Jun 2029 (SK hynix)",ll:[37.17,127.33]},
+ {f:"Intel Ohio fab 1",sat:1,site:"intel_ohio",p:"Logic",c:"US",cy:"New Albany",a:"2029-07",b:"2030-06",open:1,src:"Construction complete 2030, operating 2030–31 (Intel)",ll:[40.10,-82.71]},
+ // HBM and advanced packaging plants
+ {k:"pkg",f:"TSMC AP7, Chiayi",p:"Advanced packaging",c:"TW",cy:"Chiayi",a:"2026-01",b:"2028-12",src:"Phases from 2026; CoPoS phase end-2028 (press)",ll:[23.48,120.29]},
+ {k:"pkg",f:"Micron Singapore HBM",p:"HBM packaging",c:"SG",cy:"Singapore",a:"2026-07",b:"2027-03",src:"Initial output early CY2027 (Micron)",ll:[1.44,103.80]},
+ {k:"pkg",f:"SK hynix P&T7, Cheongju",p:"HBM packaging",c:"KR",cy:"Cheongju",a:"2027-01",b:"2027-12",src:"Construction from Apr 2026; full operation by end-2027 (SK hynix)",ll:[36.66,127.40]},
+ {k:"pkg",f:"Samsung Onyang line 5",p:"HBM packaging",c:"KR",cy:"Asan",a:"2027-07",b:"2028-06",src:"Ground broken Nov 12, 2026; operation Jun 2028 (press)",ll:[36.79,127.06]},
+ {k:"pkg",f:"Amkor Peoria",p:"Advanced packaging",c:"US",cy:"Peoria",a:"2027-07",b:"2028-03",src:"Building mid-2027, production early 2028 (Amkor)",ll:[33.77,-112.30]},
+ {k:"pkg",f:"TSMC Arizona AP1",p:"Advanced packaging",c:"US",cy:"Phoenix",a:"2028-07",b:"2029-03",est:1,src:"Construction from early 2026; opening 2029 (press)",ll:[33.77,-112.14]},
+ {k:"pkg",f:"SK hynix West Lafayette",sat:1,site:"skh_indiana",p:"HBM packaging",c:"US",cy:"West Lafayette",a:"2028-10",b:"2029-06",src:"Ground broken Aug 2026; cleanroom Oct 2028, production 2H 2029 (press)",ll:[40.42,-86.93]},
+];
+const MKS_PIN={f:"MKS Guangzhou equipment plant",ll:[23.14,113.48],site:"gz_yunpu",src:"Plating-line factory doubling, done Q3 2027 (Thesis 1)"};
+const ym=s=>{const [y,m]=s.split("-").map(Number);return y+(m-1)/12};
+const yrCls=w=>"y"+String(Math.min(2029,Math.floor(ym(w.a)))).slice(2);
+const YC={y26:"s2",y27:"s3",y28:"s4",y29:"s6"};
+let waveSel=null,waveDrawn=false,wavePkg=false,waveCN=true;
+const waveRows=()=>WAVE.filter(w=>(wavePkg||w.k!=="pkg")&&(waveCN||!w.cn));
+function drawCounts(){
+  const box=$("#counts");box.replaceChildren();const R=waveRows();
+  [2026,2027,2028,2029].forEach(y=>{
+    const inYr=R.filter(w=>ym(w.a)<y+1&&ym(w.b)>=y);
+    const slip=R.filter(w=>w.slip&&ym(w.b)<y&&ym(w.slip)>=y);
+    const unit=wavePkg?"plants":"fabs";
+    box.append(el("div",{class:y>=2028?"hot":""},el("span",{class:"yr"},String(y)),el("b",{},String(inYr.length)+(slip.length?"–"+(inYr.length+slip.length):"")),el("span",{},y===2029?`${unit} announced so far${slip.length?", incl. possible slips":""}`:`${unit} taking tools`)));
+  });
+  $("#wave-n").textContent=`${R.length} ${wavePkg?"plants":"fabs"}`;
+}
+function drawWall(){
+  const box=$("#wall");box.replaceChildren();const R=waveRows();
+  const W=980,L=300,R_=16,T=30,rh=24,H=T+R.length*rh+12;
+  const t0=2026,t1=2030.5,x=t=>L+(t-t0)/(t1-t0)*(W-L-R_);
+  const s=sv("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":"Tool move-in windows by fab, 2026 to 2030"});
+  const defs=sv("defs");const pat=sv("pattern",{id:"hatch",width:6,height:6,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"});pat.append(sv("rect",{width:2.6,height:6,fill:"var(--watch)"}));defs.append(pat);s.append(defs);
+  for(let y=2026;y<=2030;y++){s.append(sv("rect",{x:x(y),y:T-6,width:x(Math.min(y+1,t1))-x(y),height:H-T,fill:y===2028||y===2029?"var(--accent)":"transparent",opacity:.05}));s.append(sv("line",{x1:x(y),x2:x(y),y1:T-8,y2:H-4,stroke:"var(--line)"}));const tx=sv("text",{x:x(y)+6,y:T-12,style:"font:600 13px var(--f-display);fill:var(--ink)"});tx.textContent=y;s.append(tx);
+    for(let q=1;q<4;q++)s.append(sv("line",{x1:x(y+q/4),x2:x(y+q/4),y1:T-4,y2:T,stroke:"var(--line)"}))}
+  const now=2026+10.5/12;s.append(sv("line",{x1:x(now),x2:x(now),y1:T-8,y2:H-4,stroke:"var(--bad)","stroke-width":1.5,"stroke-dasharray":"3 3"}));
+  const nt=sv("text",{x:x(now)-4,y:H-2,"text-anchor":"end",style:"fill:var(--bad)"});nt.textContent="today";s.append(nt);
+  const tip=tipOn(box);
+  R.forEach((w,i)=>{
+    const y=T+i*rh;const g=sv("g",{class:"row"+(waveSel===w.f?" on":""),tabindex:0,role:"button","aria-label":`${w.f}: tools ${w.a} to ${w.b}`});
+    g.append(sv("rect",{class:"bg",x:0,y:y,width:W,height:rh,fill:"transparent",rx:4}));
+    const dot=sv("text",{x:6,y:y+16,style:`font:12px var(--f-mono);fill:${w.sat?"var(--accent)":"var(--muted)"}`});dot.textContent=w.sat?"◉":"○";g.append(dot);
+    const lab=sv("text",{x:22,y:y+16,class:"rl",style:"font-size:12px"});lab.textContent=w.f+(w.cn?" *":"");g.append(lab);
+    const pl=sv("text",{x:L-8,y:y+16,"text-anchor":"end",style:"font-size:10px"});pl.textContent=w.c;g.append(pl);
+    const xa=x(ym(w.a)),xb=x(Math.min(t1,ym(w.b)+1/12));
+    if(w.slip)g.append(sv("rect",{x:xb-3,y:y+6,width:x(ym(w.slip)+1/12)-xb+3,height:12,rx:3,fill:"url(#hatch)"}));
+    const bar=sv("rect",{x:xa,y:y+5,width:xb-xa,height:14,rx:4,fill:`var(--${YC[yrCls(w)]})`});
+    if(w.est){bar.setAttribute("fill-opacity",".55");bar.setAttribute("stroke",`var(--${YC[yrCls(w)]})`);bar.setAttribute("stroke-dasharray","3 2")}
+    g.append(bar);
+    if(w.open){g.append(sv("path",{d:`M${xb-2},${y+3} L${xb+8},${y+12} L${xb-2},${y+21}Z`,fill:`var(--${YC[yrCls(w)]})`}))}
+    const show=()=>{const bb=box.getBoundingClientRect(),sc=bb.width/W;tip.textContent=w.p+" · "+w.src;tip.style.left=Math.min(bb.width-160,Math.max(160,(xa+xb)/2*sc))+"px";tip.style.top=y*sc+"px";tip.hidden=false};
+    g.addEventListener("pointerenter",show);g.addEventListener("pointerleave",()=>tip.hidden=true);
+    g.addEventListener("click",()=>{if(w.site)location.hash=w.site;else{show();selectWave(w.f)}});
+    g.addEventListener("keydown",e=>{if(e.key==="Enter"&&w.site)location.hash=w.site});
+    s.append(g);
+  });
+  box.prepend(s);
+}
+function selectWave(f){waveSel=f;document.querySelectorAll(".wall .row").forEach(g=>g.classList.toggle("on",g.getAttribute("aria-label").startsWith(f+":")))}
+// maps: land outlines loaded at view time from a public npm package (amCharts geodata, worldLow)
+let WORLD=null;
+async function loadWorld(){
+  if(window.LAND_PATHS)return true;
+  if(WORLD)return WORLD;
+  try{const m=await import("https://unpkg.com/@amcharts/amcharts4-geodata@4.1.27/worldLow.js");WORLD=m.default;return WORLD}catch(e){return null}
+}
+function drawMap(boxId,win,rows){
+  const [lo0,lo1,la0,la1]=win,Wd=520,k=Wd/(lo1-lo0),cy=Math.cos((la0+la1)/2*Math.PI/180),Hd=Math.round((la1-la0)*k/cy);
+  const x=lo=>(lo-lo0)*k,y=la=>(la1-la)*k/cy;
+  const s=sv("svg",{viewBox:`0 0 ${Wd} ${Hd}`,role:"img"});
+  const cp=sv("clipPath",{id:"c"+boxId});cp.append(sv("rect",{width:Wd,height:Hd}));const d0=sv("defs");d0.append(cp);s.append(d0);
+  const gl=sv("g",{"clip-path":`url(#c${boxId})`});
+  if(window.LAND_PATHS){gl.append(sv("path",{d:window.LAND_PATHS[boxId==="map-asia"?"asia":"us"],class:"land"}))}
+  else if(WORLD){
+    let d="";
+    WORLD.features.forEach(ft=>{const g=ft.geometry;if(!g)return;const polys=g.type==="Polygon"?[g.coordinates]:g.type==="MultiPolygon"?g.coordinates:[];
+      polys.forEach(p=>p.forEach(ring=>{let mnx=1e9,mxx=-1e9,mny=1e9,mxy=-1e9;ring.forEach(([lo,la])=>{mnx=Math.min(mnx,lo);mxx=Math.max(mxx,lo);mny=Math.min(mny,la);mxy=Math.max(mxy,la)});
+        if(mxx<lo0-5||mnx>lo1+5||mxy<la0-5||mny>la1+5)return;
+        d+="M"+ring.map(([lo,la])=>x(lo).toFixed(1)+","+y(la).toFixed(1)).join("L")+"Z"}))});
+    gl.append(sv("path",{d,class:"land"}));
+  }else{gl.append(sv("rect",{width:Wd,height:Hd,fill:"var(--sunk)"}))}
+  s.append(gl);
+  // one pin per city; colour = latest start year there, size = number of plants
+  const MG={KR:["South Korea",[37.0,127.25]],TW:["Taiwan",[23.7,120.9]]};const NY={Malta:1,Clay:1};
+  const groups={};rows.forEach(w=>{const g=MG[w.c]?MG[w.c][0]:NY[w.cy]?"New York":w.cy;(groups[g]=groups[g]||[]).push(w)});
+  const gll=(g,ws)=>Object.values(MG).find(m=>m[0]===g)?.[1]||(g==="New York"?[43.1,-75.0]:ws[0].ll);
+  const placed=[];const tip=tipOn($("#"+boxId));
+  Object.entries(groups).sort((a,b)=>b[1].length-a[1].length).forEach(([city,ws])=>{
+    const [la,lo]=gll(city,ws);const clampY=la>la1?10:la<la0?Hd-10:y(la);const px=Math.min(Wd-8,Math.max(8,x(lo))),py=clampY;
+    const latest=ws.reduce((m,w)=>ym(w.a)>ym(m.a)?w:m,ws[0]);const first=ws.reduce((m,w)=>ym(w.a)<ym(m.a)?w:m,ws[0]);
+    const r=6+Math.min(9,ws.length*0.9);
+    const g=sv("g",{class:"pin",tabindex:0,role:"button","aria-label":`${city}: ${ws.length} plants`});
+    g.append(sv("circle",{cx:px,cy:py,r,fill:`var(--${YC[yrCls(latest)]})`,stroke:"var(--surface)","stroke-width":2}));
+    const y0=Math.floor(ym(first.a)),y1=Math.floor(ym(latest.a));
+    const label=`${city}${ws.length>1?" ×"+ws.length:""}`,sub=`tools ${y0===y1?y0:y0+"–"+String(y1).slice(2)}`;
+    const wch=Math.max(label.length*6.6,sub.length*6)+6;
+    const cand=[[r+4,-2,"start"],[-(r+4),-2,"end"],[r+4,14,"start"],[-(r+4),14,"end"],[r+4,-16,"start"],[-(r+4),-16,"end"],[r+4,30,"start"],[-(r+4),30,"end"],[r+4,-30,"start"],[-(r+4),-30,"end"]];
+    let pick=cand[0];
+    for(const c of cand){const bx=c[2]==="start"?px+c[0]:px+c[0]-wch,by=py+c[1]-11,bb=[bx,by,bx+wch,by+26];
+      if(bb[0]<0||bb[2]>Wd||bb[1]<0||bb[3]>Hd)continue;
+      if(!placed.some(p=>!(bb[2]<p[0]||bb[0]>p[2]||bb[3]<p[1]||bb[1]>p[3]))){pick=c;placed.push(bb);break}}
+    const t=sv("text",{x:px+pick[0],y:py+pick[1],"text-anchor":pick[2]});t.textContent=label;g.append(t);
+    const t2=sv("text",{x:px+pick[0],y:py+pick[1]+12,"text-anchor":pick[2],class:"yr"});t2.textContent=sub;g.append(t2);
+    const show=()=>{const sc=$("#"+boxId).getBoundingClientRect().width/Wd;tip.textContent=ws.map(w=>w.f+" ("+w.a.slice(0,4)+")").join("  ·  ");tip.style.left=Math.min(Wd*sc-120,Math.max(120,px*sc))+"px";tip.style.top=(py-r)*sc+"px";tip.hidden=false};
+    g.addEventListener("pointerenter",show);g.addEventListener("pointerleave",()=>tip.hidden=true);
+    g.addEventListener("click",()=>{const w=ws.find(w=>w.site);if(w)location.hash=w.site;else show()});
+    s.append(g)});
+  // MKS's own plant
+  const [mla,mlo]=MKS_PIN.ll;if(boxId==="map-asia"){const px=x(mlo),py=y(mla);const g=sv("g",{class:"pin"});
+    g.append(sv("rect",{x:px-6,y:py-6,width:12,height:12,transform:`rotate(45 ${px} ${py})`,fill:"var(--watch)",stroke:"var(--surface)","stroke-width":2}));
+    const t=sv("text",{x:px-10,y:py+4,"text-anchor":"end"});t.textContent="MKS Guangzhou";g.append(t);g.addEventListener("click",()=>location.hash="gz_yunpu");s.append(g)}
+  $("#"+boxId).replaceChildren(s);
+}
+const REGS=[["Taiwan",["TW"]],["South Korea",["KR"]],["Japan / Singapore",["JP","SG"]],["US",["US"]],["Europe / India",["DE","IN"]],["China",["CN"]]];
+const REGC=["s6","s5","s4","s3","s2","s1"];
+function drawYearBars(){
+  const box=$("#ybars");box.replaceChildren();const R=waveRows();
+  const W=980,H=330,L=40,B=34,T=16,legW=190,yrs=[2026,2027,2028,2029];
+  const data=yrs.map(y=>REGS.map(([n,cs])=>R.filter(w=>cs.includes(w.c)&&ym(w.a)<y+1&&ym(w.b)>=y)));
+  const tot=data.map(d=>d.reduce((a,x)=>a+x.length,0));const mx=Math.max(...tot,1);
+  const bw=120,gap=(W-L-legW-bw*4)/4,y=v=>H-B-v/mx*(H-B-T-18);
+  const s=sv("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":"Fabs taking tools by year and region"});
+  s.append(sv("line",{x1:L,x2:W-legW,y1:H-B,y2:H-B,stroke:"var(--line)"}));
+  const tip=tipOn(box);
+  data.forEach((d,j)=>{const x=L+gap/2+j*(bw+gap);let acc=0;
+    d.forEach((ws,i)=>{if(!ws.length)return;const y0=y(acc),y1=y(acc+ws.length);acc+=ws.length;
+      const r=sv("rect",{x,y:y1,width:bw,height:Math.max(1,y0-y1-2),rx:3,fill:`var(--${REGC[i]})`});s.append(r);
+      if(y0-y1>14){const t=sv("text",{x:x+bw/2,y:(y0+y1)/2+4,"text-anchor":"middle",style:`font:600 12px var(--f-mono);fill:${i<4?"var(--surface)":"var(--ink)"}`});t.textContent=ws.length;s.append(t)}
+      const show=()=>{const sc=box.getBoundingClientRect().width/W;tip.textContent=`${yrs[j]} · ${REGS[i][0]}: `+ws.map(w=>w.f).join(", ");tip.style.left=Math.min(box.getBoundingClientRect().width-200,Math.max(200,(x+bw/2)*sc))+"px";tip.style.top=y1*sc+"px";tip.hidden=false};
+      r.addEventListener("pointerenter",show);r.addEventListener("click",show);r.addEventListener("pointerleave",()=>tip.hidden=true)});
+    const tt=sv("text",{x:x+bw/2,y:y(tot[j])-6,"text-anchor":"middle",style:"font:700 16px var(--f-display);fill:var(--ink)"});tt.textContent=tot[j];s.append(tt);
+    const lb=sv("text",{x:x+bw/2,y:H-B+20,"text-anchor":"middle",style:"font:600 13px var(--f-display);fill:var(--ink)"});lb.textContent=yrs[j]+(yrs[j]===2029?" (so far)":"");s.append(lb)});
+  REGS.slice().reverse().forEach(([n],k)=>{const i=REGS.length-1-k;const yy=T+10+k*26;s.append(sv("rect",{x:W-legW+24,y:yy,width:14,height:14,rx:3,fill:`var(--${REGC[i]})`}));const t=sv("text",{x:W-legW+46,y:yy+12,style:"font:12px var(--f-body);fill:var(--ink)"});t.textContent=n;s.append(t)});
+  box.prepend(s);
+}
+async function drawWave(){
+  drawCounts();drawYearBars();drawWall();
+  const w=await loadWorld();const R=waveRows();
+  drawMap("map-asia",[100,142,16,42],R.filter(p=>["KR","JP","TW","CN","SG"].includes(p.c)));
+  drawMap("map-us",[-126,-66,23,50],R.filter(p=>p.c==="US"));
+  const off=R.filter(p=>["DE","IN"].includes(p.c)).map(p=>p.f);
+  $("#mapkey").replaceChildren(...[["s2","Tools from 2026"],["s3","2027"],["s4","2028"],["s6","2029"]].map(([c,t])=>el("span",{},el("i",{class:"sw",style:`background:var(--${c});border-radius:50%`}),t)),el("span",{},el("i",{class:"sw",style:"background:var(--watch);transform:rotate(45deg)"}),"MKS's own plant (Thesis 1)"),el("span",{},"Pin size = number of plants; colour = latest start there"));
+  $("#map-note").textContent=(off.length?"Not on the maps: "+off.join(", ")+". ":"")+(w?"Map outlines: amCharts geodata (worldLow). Tap a pin to list its plants or see it from space.":"Map outlines could not load on this connection; pins are placed by latitude and longitude.");
+}
+document.querySelectorAll("[data-wave]").forEach(b=>b.addEventListener("click",()=>{const k=b.dataset.wave;if(k==="pkg")wavePkg=!wavePkg;if(k==="cn")waveCN=!waveCN;b.setAttribute("aria-pressed",k==="pkg"?wavePkg:waveCN);drawWave()}));
+
+/* ---------- utils ---------- */
+const $=s=>document.querySelector(s);
+const el=(t,a={},...c)=>{const e=document.createElement(t);for(const k in a){if(k==="class")e.className=a[k];else if(k==="style")e.style.cssText=a[k];else if(k.startsWith("on"))e.addEventListener(k.slice(2),a[k]);else e.setAttribute(k,a[k])}for(const x of c.flat())if(x!=null)e.append(x);return e};
+const NS="http://www.w3.org/2000/svg";
+const sv=(t,a={})=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
+const fmtD=d=>{const [y,m,dd]=d.split("-");return new Date(+y,+m-1,+(dd||1)).toLocaleDateString("en-US",{month:"short",year:"numeric",...(dd?{day:"numeric"}:{})})};
+const tnum=d=>{const [y,m,dd]=d.split("-").map(Number);return y+(m-1)/12+((dd||15)-1)/365};
+const vmark={Supports:"▲",Watch:"●",Against:"▼",Method:"◆"};
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+/* ---------- routing ---------- */
+const VIEWS=["signals","wave","fabs","imports","boards","ask"];
+function route(){
+  const h=(location.hash||"#signals").slice(1);
+  let v=VIEWS.includes(h)?h:"signals";
+  if(SITES[h]){v="fabs";selectSite(h)}
+  VIEWS.forEach(x=>{$("#v-"+x).hidden=x!==v});
+  document.querySelectorAll("nav a").forEach(a=>a.toggleAttribute("aria-current",a.dataset.v===v)||a.dataset.v===v&&a.setAttribute("aria-current","page"));
+  document.querySelectorAll("nav a").forEach(a=>{if(a.dataset.v===v)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
+  if(v==="wave")drawWave();
+  if(v==="imports")drawImports();
+  if(v==="boards")drawBoards();
+  window.scrollTo(0,0);
+}
+addEventListener("hashchange",route);
+
+/* ---------- signals ---------- */
+let filter="all";
+function drawCards(){
+  const box=$("#cards");box.replaceChildren();
+  SIGNALS.filter(s=>filter==="all"||(filter==="Against"?s.v==="Against":s.thesis===filter)).forEach(s=>{
+    box.append(el("article",{class:"card","data-v":s.v},
+      el("div",{class:"meta"},el("span",{class:"pill"},el("i",{"aria-hidden":"true"},vmark[s.v]),s.v),el("span",{class:"tag"},s.thesis)),
+      el("h3",{},s.title),
+      el("div",{class:"big"},s.big,el("small",{},s.bigNote)),
+      el("p",{},s.body),
+      el("div",{class:"ai"},el("b",{},"So what"),s.ai),
+      el("button",{class:"go",onclick:()=>{location.hash=s.site||s.go}},s.site?"See it from space →":s.go==="ask"?"Ask about it →":s.go==="wave"?"See the 2029 wall →":"See the data →")));
+  });
+}
+document.querySelectorAll(".filters .chip").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.f;document.querySelectorAll(".filters .chip").forEach(x=>x.setAttribute("aria-pressed",x===b));drawCards()}));
+
+/* ---------- fabs ---------- */
+let cur="micron_clay", idx=0, timer=null, cmp=false;
+function siteObs(s){return OBS.filter(o=>SITES[s].fabs.includes(o.fab)).sort((a,b)=>a.date<b.date?-1:1)}
+function buildSiteList(){
+  const box=$("#sitelist");
+  Object.entries(SITES).forEach(([k,s])=>box.append(el("button",{class:"site","data-k":k,"aria-pressed":"false",onclick:()=>{location.hash=k}},el("b",{},s.short),el("span",{},s.product+" · "+s.thesis))));
+}
+function selectSite(k){
+  cur=k;stop();
+  const dates=RAW.imgs[k];
+  idx=dates.length-1;
+  document.querySelectorAll(".site").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===k));
+  const s=SITES[k];
+  $("#fab-title").textContent=s.name;
+  $("#fab-lede").textContent=s.why;
+  $("#slider").max=dates.length-1;
+  $("#fact-site").replaceChildren(el("h4",{},"What the company says"),el("dl",{class:"kv"},el("dt",{},"Product"),el("dd",{},s.product),el("dt",{},"Schedule"),el("dd",{},s.schedule),el("dt",{},"Tools go in"),el("dd",{},el("b",{},s.tools)),el("dt",{},"Tests"),el("dd",{},s.thesis)));
+  $("#ai-out").replaceChildren();
+  // preload
+  dates.forEach(d=>{const i=new Image();i.src=imgSrc(k,d)});
+  drawTimeline();show();
+}
+const imgSrc=(k,d)=>`img/${k}/${d}.jpg`;
+function show(){
+  const dates=RAW.imgs[cur], d=dates[idx];
+  $("#slider").value=idx;
+  $("#date").textContent=fmtD(d);
+  $("#img-top").src=imgSrc(cur,d);
+  $("#img-top").alt=`${SITES[cur].name}, Sentinel-2 image of ${fmtD(d)}`;
+  $("#img-base").src=imgSrc(cur,cmp?dates[0]:d);
+  $("#img-base").alt=cmp?`First image, ${fmtD(dates[0])}`:"";
+  $("#lbl-r").textContent=fmtD(d);
+  $("#lbl-l").textContent=fmtD(dates[0]);
+  $("#lbl-l").hidden=!cmp;$("#divider").hidden=!cmp;$("#cut").hidden=!cmp;
+  $("#viewer").style.setProperty("--cut",cmp?$("#cut").value+"%":"0%");
+  const im=$("#img-top");if(im.complete&&im.naturalWidth)drawAnn(d);else im.onload=()=>drawAnn(RAW.imgs[cur][idx]);
+  // stage at date
+  const obs=siteObs(cur);
+  const byFab={};obs.forEach(o=>{if(o.date<=d)byFab[o.fab]=o});
+  const fs=$("#fact-stage");fs.replaceChildren(el("h4",{},"Team's stage call on this date"));
+  const fabsWithCalls=SITES[cur].fabs;
+  let any=false;
+  fabsWithCalls.forEach(f=>{const o=byFab[f];if(!o)return;any=true;const i=stageIdx(o.stage);
+    fs.append(el("div",{style:"margin-bottom:8px"},el("div",{class:"stage-now"},el("i",{class:"sw",style:`background:var(--s${i})`}),el("b",{},o.stage),el("span",{class:"note"},`${f.replace(/ \(running\)/,"")} · called on ${fmtD(o.date)}`)),el("div",{style:"font-size:13.5px"},o.evidence)))});
+  if(!any)fs.append(el("p",{class:"note",style:"margin:0"},"No stage call yet at this date. Move the slider forward."));
+  markTimeline();
+}
+function drawTimeline(){
+  const dates=RAW.imgs[cur], obs=siteObs(cur);
+  const t0=tnum(dates[0])-.08, t1=Math.max(tnum(dates.at(-1)),...obs.map(o=>tnum(o.date)))+.08;
+  const W=640, fabs=SITES[cur].fabs.filter(f=>obs.some(o=>o.fab===f)), rowH=22, H=28+fabs.length*rowH+16;
+  const x=t=>12+(t-t0)/(t1-t0)*(W-24);
+  const s=sv("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":"Image dates and stage calls over time"});
+  for(let y=Math.ceil(t0);y<=t1;y++){s.append(sv("line",{x1:x(y),x2:x(y),y1:16,y2:H-14,stroke:"var(--line)"}));const tx=sv("text",{x:x(y)+3,y:12});tx.textContent=y;s.append(tx)}
+  dates.forEach((d,i)=>{const c=sv("circle",{cx:x(tnum(d)),cy:22,r:4,fill:"var(--muted)","data-i":i,class:"dot",style:"cursor:pointer"});c.addEventListener("click",()=>{stop();idx=i;show()});s.append(c)});
+  fabs.forEach((f,r)=>{const y=34+r*rowH;const o=obs.filter(q=>q.fab===f);
+    o.forEach((q,j)=>{const xa=x(tnum(q.date)), xb=j<o.length-1?x(tnum(o[j+1].date)):x(t1)-2;const i=stageIdx(q.stage);
+      s.append(sv("rect",{x:xa,y:y,width:Math.max(3,xb-xa-2),height:14,rx:3,fill:`var(--s${i})`}))});
+    const lab=sv("text",{x:x(tnum(o[0].date))+4,y:y+11,class:"ann",style:"font-size:10px;paint-order:stroke;stroke:var(--surface);stroke-width:3px"});lab.textContent=f.replace(/ \(running\)/,"").replace(/^(SK hynix|Micron|TSMC|Samsung|JASM|MKS) /,"");s.append(lab)});
+  s.append(sv("line",{id:"tl-now",x1:0,x2:0,y1:14,y2:H-12,stroke:"var(--accent)","stroke-width":2}));
+  $("#timeline").replaceChildren(s);
+  $("#timeline").dataset.t0=t0;$("#timeline").dataset.t1=t1;
+  const used=[...new Set(obs.map(o=>stageIdx(o.stage)))].sort();
+  $("#legend").replaceChildren(...used.map(i=>el("span",{},el("i",{class:"sw",style:`background:var(--s${i})`}),SHORT[i])));
+}
+function markTimeline(){
+  const t0=+$("#timeline").dataset.t0,t1=+$("#timeline").dataset.t1,W=640;
+  const xx=12+(tnum(RAW.imgs[cur][idx])-t0)/(t1-t0)*(W-24);
+  const l=document.getElementById("tl-now");if(l){l.setAttribute("x1",xx);l.setAttribute("x2",xx)}
+  document.querySelectorAll("#timeline .dot").forEach(c=>{const on=+c.dataset.i===idx;c.setAttribute("r",on?6:4);c.setAttribute("fill",on?"var(--accent)":"var(--muted)")});
+}
+function stop(){if(timer){clearInterval(timer);timer=null;$("#play").textContent="Play"}}
+$("#play").addEventListener("click",()=>{if(timer){stop();return}
+  if(idx>=RAW.imgs[cur].length-1)idx=0;show();$("#play").textContent="Pause";
+  timer=setInterval(()=>{if(idx>=RAW.imgs[cur].length-1){stop();return}idx++;show()},750)});
+$("#slider").addEventListener("input",e=>{stop();idx=+e.target.value;show()});
+$("#cmp").addEventListener("click",()=>{cmp=!cmp;$("#cmp").setAttribute("aria-pressed",cmp);$("#cmp").textContent=cmp?"Stop comparing":"Compare with first image";show()});
+$("#lab").addEventListener("click",()=>{showLabels=!showLabels;$("#lab").setAttribute("aria-pressed",showLabels);$("#lab").textContent=showLabels?"Labels on":"Labels off";show()});
+$("#cut").addEventListener("input",e=>$("#viewer").style.setProperty("--cut",e.target.value+"%"));
+// drag on image to move the divider
+(()=>{const v=$("#viewer");let drag=false;const mv=e=>{if(!cmp||!drag)return;const r=v.getBoundingClientRect();const p=Math.min(100,Math.max(0,(e.clientX-r.left)/r.width*100));$("#cut").value=p;v.style.setProperty("--cut",p+"%")};
+ v.addEventListener("pointerdown",e=>{if(!cmp)return;drag=true;v.setPointerCapture(e.pointerId);mv(e)});v.addEventListener("pointermove",mv);v.addEventListener("pointerup",()=>drag=false);v.addEventListener("pointercancel",()=>drag=false)})();
+
+/* ---------- AI (sample) ---------- */
+let samplePromise=null;
+const getSample=()=>samplePromise||(samplePromise=(window.claude?.use?window.claude.use("sample"):Promise.resolve(null)).catch(()=>null));
+const errCopy=c=>({not_granted:"Claude was not allowed for this page. Everything else still works.",sampling_disabled:"Claude is not available on this account.",rate_limited:"Too many questions at once. Try again in a minute.",refused:"Claude declined that one. Try rephrasing.",session_expired:"Please sign in to claude.ai again.",images_unavailable:"This view cannot send images to Claude.",invalid_json:"The answer came back in the wrong format. Tap again."}[c]||"Something went wrong reaching Claude. Tap to try again.");
+async function blobOf(src){const r=await fetch(src);return r.blob()}
+$("#ai-read").addEventListener("click",async()=>{
+  const out=$("#ai-out"), btn=$("#ai-read");
+  const sample=await getSample();
+  if(!sample){out.textContent="AI reading is available when this page is opened on claude.ai.";return}
+  const dates=RAW.imgs[cur], d=dates[idx], s=SITES[cur];
+  btn.disabled=true;out.replaceChildren(el("span",{class:"note"},"Looking at the images…"));
+  try{
+    const imgs=[await blobOf(imgSrc(cur,dates[0])),await blobOf(imgSrc(cur,d))];
+    const prompt=`You are a satellite-imagery analyst on an equity research team. Two Sentinel-2 true-colour crops (10 m per pixel) of the same site are attached: image 1 is from ${dates[0]}, image 2 is from ${d}.
+Site: ${s.name} (${s.product}). Company schedule: ${s.schedule}.
+Focus on the area the team marks as: ${(BOXES[cur]||[]).map(b=>b.label+" at pixel box "+b.r.join(",")).join("; ")} (x0,y0,x1,y1 in image 2 pixels).
+Classify the construction stage visible in image 2 using exactly one of: ${STAGES.join("; ")}.
+Rules: judge only what is visible at 10 m; never claim anything about the inside of buildings; if unsure, choose the earlier stage and say so.
+Reply with only JSON: {"stage": string, "confidence": "low"|"medium"|"high", "change": string (one sentence on what changed between image 1 and image 2), "watch_next": string (one sentence on what to look for in the next image)}`;
+    const r=await sample.json(prompt,{images:imgs});
+    const team=siteObs(cur).filter(o=>o.date<=d).at(-1);
+    const agree=team&&String(r.stage)===team.stage;
+    out.replaceChildren(
+      el("div",{},el("span",{class:"k"},"AI call "),el("b",{},String(r.stage||"?"))," · ",String(r.confidence||"")," confidence"),
+      el("div",{style:"margin-top:6px"},el("span",{class:"k"},"Change "),String(r.change||"")),
+      el("div",{style:"margin-top:6px"},el("span",{class:"k"},"Watch next "),String(r.watch_next||"")),
+      team?el("div",{style:"margin-top:8px"},el("span",{class:"pill",style:`--c:${agree?"var(--good)":"var(--watch)"}`},el("i",{"aria-hidden":"true"},agree?"✓":"≠"),agree?"Matches the team's call":`Team called "${team.stage}"`)):null);
+  }catch(e){out.textContent=errCopy(e&&e.code)}
+  finally{btn.disabled=false}
+});
+
+/* ---------- charts ---------- */
+function tipOn(box){let t=box.querySelector(".tip");if(!t){t=el("div",{class:"tip",hidden:""});box.append(t)}return t}
+function barChart(box,{data,yfmt=v=>v,color="var(--s3)",band=null,notes=[],H=230,yMin=null,dots=null,zeroLine=false}){
+  box.replaceChildren();
+  const W=720,L=44,R=10,T=14,B=26;
+  const vals=data.map(d=>d[1]).concat(dots?dots.map(d=>d[1]):[]).filter(v=>v!=null);
+  let lo=yMin!=null?yMin:Math.min(0,...vals),hi=Math.max(...vals);const pad=(hi-lo)*.08;hi+=pad;if(lo<0)lo-=pad;
+  const step=niceStep((hi-lo)/4);lo=Math.floor(lo/step)*step;hi=Math.ceil(hi/step)*step;
+  const n=data.length,bw=(W-L-R)/n;
+  const x=i=>L+i*bw, y=v=>T+(hi-v)/(hi-lo)*(H-T-B);
+  const s=sv("svg",{viewBox:`0 0 ${W} ${H}`,role:"img"});
+  for(let v=lo;v<=hi+1e-9;v+=step){s.append(sv("line",{x1:L,x2:W-R,y1:y(v),y2:y(v),stroke:"var(--line)","stroke-width":v===0?1.5:1}));const t=sv("text",{x:L-6,y:y(v)+4,"text-anchor":"end"});t.textContent=yfmt(+v.toFixed(6));s.append(t)}
+  if(band){const a=data.findIndex(d=>d[0]===band[0]),b=data.findIndex(d=>d[0]===band[1]);s.append(sv("rect",{x:x(a),y:T,width:(b-a+1)*bw,height:H-T-B,fill:"var(--method)",opacity:.14}));const t=sv("text",{x:x(a)+3,y:T+11,class:"ann"});t.textContent=band[2];s.append(t)}
+  let lastYear="";
+  data.forEach((d,i)=>{const v=d[1];if(v!=null){const y0=y(Math.max(0,lo)),yv=y(v);s.append(sv("rect",{x:x(i)+bw*.12,y:Math.min(y0,yv),width:Math.max(1,bw*.76),height:Math.max(1,Math.abs(y0-yv)),rx:Math.min(3,bw*.3),fill:typeof color==="function"?color(d,i):color}))}
+    const yr=d[0].slice(0,4);if(yr!==lastYear&&(d[0].endsWith("-01")||d[0].endsWith("Q1")||i===0)){lastYear=yr;const t=sv("text",{x:x(i)+2,y:H-8});t.textContent=yr;s.append(t);s.append(sv("line",{x1:x(i),x2:x(i),y1:H-B,y2:H-B+5,stroke:"var(--muted)"}))}});
+  if(dots)dots.forEach(([k,v])=>{const i=data.findIndex(d=>d[0]===k);if(i<0||v==null)return;s.append(sv("circle",{cx:x(i)+bw/2,cy:y(v),r:6,fill:"var(--watch)",stroke:"var(--surface)","stroke-width":2}))});
+  notes.forEach(([k,txt,dy=0])=>{const i=data.findIndex(d=>d[0]===k);if(i<0)return;const v=data[i][1];const t=sv("text",{x:x(i)+bw/2,y:y(v)-8+dy,"text-anchor":i>n*.75?"end":"middle",class:"ann"});t.textContent=txt;s.append(t)});
+  // hit layer
+  const tip=tipOn(box);
+  data.forEach((d,i)=>{const r=sv("rect",{x:x(i),y:T,width:bw,height:H-T-B,fill:"transparent"});
+    const showTip=()=>{const bb=box.getBoundingClientRect(),sc=bb.width/W;const dot=dots&&dots.find(q=>q[0]===d[0]);tip.textContent=`${d[0]}  ${d[1]==null?"n/a":yfmt(d[1])}${dot&&dot[1]!=null?"  ·  MKS "+yfmt(dot[1]):""}`;tip.style.left=(x(i)+bw/2)*sc+"px";tip.style.top=y(Math.max(d[1]||0,dot?dot[1]:-1e9))*sc+"px";tip.hidden=false};
+    r.addEventListener("pointerenter",showTip);r.addEventListener("click",showTip);r.addEventListener("pointerleave",()=>tip.hidden=true);s.append(r)});
+  box.prepend(s);
+}
+function niceStep(r){const p=Math.pow(10,Math.floor(Math.log10(r)));const m=r/p;return (m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*p}
+function ma3(a){return a.map((d,i)=>[d[0],i<2?null:+((a[i][1]+a[i-1][1]+a[i-2][1])/3).toFixed(2)])}
+let drawnI=false,drawnB=false;
+function drawImports(){
+  if(drawnI)return;drawnI=true;
+  drawClocks();
+  barChart($("#ch-kyushu"),{data:RAW.trade.kyushu,yfmt:v=>"¥"+v,color:d=>d[0]>="2023-09"&&d[0]<="2023-12"?"var(--s5)":"var(--s2)",band:["2023-02","2023-05","Exterior done"],notes:[["2023-11","Nov 2023 peak ¥28.4bn"]]});
+  const C=[["us","United States","Comtrade, through Aug 2026","+15.9% Jan–Aug 2026"],["japan","Japan","Comtrade (USD), through Aug 2026","+9.1% Jan–Sep 2026 in JPY"],["taiwan","Taiwan (mirror)","Exports to Taiwan by 6 suppliers, through Dec 2025","+8.4% Jan–Aug 2026 (US, NL, JP)"],["korea","South Korea","Comtrade, through Dec 2025","+16.6% in 2025; 2026 not yet out"]];
+  const box=$("#ch-countries");box.replaceChildren();
+  C.forEach(([k,name,sub,chg])=>{const p=el("div",{class:"panel"},el("h3",{},name),el("p",{class:"sub"},"HS 8486 imports, USD bn, 3-month average · "+sub),el("div",{class:"big",style:"font-size:20px;margin-bottom:6px"},chg),el("div",{class:"chart"}));box.append(p);
+    barChart(p.querySelector(".chart"),{data:ma3(RAW.trade[k]),yfmt:v=>"$"+v,H:170,color:d=>d[0]>="2026"?"var(--s5)":"var(--s2)"})});
+}
+const MKS_JP=[["2023Q1",58,794],["2023Q2",82,1003],["2023Q3",68,932],["2023Q4",72,892],["2024Q1",57,868],["2024Q2",55,887],["2024Q3",65,896],["2024Q4",73,934],["2025Q1",68,936],["2025Q2",59,973],["2025Q3",56,988],["2025Q4",57,1033],["2026Q1",67,1078],["2026Q2",78,1248],["2026Q3",91,1413]];
+function drawClocks(){
+  const box=$("#ch-clocks");box.replaceChildren();
+  const W=980,L=120,R=12,t0=2022,t1=2026.83,x=t=>L+(t-t0)/(t1-t0)*(W-L-R);
+  const lanes=[{y:26,h:34,a:"Satellite",b:""},{y:84,h:90,a:"MKS Japan",b:"$m / quarter"},{y:198,h:90,a:"Kyushu imports",b:"¥bn / month"}];
+  const H=318;const s=sv("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":"JASM fab 1 timeline: satellite stages, MKS Japan revenue, Kyushu tool imports"});
+  s.append(sv("rect",{x:x(2023+1/12),y:16,width:x(2023+5/12)-x(2023+1/12),height:H-36,fill:"var(--method)",opacity:.13}));
+  [[2023+1/12,"Shell done"],[2024+1.8/12,"Fab opens"],[2024+11/12,"Mass production"]].forEach(([t,l])=>{s.append(sv("line",{x1:x(t),x2:x(t),y1:14,y2:H-20,stroke:"var(--ink)","stroke-dasharray":"2 3",opacity:.5}));const tx=sv("text",{x:x(t)+3,y:12,class:"ann"});tx.textContent=l;s.append(tx)});
+  for(let y=2022;y<=2026;y++){s.append(sv("line",{x1:x(y),x2:x(y),y1:18,y2:H-20,stroke:"var(--line)"}));const tx=sv("text",{x:x(y)+4,y:H-6});tx.textContent=y;s.append(tx)}
+  lanes.forEach(l=>{const t=sv("text",{x:0,y:l.y+12,style:"font:600 11.5px var(--f-display);fill:var(--ink)"});t.textContent=l.a;s.append(t);if(l.b){const u=sv("text",{x:0,y:l.y+26});u.textContent=l.b;s.append(u)}});
+  const tip=tipOn(box);const hit=(node,txt,cx,cy)=>{const f=()=>{const sc=box.getBoundingClientRect().width/W;tip.textContent=txt;tip.style.left=cx*sc+"px";tip.style.top=cy*sc+"px";tip.hidden=false};node.addEventListener("pointerenter",f);node.addEventListener("click",f);node.addEventListener("pointerleave",()=>tip.hidden=true)};
+  const ob=OBS.filter(o=>o.fab==="JASM Kumamoto fab 1 (running)").sort((a,b)=>a.date<b.date?-1:1);
+  ob.forEach((o,j)=>{const a=tnum(o.date),b=j<ob.length-1?tnum(ob[j+1].date):t1;const i=stageIdx(o.stage);const r=sv("rect",{x:x(a),y:lanes[0].y,width:Math.max(2,x(b)-x(a)-2),height:lanes[0].h,rx:3,fill:`var(--s${i})`});s.append(r);hit(r,`${o.date}: ${o.stage}`,(x(a)+x(b))/2,lanes[0].y);
+    if(x(b)-x(a)>60){const t=sv("text",{x:x(a)+4,y:lanes[0].y+21,style:`font:500 10.5px var(--f-body);fill:${i>=4?"var(--surface)":"var(--ink)"}`});t.textContent=SHORT[i];s.append(t)}});
+  const ym=v=>lanes[1].y+lanes[1].h-v/100*lanes[1].h;
+  s.append(sv("line",{x1:L,x2:W-R,y1:lanes[1].y+lanes[1].h,y2:lanes[1].y+lanes[1].h,stroke:"var(--line)"}));
+  const lt=sv("text",{x:L+3,y:lanes[1].y-3});lt.textContent="$100m";s.append(lt);s.append(sv("line",{x1:L,x2:W-R,y1:lanes[1].y,y2:lanes[1].y,stroke:"var(--line)","stroke-dasharray":"2 3"}));
+  ["2022: no quarterly","data on this basis"].forEach((t_,k)=>{const na=sv("text",{x:x(2022.04),y:lanes[1].y+lanes[1].h/2+k*14,style:"font-style:italic"});na.textContent=t_;s.append(na)});
+  MKS_JP.forEach(([q,v,tot])=>{const t=+q.slice(0,4)+(+q.slice(-1)-1)/4;const xa=x(t)+2,w=x(t+.25)-x(t)-4;const r=sv("rect",{x:xa,y:ym(v),width:w,height:lanes[1].y+lanes[1].h-ym(v),rx:3,fill:q>="2026Q2"?"var(--s5)":q.startsWith("2023")?"var(--s4)":"var(--s3)"});s.append(r);hit(r,`${q}: MKS Japan $${v}m (${(v/tot*100).toFixed(1)}% of MKS)`,xa+w/2,ym(v))});
+  const yi=v=>lanes[2].y+lanes[2].h-Math.min(v,50)/50*lanes[2].h;
+  s.append(sv("line",{x1:L,x2:W-R,y1:lanes[2].y+lanes[2].h,y2:lanes[2].y+lanes[2].h,stroke:"var(--line)"}));
+  const it=sv("text",{x:L+3,y:lanes[2].y-3});it.textContent="¥50bn";s.append(it);s.append(sv("line",{x1:L,x2:W-R,y1:lanes[2].y,y2:lanes[2].y,stroke:"var(--line)","stroke-dasharray":"2 3"}));
+  RAW.trade.kyushu.forEach(([m,v])=>{const t=tnum(m+"-01");const xa=x(t)+.5,w=Math.max(1,x(t+1/12)-x(t)-1);const r=sv("rect",{x:xa,y:yi(v),width:w,height:lanes[2].y+lanes[2].h-yi(v),rx:1,fill:m>="2023-09"&&m<="2023-12"?"var(--s5)":"var(--s2)"});s.append(r);hit(r,`${m}: ¥${v}bn`,xa,yi(v))});
+  box.prepend(s);
+}
+function drawBoards(){
+  if(drawnB)return;drawnB=true;
+  const pcb=RAW.pcb.filter(r=>r[0]>="2022Q1");
+  barChart($("#ch-boards"),{data:pcb.map(r=>[r[0],r[1]]),yfmt:v=>v+"%",color:d=>d[1]<0?"var(--s1)":d[0]>="2026Q2"?"var(--s5)":"var(--s3)",dots:RAW.chem.filter(r=>/Q/.test(r[0])).map(r=>[r[0],r[1]]),notes:[["2026Q3","+46.5%"]]});
+  barChart($("#ch-down"),{data:[["MKS chemistry",-10],["Taiwan board makers",-20.9],["MKS semiconductor",-28]],yfmt:v=>v+"%",H:200,color:(d,i)=>["var(--s4)","var(--s2)","var(--s1)"][i]});
+  // label the 3 bars
+  const svg=$("#ch-down svg");[["Chemistry",-10],["Boards",-20.9],["MKS semi",-28]].forEach(([t,v],i)=>{const tx=sv("text",{x:44+(i+.5)*(720-54)/3,y:30,"text-anchor":"middle",class:"ann"});tx.textContent=`${t} ${v}%`;svg.append(tx)});
+  svg.querySelectorAll("text").forEach(t=>{if(/^MKS chemistry|^Taiwan|^MKS semi/.test(t.textContent)&&!t.classList.contains("ann"))t.remove()});
+  barChart($("#ch-rev"),{data:RAW.pcb.filter(r=>r[0]>="2022Q1").map(r=>[r[0],r[2]]),yfmt:v=>"NT$"+v,H:200,color:d=>d[0]>="2026Q2"?"var(--s5)":"var(--s3)"});
+}
+
+/* ---------- ask ---------- */
+const CONTEXT=`You are the research analyst for a student equity team pitching a LONG on MKS Inc. (MKSI) at an investing competition. Price $215.65 (Nov 13, 2026); target $300 (+39%).
+Thesis 1: MKS owns a plating-chemistry business (ex-Atotech), about $316m EBITDA, 24% of EBITDA, that deserves a chemistry multiple (~14x vs MKS 9x).
+Thesis 2: 2028 is not the peak of chip-tool spending; fabs under construction set 2028-2029 tool demand, so the market can roll MKS forward to 2028 earnings.
+Thesis 3: MKS's 2023-2025 share loss was mostly NAND; NAND tool spending is recovering.
+Alternative data we built (all free public sources):
+- Satellite (Sentinel-2, 10 m): Micron Clay NY went from woods (Oct 2025) to foundations (Oct 2026), building done est. 1H-mid 2028, tools late 2028 through 2029. SK hynix Yongin Y1 roof on (Nov 2026), first cleanroom Feb 2027; Y2 area bare, cleanroom Jun 2029. SK hynix M17 (NAND) still farmland, groundbreaking Feb 2027, cleanroom Dec 2028. TSMC Arizona fab 2 tool move-in under way. Micron Boise ID1 exterior finished (output mid 2027); ID2 at foundations, could slip to 2029. JASM Kumamoto fab 2 frame going up. Samsung Taylor building sat ~2.5 years without tools.
+- Fab calendar (39 new wafer fabs worldwide, company/press dates plus our estimates): fabs taking tools 2026: 13, 2027: 22, 2028: 21, 2029: 14 to 16 announced so far (companies announce 2-3 years ahead). Includes TSMC Taichung A14 and Arizona fab 4, Samsung Pyeongtaek P5 fab 2, Samsung Taylor fab 2, Samsung Yongin fab 1, Kioxia Kitakami Fab3 (NAND), Winbond Kaohsiung, GF Malta, Intel Ohio (2030). Micron Hiroshima tools from 2H28. Counts fabs, not dollars.
+- Ruler: JASM fab 1 exterior finished Feb-May 2023; Kyushu HS 8486 imports 3-month average >2x 2022 level from Sep 2023, peak Nov 2023 (JPY 28.4bn). So tools go in ~4 months after the building is done. Measured at one fab only.
+- HS 8486 tool imports 2026: US +15.9% Jan-Aug; Japan +9.1% Jan-Sep (JPY); Taiwan mirror +8.4%; Korea 2026 not yet published (2025 +16.6%); Japanese tool exports to Korea +26.2%.
+- Taiwan 5 board makers' revenue: +32% y/y 2Q26, +46.5% 3Q26 (fastest in series); correlation with MKS chemistry growth 0.69 over 11 quarters; MKS chemistry +22% 1Q26, +21% 2Q26.
+- Against us: MKS chemistry fell 10% in 2023 (board makers -20.9%, MKS semi -28%), so "less cyclical", not recession-proof. A Chinese rival (Tiancheng) took 11 high-end PCB lines from Atotech 2019-2022, ~2-3% a year. Guangzhou Phase 2 (ground broken Oct 29, 2026, done Q3 2027) doubles the plating-EQUIPMENT factory, not chemistry capacity. Free 10 m imagery cannot see inside buildings; trade data covers all chip tools, not only MKS content; 2026 data provisional.
+Answer rules: plain English, at most 120 words unless asked for more, lead with the answer, cite the specific signal and number, say clearly when the data cannot answer the question. No markdown headers.`;
+const SUGG=["What would prove us wrong about 2028?","Which signal should we check next month, and what result would worry us?","Why should a judge trust 10-metre satellite images?","Summarise the alternative-data case for Thesis 2 in three bullets.","How does this support Thesis 3, the NAND share recovery?"];
+const turns=[];let ctl=null;
+function addMsg(role,text){$("#chat-empty")?.remove();const m=el("div",{class:"msg "+(role==="user"?"u":"a")},text);$("#chat").append(m);m.scrollIntoView({block:"nearest",behavior:"smooth"});return m}
+async function ask(q){
+  q=q.trim();if(!q)return;
+  const sample=await getSample();
+  addMsg("user",q);
+  if(!sample){addMsg("assistant","The analyst answers when this page is opened on claude.ai. The data views work everywhere.");return}
+  turns.push({role:"user",content:q});
+  const m=addMsg("assistant","Thinking…");$("#send").disabled=true;
+  ctl=new AbortController();
+  try{const {text}=await sample([{role:"user",content:CONTEXT},...turns.slice(-8)],{cache:false,signal:ctl.signal,onText:({text})=>{m.textContent=text}});
+    turns.push({role:"assistant",content:text});}
+  catch(e){m.textContent=e&&e.text?e.text:errCopy(e&&e.code);turns.pop()}
+  finally{$("#send").disabled=false}
+}
+$("#compose").addEventListener("submit",e=>{e.preventDefault();const q=$("#q").value;$("#q").value="";ask(q)});
+SUGG.forEach(s=>$("#suggest").append(el("button",{class:"chip",style:"text-align:left;border-radius:10px;padding:10px 12px",onclick:()=>{location.hash="ask";ask(s)}},s)));
+
+/* ---------- boot ---------- */
+buildSiteList();drawCards();selectSite("micron_clay");route();
+</script>
+
+</body></html>
