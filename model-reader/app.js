@@ -133,27 +133,42 @@
     return isPct(outKey) ? (nv - base) : (base ? nv / base - 1 : 0);
   }
   function fmtImp(x) { if (x === null || isNaN(x)) return "n/a"; const s = (x >= 0 ? "+" : "−") + Math.abs(x * 100).toFixed(1); return s + (isPct(outKey) ? "pt" : "%"); }
+  /* one measure per lever: "back to consensus" when the model has a consensus pair, else a 10% move */
+  function lever(k) {
+    const r = { k, up: null, dn: null, cons: null, pair: M.consensusPair(k), thesis: M.thesisOf(k), err: null };
+    try { r.up = impact(k, 1.1); r.dn = impact(k, 0.9); } catch (e) { r.err = e.message || String(e); }
+    if (r.pair && !r.err) { try { const base = M.safeValue(outKey), nv = M.recompute(new Map([[k, M.safeValue(r.pair)]]), outKey); r.cons = isPct(outKey) ? nv - base : (base ? nv / base - 1 : 0); } catch (e) { } }
+    r.key = r.cons !== null ? Math.abs(r.cons) : Math.max(Math.abs(r.up || 0), Math.abs(r.dn || 0));
+    return r;
+  }
+  function switchEffects(sw) {
+    const base = M.safeValue(outKey);
+    return sw.options.filter(o => o.v !== sw.current).map(o => { let d = null; try { const nv = M.recompute(new Map([[sw.k, o.v]]), outKey); d = isPct(outKey) ? nv - base : (base ? nv / base - 1 : 0); } catch (e) { } return { o, d }; });
+  }
+  const thesisTag = t => t && t.length ? t.map(n => `<span class="tag th">Thesis ${n}</span>`).join(" ") : "";
   function renderRank() {
     const box = $("#rank"); if (!outKey) { box.innerHTML = ""; return; }
-    const all = M.inputsOf(outKey).inputs, inputs = all.filter(useInput), hidden = all.length - inputs.length;
-    const rows = [];
-    for (const k of inputs.slice(0, 600)) {
-      let up = null, dn = null, err = null;
-      try { up = impact(k, 1.1); dn = impact(k, 0.9); } catch (e) { err = e.message || String(e); }
-      rows.push({ k, up, dn, err, m: Math.max(Math.abs(up || 0), Math.abs(dn || 0)) });
-    }
-    const moving = rows.filter(r => r.err || r.m > 1e-9).sort((a, b) => b.m - a.m);
+    const sws = M.switchesFor(outKey), swKeys = new Set(sws.map(x => x.k));
+    const all = M.inputsOf(outKey).inputs.filter(k => !swKeys.has(k)), inputs = all.filter(useInput), hidden = all.length - inputs.length;
+    const rows = inputs.slice(0, 600).map(lever).map(r => Object.assign(r, { m: Math.max(Math.abs(r.up || 0), Math.abs(r.dn || 0)) }));
+    const moving = rows.filter(r => r.err || r.key > 1e-9).sort((a, b) => b.key - a.key);
     const still = rows.length - moving.length;
     const max = Math.max(1e-9, ...moving.map(r => r.m));
-    $("#rankHint").textContent = `${inputs.length} forecast assumptions feed this answer. Each moved 10% up (teal) and down (grey), ranked by how far the answer moves` +
+    $("#rankHint").textContent = `${inputs.length} forecast assumptions feed this answer. Each moved 10% up (teal) and down (grey); where the model also holds the consensus figure for the same thing, the ranking uses what happens if ours goes back to consensus. Ranked by how far the answer moves` +
       (isPct(outKey) ? " in percentage points." : ".") + (still ? ` ${still} more feed it without moving it.` : "") + (hidden ? ` ${hidden} reported actuals and facts are left out.` : "") + " Tap one to drag it.";
-    box.innerHTML = moving.slice(0, 60).map((r, i) => {
+    const swHtml = sws.length ? `<div class="swbox"><h3>Switches</h3><p class="hint">Cells the model uses as on/off or case selectors. Pick an option to see the answer change.</p>` + sws.map(sw => {
+        const eff = switchEffects(sw).filter(e => e.d !== null);
+        return `<div class="sw" data-k="${esc(sw.k)}"><div class="top"><span class="lab">${esc(sw.name)}</span><select aria-label="${esc(sw.name)}">${sw.options.map(o => `<option value="${o.v}"${o.v === sw.current ? " selected" : ""}>${o.v} = ${esc(o.text)}</option>`).join("")}</select></div>
+          <div class="meta"><span>${esc(sw.k)}</span>${eff.map(e => `<span>${esc(e.o.text)}: ${fmtImp(e.d)}</span>`).join("")}</div><div class="res"></div></div>`;
+      }).join("") + `</div>` : "";
+    box.innerHTML = swHtml + moving.slice(0, 60).map((r, i) => {
       const c = M.cell(r.k), note = M.note(r.k), [tc, tl] = tagOf(note);
       const w = x => Math.min(50, Math.abs(x || 0) / max * 50);
       const bar = x => x === null ? "" : `<i style="${x >= 0 ? "left:50%" : `left:${50 - w(x)}%`};width:${w(x)}%;background:${x === r.up ? "var(--accent)" : "var(--faint)"}"></i>`;
       return `<div class="ri" data-k="${esc(r.k)}" tabindex="0">
-        <div class="top"><span class="lab">${i + 1}. ${esc(M.assumptionName(r.k))}${M.periodOf(r.k) ? " · " + esc(M.periodOf(r.k).label) : ""}</span><span class="imp">${r.err ? "n/a" : fmtImp(r.up) + " / " + fmtImp(r.dn)}</span></div>
-        <div class="meta"><span>${esc(r.k)}</span><span>now ${esc(fmtA(M, r.k, c.v, M.assumptionName(r.k)))}</span><span class="tag ${tc}">${tl}</span></div>
+        <div class="top"><span class="lab">${i + 1}. ${esc(M.assumptionName(r.k))}${M.periodOf(r.k) ? " · " + esc(M.periodOf(r.k).label) : ""}</span><span class="imp">${r.err ? "n/a" : r.cons !== null ? "vs consensus " + fmtImp(r.cons) : fmtImp(r.up) + " / " + fmtImp(r.dn)}</span></div>
+        <div class="meta"><span>${esc(r.k)}</span><span>now ${esc(fmtA(M, r.k, c.v, M.assumptionName(r.k)))}</span><span class="tag ${tc}">${tl}</span>${thesisTag(r.thesis)}</div>
+        ${r.cons !== null ? `<div class="note">Consensus has ${esc(fmtA(M, r.pair, M.safeValue(r.pair), M.assumptionName(r.k)))} (${esc(r.pair)}). Back to consensus moves the answer ${fmtImp(r.cons)}; a 10% move is ${fmtImp(r.up)} / ${fmtImp(r.dn)}.</div>` : ""}
         ${r.err ? `<div class="err">Can't recompute through this one (${esc(r.err)}).</div>` : `<div class="bars"><span class="mid"></span>${bar(r.up)}${bar(r.dn)}</div>`}
         ${note ? `<div class="note">${esc(note)}</div>` : ""}
         <div class="whatif" hidden></div></div>`;
@@ -318,10 +333,30 @@
         if (ok.length) out.push("EPS reaches $" + ok[ok.length - 1][1].toFixed(2) + " by FY" + ok[ok.length - 1][0].year + ".");
       }
     }
+    if (isA && outKey) {
+      const sws = M.switchesFor(outKey).map(sw => ({ sw, eff: switchEffects(sw).filter(e => e.d !== null && Math.abs(e.d) >= 0.005) })).filter(x => x.eff.length);
+      if (sws.length) out.push("Switches in the model: " + sws.slice(0, 3).map(({ sw, eff }) => {
+        const cur = sw.options.find(o => o.v === sw.current), e = eff.sort((a, b) => Math.abs(b.d) - Math.abs(a.d))[0];
+        return "<b>" + esc(sw.name) + "</b> is set to \u201c" + esc(cur.text) + "\u201d; switching to \u201c" + esc(e.o.text) + "\u201d moves the answer " + fmtImp(e.d);
+      }).join("; ") + ".");
+      const sk = new Set(M.switchesFor(outKey).map(x => x.k));
+      const levers = M.inputsOf(outKey).inputs.filter(k => !sk.has(k) && M.inputKind(k) === "forecast").map(lever).filter(r => !r.err && r.key > 1e-9);
+      const say = r => {
+        const nm = M.assumptionName(r.k), now = fmtA(M, r.k, M.cell(r.k).v, nm);
+        return "<b>" + esc(nm) + "</b> (" + esc(now) + (r.cons !== null ? "; consensus " + esc(fmtA(M, r.pair, M.safeValue(r.pair), nm)) + ", and going back to it moves the answer " + fmtImp(r.cons) : "; 10% higher moves the answer " + fmtImp(r.up)) + ")";
+      };
+      const top = levers.slice().sort((a, b) => b.key - a.key).slice(0, 3);
+      if (top.length) out.push("The forecast assumptions that move the answer most: " + top.map(say).join("; ") + ".");
+      const th = [...new Set(levers.flatMap(r => r.thesis))].sort((a, b) => a - b);
+      if (th.length) out.push("By thesis, the input that matters most: " + th.map(n => {
+        const best = levers.filter(r => r.thesis.includes(n)).sort((a, b) => ((b.cons !== null) - (a.cons !== null)) || (/\bours?\b/i.test(M.rowLabel(b.k)) - /\bours?\b/i.test(M.rowLabel(a.k))) || (b.key - a.key))[0];
+        return "Thesis " + n + ", " + say(best);
+      }).join("; ") + ".");
+    }
     const rowsAll = m.forecastRows();
     const zero = rowsAll.filter(g => g.cells.every(k => m.cell(k).v === 0));
     const live = rowsAll.filter(g => !zero.includes(g));
-    if (live.length) {
+    if (live.length && !(isA && outKey)) {
       let ranked = live.map(g => ({ g, name: m.assumptionName(g.cells[0]), imp: isA ? rowImpact(g.cells) : null }));
       if (isA && outKey) ranked = ranked.filter(r => r.imp !== null && Math.abs(r.imp) > 1e-9).sort((a, b) => Math.abs(b.imp) - Math.abs(a.imp));
       const top = ranked.slice(0, 3);
@@ -391,7 +426,15 @@
     document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", x === t));
     ["assumes", "rank", "inputs", "sheets"].forEach(p => $("#p-" + p).hidden = p !== t.dataset.p);
   }));
-  $("#rank").addEventListener("click", e => { const r = e.target.closest(".ri"); if (r && !e.target.closest(".whatif")) openWhatIf(r); });
+  $("#rank").addEventListener("change", e => {
+    const sel = e.target.closest(".sw select"); if (!sel) return;
+    const sw = sel.closest(".sw"), k = sw.dataset.k, v = +sel.value, base = M.safeValue(outKey);
+    if (v === M.cell(k).v) { sw.querySelector(".res").textContent = ""; return; }
+    try { const nv = M.recompute(new Map([[k, v]]), outKey), d = isPct(outKey) ? nv - base : (base ? nv / base - 1 : 0);
+      sw.querySelector(".res").innerHTML = `Answer: <b>${esc(fmt(outKey, nv))}</b> <span class="${d > 0 ? "pos" : d < 0 ? "neg" : ""}">${fmtImp(d)}</span> (the file is unchanged)`; }
+    catch (err) { sw.querySelector(".res").textContent = "Can't recompute this option."; }
+  });
+  $("#rank").addEventListener("click", e => { if (e.target.closest(".sw")) return; const r = e.target.closest(".ri"); if (r && !e.target.closest(".whatif")) openWhatIf(r); });
   $("#rank").addEventListener("keydown", e => { if (e.key === "Enter") { const r = e.target.closest(".ri"); if (r) openWhatIf(r); } });
   $("#sheetsel").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; sheet = b.dataset.s; renderSheets(); });
   $("#grid").addEventListener("click", e => { const td = e.target.closest("td[data-k]"); if (td) showDetail(td.dataset.k); });

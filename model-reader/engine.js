@@ -584,3 +584,56 @@
     return { sheet: best.sn, years: years.map(([c, p]) => ({ label: p.label, year: Math.floor(p.end / 100), forecast: Math.floor(p.end / 100) > lastActualYear })), rows };
   };
 })();
+
+/* ---------- levers: switches, thesis tags, "ours vs consensus" pairs ---------- */
+(function () {
+  "use strict";
+  const ME = window.ModelEngine, M = ME.Model.prototype;
+
+  /* a switch is an integer input whose label lists its options, e.g. "(0 = none, 1 = E&P chemistry, 2 = all)" */
+  M.switchInfo = function (k) {
+    this._sw = this._sw || new Map(); if (this._sw.has(k)) return this._sw.get(k);
+    let res = null; const c = this.cells.get(k);
+    if (c && !c.f && typeof c.v === "number" && Number.isInteger(c.v) && c.v >= 0 && c.v <= 9) {
+      const lab = this.rowLabel(k) + " " + this.note(k);
+      const m = /\(([^()]*\b\d\s*=\s*[^()]*)\)/.exec(lab);
+      if (m) {
+        const opts = [];
+        for (const part of m[1].split(/[,;]/)) { const mm = /^\s*(\d)\s*=\s*(.+?)\s*$/.exec(part); if (mm) opts.push({ v: +mm[1], text: mm[2] }); }
+        if (opts.length >= 2 && opts.some(o => o.v === c.v)) res = { k, name: this.rowLabel(k).replace(m[0], "").trim(), options: opts.sort((a, b) => a.v - b.v), current: c.v };
+      }
+    }
+    this._sw.set(k, res); return res;
+  };
+  M.switchesFor = function (outKey) { return this.inputsOf(outKey).inputs.map(k => this.switchInfo(k)).filter(Boolean); };
+
+  /* which thesis an input belongs to: from its own label, else from the section heading above it */
+  M.thesisOf = function (k) {
+    const nums = s => [...String(s).matchAll(/thesis\s*(\d+)/gi)].map(x => +x[1]);
+    const own = nums(this.rowLabel(k)); if (own.length) return [...new Set(own)];
+    const [sn, a] = k.split("!"), A = ME.splitAddr(a), bd = this.bounds[sn];
+    for (let r = A.r - 1; r >= Math.max(bd.r0, A.r - 40); r--) {
+      let txt = null, n = 0;
+      for (let c = bd.c0; c <= Math.min(bd.c1, bd.c0 + 30); c++) { const x = this.cells.get(ME.key(sn, ME.numToCol(c) + r)); if (!x) continue; if (typeof x.v === "number") n++; else if (typeof x.v === "string" && /[A-Za-z]/.test(x.v) && !txt) txt = x.v; }
+      if (txt && n === 0) { const t = nums(txt); return [...new Set(t)]; }
+    }
+    return [];
+  };
+
+  /* "ours" input -> the consensus figure for the same thing, matched on the label */
+  const norm = s => String(s).toLowerCase().replace(/\(thesis[^)]*\)|thesis\s*\d+/g, " ").replace(/consensus-implied|consensus|implied|street|\bours\b|\bour\b|\(.*?\)/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
+  M.consensusPair = function (k) {
+    this._cp = this._cp || new Map(); if (this._cp.has(k)) return this._cp.get(k);
+    let res = null; const lab = this.rowLabel(k);
+    if (/\bours?\b|our view|thesis/i.test(lab) && !/consensus/i.test(lab)) {
+      const want = norm(lab), [sn, a] = k.split("!"), col = a.replace(/\d+/g, "");
+      if (want) for (const [kk, c] of this.cells) {
+        if (kk === k || !kk.startsWith(sn + "!") || kk.split("!")[1].replace(/\d+/g, "") !== col) continue;
+        const l2 = this.rowLabel(kk); if (!/consensus|street/i.test(l2)) continue;
+        const v = c.f ? this.safeValue(kk) : c.v; if (typeof v !== "number") continue;
+        if (norm(l2) === want) { res = kk; break; }
+      }
+    }
+    this._cp.set(k, res); return res;
+  };
+})();
