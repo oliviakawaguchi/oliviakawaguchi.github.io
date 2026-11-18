@@ -61,9 +61,11 @@
   }
   function readFile2(f) {
     if (!f) return; const fr = new FileReader();
-    fr.onload = () => { try { M2 = new E.Model(XLSX.read(fr.result, { type: "array", cellFormula: true, cellNF: true, sheetStubs: true }), XLSX); name2 = f.name;
+    $("#f2sub").hidden = false; $("#f2sub").textContent = "Reading " + f.name + " to compare\u2026 (large models take a few seconds)";
+    fr.onload = () => setTimeout(() => { try { M2 = new E.Model(XLSX.read(fr.result, { type: "array", cellFormula: true, cellNF: true, sheetStubs: true }), XLSX); name2 = f.name;
         $("#f2sub").hidden = false; $("#f2sub").textContent = "Comparing with: " + f.name; } catch (e) { $("#f2sub").hidden = false; $("#f2sub").textContent = "Could not read " + f.name; M2 = null; }
-      renderAssumes(); document.querySelector('.tab[data-p="assumes"]').click(); };
+      renderAssumes(); document.querySelector('.tab[data-p="assumes"]').click();
+      if (M2) { $("#f2sub").textContent = "Comparing with " + f.name + ". B is shown next to A under \u201cWhat it assumes\u201d below."; const p = document.querySelector(".plain"); if (p) p.scrollIntoView({ behavior: "smooth", block: "start" }); } }, 30);
     fr.readAsArrayBuffer(f);
   }
   async function loadSample() {
@@ -382,6 +384,8 @@
   }
   function compareSummary() {
     const A = M.impliedMetrics(), B = M2 && M2.impliedMetrics();
+    if (!A && B) return ["A has no income-statement rows by fiscal year, so there is no revenue, margin or EPS path to set against B's. B's path is in the table below; the two models' assumptions are listed side by side further down."];
+    if (A && !B) return ["B has no income-statement rows by fiscal year, so only A's revenue, margin and EPS path can be shown."];
     if (!A || !B) return [];
     const out = [];
     for (const [key, nm, kind] of [["revg", "Revenue growth", "pt"], ["ebm", "EBITDA margin", "pt"], ["gm", "Gross margin", "pt"], ["eps", "EPS", "pct"]]) {
@@ -441,8 +445,8 @@
   $("#detail").addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (g) return showDetail(g.dataset.go); const o = e.target.closest("[data-out]"); if (o) { setOutput(o.dataset.out); window.scrollTo({ top: 0, behavior: "smooth" }); } });
   $("#outSel").addEventListener("change", e => setOutput(e.target.value));
   $("#outAddr").addEventListener("change", e => { let v = e.target.value.trim().replace(/\$/g, ""); if (!v) return; if (!v.includes("!")) v = sheet + "!" + v.toUpperCase(); else { const [s, a] = v.split("!"); v = s.replace(/^'|'$/g, "") + "!" + a.toUpperCase(); } setOutput(v); });
-  $("#file").addEventListener("change", e => readFile(e.target.files[0]));
-  $("#file2").addEventListener("change", e => readFile2(e.target.files[0]));
+  $("#file").addEventListener("change", e => { readFile(e.target.files[0]); e.target.value = ""; });
+  $("#file2").addEventListener("change", e => { readFile2(e.target.files[0]); e.target.value = ""; });
   document.querySelectorAll(".withActuals").forEach(cb => cb.addEventListener("change", e => { withActuals = e.target.checked; document.querySelectorAll(".withActuals").forEach(x => x.checked = withActuals); renderRank(); renderInputs(); }));
   $("#sample").addEventListener("click", loadSample);
   const drop = $("#drop");
