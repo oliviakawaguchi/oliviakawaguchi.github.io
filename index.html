@@ -61,11 +61,8 @@ a.feat:hover .tap{background:var(--accent)}
 .hero.stat div.key b{color:var(--accent)}
 .hero.stat span{font:500 11px/1.35 var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-top:8px}
 .feat .desc{margin-top:10px}
+section .feat + .feat{margin-top:4px}
 
-.item.th{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:18px;align-items:start}
-.item.th .tb{width:220px;aspect-ratio:1.6;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:var(--soft)}
-.item.th .tb img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
-@media(max-width:600px){.item.th{grid-template-columns:minmax(0,1fr);gap:10px}.item.th .tb{width:100%;aspect-ratio:2;order:0}}
 details summary{list-style:none;cursor:pointer;font-size:13px;color:var(--muted);padding:12px 0}
 details summary::-webkit-details-marker{display:none}
 details summary::before{content:"Show 2 more"}
@@ -107,31 +104,25 @@ footer{margin:56px 0 0;font-size:12.5px;color:var(--faint)}
 
 <section>
   <h2>Tools · Alpha Challenge team</h2>
-  <a class="item th" href="signal/">
-    <div>
-    <div class="meta"><b>Monitoring</b> · 2026-11-16</div>
+  <a class="item feat" href="signal/">
     <div class="title">Signal Watch</div>
+    <div class="meta"><b>Monitoring</b> · 2026-11-16</div>
+    <div class="hero"><span class="tap">Tap to open the app</span><img src="assets/card-signal.jpg" alt="Signal Watch: Fabs from space, Micron Clay NY from Sentinel-2" loading="lazy" width="1208" height="604"></div>
     <div class="desc">Satellite, customs and supplier revenue, lined up as a sequence that leads MKS's reported numbers.</div>
-  </div>
-    <div class="tb"><img src="assets/thumb-signal.jpg" alt="Signal Watch dashboard" loading="lazy" width="480" height="300"></div>
   </a>
-  <a class="item th" href="screen/">
-    <div>
-    <div class="meta"><b>Live · Screening</b> · updated every trading day</div>
+  <a class="item feat" href="screen/">
     <div class="title">Live Screen: 697 companies, re-ranked every day</div>
+    <div class="meta"><b>Live · Screening</b> · updated every trading day</div>
+    <div class="hero"><span class="tap">Tap to open the app</span><img src="assets/card-screen.jpg" alt="Live Screen: 697 companies ranked as of today" loading="lazy" width="1208" height="604"></div>
     <div class="desc">The front of our 7,004-to-17 funnel, running on its own. It flags operating moves that are unusual for each company, prices them against peers, and re-ranks after every close. Press replay to watch 60 days of it.</div>
     <div class="num">Original run: 777 quotes checked · 81.7% verbatim · 15 untraceable, disclosed</div>
-  </div>
-    <div class="tb"><img src="assets/thumb-screen.jpg" alt="Live Screen ranking" loading="lazy" width="480" height="300"></div>
   </a>
-  <a class="item th" href="model-reader/">
-    <div>
-    <div class="meta"><b>Interactive · Model</b> · 2026-11-18</div>
+  <a class="item feat" href="model-reader/">
     <div class="title">Model Reader: find the assumptions inside anyone's model</div>
+    <div class="meta"><b>Interactive · Model</b> · 2026-11-18</div>
+    <div class="hero"><span class="tap">Tap to open the app</span><img src="assets/card-reader.jpg" alt="Model Reader: plain-English summary and switches beside the model's input sheet" loading="lazy" width="1208" height="671"></div>
     <div class="desc">Open any Excel model. It finds every typed number, traces what each one drives, and ranks which move the answer most. Drag one and the answer recomputes. Runs on a public-data version of our MKSI model; the sell-side originals in person.</div>
     <div class="num">Rebuilds a 13,805-formula broker model to the cent</div>
-  </div>
-    <div class="tb"><img src="assets/thumb-reader.jpg" alt="Model Reader with the MKSI sample" loading="lazy" width="480" height="300"></div>
   </a>
   <div class="item off">
     <div class="meta"><b>Team deck</b> · 2026-11-22</div>
@@ -143,33 +134,27 @@ footer{margin:56px 0 0;font-size:12.5px;color:var(--faint)}
 
 <section>
   <h2>Tools · Independent</h2>
-  <a class="item th" href="thesis-monitor/">
-    <div>
-    <div class="meta"><b>Interactive</b> · 2026-11-17</div>
+  <a class="item feat" href="thesis-monitor/">
     <div class="title">Thesis Monitor</div>
+    <div class="meta"><b>Interactive</b> · 2026-11-17</div>
+    <div class="hero"><span class="tap">Tap to open the app</span><img src="assets/card-monitor.jpg" alt="Thesis Monitor home: Time Machine, Pitch Diagnosis, Live Monitor" loading="lazy" width="1208" height="604"></div>
     <div class="desc">Time machine, pitch diagnosis and live monitoring for an investment thesis.</div>
-  </div>
-    <div class="tb"><img src="assets/thumb-monitor-home.jpg" alt="Thesis Monitor home" loading="lazy" width="480" height="300"></div>
   </a>
-  <a class="item th" href="shelf/">
-    <div>
-    <div class="meta"><b>Monitoring · KDP</b> · 2026-11-17</div>
+  <a class="item feat" href="shelf/">
     <div class="title">Shelf Variance: watching a launch cross the country</div>
+    <div class="meta"><b>Monitoring · KDP</b> · 2026-11-17</div>
+    <div class="hero"><span class="tap">Tap to open the app</span><img src="assets/card-shelf.jpg" alt="Shelf Variance: guess where Dr Pepper launches first" loading="lazy" width="1208" height="604"></div>
     <div class="desc">Keurig Dr Pepper launches read across 25 grocery chains in all 50 states on one morning, with the break points fixed in advance.</div>
-  </div>
-    <div class="tb"><img src="assets/thumb-shelf.jpg" alt="Shelf Variance" loading="lazy" width="480" height="300"></div>
   </a>
 </section>
 
 <section>
   <h2>On the record</h2>
-  <a class="item th" href="agents/">
-    <div>
-    <div class="meta"><b>Experiment · Research agents</b> · 2026-10-28</div>
+  <a class="item feat" href="agents/">
     <div class="title">60 agents working alone reached the answer once and finished it never. One agent working with me found it.</div>
+    <div class="meta"><b>Experiment · Research agents</b> · 2026-10-28</div>
+    <div class="hero"><span class="tap">Tap to open the app</span><img src="assets/card-agents.jpg" alt="Research agents: 60 agents alone vs one research agent working with me" loading="lazy" width="1208" height="604"></div>
     <div class="desc">MKS doesn't disclose its chemistry margin. Its own 10-K names three Japanese competitors; their filings gave the gap: 3.9–32.2pt.</div>
-  </div>
-    <div class="tb"><img src="assets/thumb-agents.jpg" alt="Research agents page" loading="lazy" width="480" height="300"></div>
   </a>
   <details>
     <summary></summary>

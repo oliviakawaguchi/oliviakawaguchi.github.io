@@ -171,9 +171,9 @@ textarea{flex:1;font:15px var(--f-body);border:1px solid var(--line);background:
       <div class="asof">Data as of Nov 16, 2026 · Sentinel-2 · HS 8486 · MOPS</div>
     </div>
     <nav aria-label="Views">
+      <a href="#fabs" data-v="fabs">Fabs from space</a>
       <a href="#signals" data-v="signals">Signals</a>
       <a href="#wave" data-v="wave">Tool wave</a>
-      <a href="#fabs" data-v="fabs">Fabs from space</a>
       <a href="#imports" data-v="imports">Tool imports</a>
       <a href="#boards" data-v="boards">Board makers</a>
       <a href="#ask" data-v="ask">Ask the analyst</a>
@@ -687,8 +687,8 @@ const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k
 /* ---------- routing ---------- */
 const VIEWS=["signals","wave","fabs","imports","boards","ask"];
 function route(){
-  const h=(location.hash||"#signals").slice(1);
-  let v=VIEWS.includes(h)?h:"signals";
+  const h=(location.hash||"#fabs").slice(1);
+  let v=VIEWS.includes(h)?h:"fabs";
   if(SITES[h]){v="fabs";selectSite(h)}
   VIEWS.forEach(x=>{$("#v-"+x).hidden=x!==v});
   document.querySelectorAll("nav a").forEach(a=>a.toggleAttribute("aria-current",a.dataset.v===v)||a.dataset.v===v&&a.setAttribute("aria-current","page"));
