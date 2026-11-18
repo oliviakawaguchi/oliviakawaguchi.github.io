@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Research Agents</title>
+<meta name="description" content="Finding the numbers a company won't disclose: sixty agents working alone versus one research agent working with a person.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f7f5; --surface:#fff; --ink:#15171a; --muted:#646a71; --faint:#9aa0a6; --line:#e4e4e0;
+  --accent:#0f5c63; --accent-soft:#e1efef; --warn:#b45309; --warn-soft:#fdf0dc; --bad:#b91c1c;
+  --sans:"Inter",system-ui,-apple-system,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111316; --surface:#1a1d21; --ink:#eceef0; --muted:#a3aab1; --faint:#6f767d; --line:#2a2e34;
+  --accent:#6cc3c9; --accent-soft:#16302f; --warn:#f0b45a; --warn-soft:#33281a; --bad:#f08a80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111316; --surface:#1a1d21; --ink:#eceef0; --muted:#a3aab1; --faint:#6f767d; --line:#2a2e34;
+  --accent:#6cc3c9; --accent-soft:#16302f; --warn:#f0b45a; --warn-soft:#33281a; --bad:#f08a80; color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.6 var(--sans)}
+.wrap{max-width:860px;margin:0 auto;padding:22px max(16px,env(safe-area-inset-left)) 64px max(16px,env(safe-area-inset-right))}
+.back{font-size:13px;color:var(--muted);text-decoration:none}
+h1{font:600 27px/1.2 var(--sans);margin:10px 0 6px}
+.lead{color:var(--muted);margin:0 0 18px;max-width:42em}
+h2{font:600 19px/1.3 var(--sans);margin:40px 0 6px}
+.sub{color:var(--muted);margin:0 0 12px;font-size:14.5px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.vs{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:680px){.vs{grid-template-columns:1fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card.win{border-left:3px solid var(--accent)}
+.card.lose{border-left:3px solid var(--faint)}
+.card .k{font:500 11.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card .big{font:500 30px/1.15 var(--mono);margin:6px 0 4px}
+.card p{margin:6px 0 0;font-size:14.5px}
+.quote{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:12px 14px;margin:10px 0;font-size:14.5px}
+.quote .src{display:block;font:12px var(--mono);color:var(--muted);margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th{font:500 11.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.r{font-family:var(--mono);white-space:nowrap}
+.scroll{overflow-x:auto}
+.against{background:var(--warn-soft);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:14.5px}
+.against b{color:var(--warn)}
+figure{margin:14px 0 0}
+figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:10px;background:#fff}
+figcaption{font-size:12.5px;color:var(--muted);margin-top:6px}
+ul.rules{padding-left:1.1em;margin:8px 0 0}
+ul.rules li{margin:8px 0;font-size:14.5px}
+.who td:first-child{font-weight:600;width:34%}
+footer{margin-top:44px;font-size:12px;color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../">← Olivia Kawaguchi</a>
+  <h1>Research agents: finding the numbers a company won't disclose</h1>
+  <p class="lead">MKS Inc. owns a chemistry business it does not break out: no chemistry revenue, no chemistry margin. That was the number our pitch needed. Two kinds of AI agents went looking for it.</p>
+
+  <div class="vs">
+    <div class="card lose">
+      <div class="k">60 agents working alone</div>
+      <div class="big">1 of 60 · 0 finished</div>
+      <p>Discipline specialists (physics, chemistry, queueing, accounting, regulation…) plus a generalist control. One reached the right route. None completed it. They ran out of road on access to primary documents, not on expertise.</p>
+    </div>
+    <div class="card win">
+      <div class="k">One research agent, working with me</div>
+      <div class="big">3.9–32.2pt</div>
+      <p>Read MKS's own 10-K, found that three of its chemistry competitors are Japanese, pulled 13 of their annual reports, and measured the chemistry-versus-equipment margin gap MKS won't show.</p>
+    </div>
+  </div>
+
+  <h2>How the research agent found it</h2>
+  <p class="sub">Terminals search company → metric. When the company discloses nothing, search the other way: for the missing number, who is obliged to publish it?</p>
+  <div class="quote">“In MSD, Element Solutions Inc., Qnity Electronics, Inc., <b>Uyemura, JCU International, Inc. and Okuno Chemical Industries</b>… offer products that compete with our chemistry products.”
+    <span class="src">MKS Inc., FY2025 Form 10-K, Competition</span></div>
+  <p class="sub">Japanese listed companies report their chemistry and equipment segments separately. MKS named them; their filings answer the question MKS doesn't.</p>
+
+  <div class="scroll"><table>
+    <thead><tr><th>What MKS doesn't disclose</th><th>Who has to</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Chemistry vs equipment revenue mix</td><td><b>The previous owner.</b> Atotech filed 20-Fs as an NYSE company until MKS bought it in 2022 (FY2021 20-F, read in full).</td><td class="r">87% / 13%</td></tr>
+      <tr><td>Profitability gap between the two businesses</td><td><b>Competitors, in another language.</b> Uyemura and JCU, 13 annual reports on EDINET, read in Japanese.</td><td class="r">3.9–32.2pt<br><span style="color:var(--muted);font-size:12px">12 observations, not a fixed coefficient</span></td></tr>
+      <tr><td>Metal consumption</td><td><b>Physics, not finance.</b> Faraday's law ties plated metal to substrate area; JEITA industry statistics give the area.</td><td class="r">rate of change only<br><span style="color:var(--muted);font-size:12px">loading per unit area is undisclosed</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="against"><b>The same filing cut against us.</b> Atotech's 20-F says palladium is contractually passed through to nearly all customers: a palladium price move changes gross margin percent and leaves gross profit dollars untouched. That weakened part of the chemistry case, and the thesis was revised down.</div>
+  <figure><img src="reverse-index.svg" alt="The reverse index: from each variable MKS does not disclose, to whoever must publish it, to the result" loading="lazy"><figcaption>The reverse index, as run on MKS.</figcaption></figure>
+
+  <h2>What the sixty agents taught us</h2>
+  <p class="sub">The first run handed each specialist the question and let it search. It failed for a reason that had nothing to do with intelligence.</p>
+  <ul class="rules">
+    <li><b>Access, not expertise, was the constraint.</b> Agents spent their effort on a 270,000-word filing that truncated mid-download and a press page that returned 403. So the orchestrator now fetches every document once and every agent argues over the same local files. That one change made the second run return numbers.</li>
+    <li><b>Bigger panels search in the wrong place faster.</b> Across three differently framed searches, 248 ideas came back and only 11 (4.4%) touched the valuation multiple, which is where the position was actually decided. Reframing the search did not move that share. The fix is a quota of seats assigned to the question that matters, not more seats.</li>
+    <li><b>Nobody on the panel proposed reading the competitors' filings in Japanese.</b> That route came from the research agent working with a person who had asked why MKS's Japanese business mattered.</li>
+  </ul>
+  <figure><img src="panel.svg" alt="Sixty discipline agents and the routes they proposed, against the route found by a research agent working with a person" loading="lazy"><figcaption>Three of the routes the panel proposed, and the one it never did.</figcaption></figure>
+
+  <h2>The half that removes views</h2>
+  <p class="sub">Most multi-agent investment setups produce a view. This harness exists to delete the ones that can't be defended.</p>
+  <ul class="rules">
+    <li><b>A quote is worthless until it is checked against the file.</b> Every citation is verified against the exact file and line, or struck. It caught a wrong premise in evidence the orchestrator itself had supplied, reported by the agent whose argument that premise helped.</li>
+    <li><b>A question is not evidence of its answer,</b> and a fact consistent with both sides scores for neither.</li>
+    <li><b>The judge may answer “indeterminate”</b>, and may say the pre-registered rubric was wrong rather than force a fit.</li>
+    <li><b>It killed one of our three legs.</b> We had argued MKS was the bottleneck on its own revenue. Across five earnings calls management denies it, and there is no instance of an order turned away. The capacity leg came out of the pitch.</li>
+  </ul>
+
+  <h2>Who did what</h2>
+  <div class="scroll"><table class="who">
+    <tbody>
+      <tr><td>60 agents working alone</td><td>Proposed routes across sixty disciplines. One reached the right one; none finished it. Never proposed the Japanese filings.</td></tr>
+      <tr><td>A research agent working with me</td><td>Read MKS's 10-K competitor list, identified the three Japanese companies, pulled their earnings releases and 13 annual reports, and used them as a control group.</td></tr>
+      <tr><td>Me</td><td>Asked the question (why does MKS's Japanese business matter?), judged which numbers were comparable, and made the call, including revising the thesis down.</td></tr>
+    </tbody>
+  </table></div>
+
+  <footer>Filings: MKS Inc. FY2025 Form 10-K; Atotech Ltd FY2021 Form 20-F (SEC EDGAR); Uyemura & Co. and JCU Corporation annual securities reports (EDINET). Agent runs: October 2026. Built with Claude.</footer>
+</div>
+</body>
+</html>

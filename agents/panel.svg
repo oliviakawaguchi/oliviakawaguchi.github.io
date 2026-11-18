@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 666" width="1280" height="666" font-family="Helvetica, Arial, sans-serif">
+<rect width="1280" height="666" fill="#ffffff"/>
+<defs>
+<g id="bot"><line x1="0" y1="-36" x2="0" y2="-29" stroke="#2f6b43" stroke-width="2.4"/><circle cx="0" cy="-39" r="4" fill="#2f6b43"/><rect x="-21" y="-29" width="42" height="31" rx="9" fill="#eaf3ec" stroke="#2f6b43" stroke-width="2.2"/><circle cx="-8" cy="-16" r="3.6" fill="#2f6b43"/><circle cx="8" cy="-16" r="3.6" fill="#2f6b43"/><line x1="-8" y1="-6" x2="8" y2="-6" stroke="#2f6b43" stroke-width="2"/><rect x="-17" y="6" width="34" height="27" rx="7" fill="#f4f9f5" stroke="#2f6b43" stroke-width="2.2"/><line x1="-17" y1="13" x2="-28" y2="22" stroke="#2f6b43" stroke-width="2.2"/><line x1="17" y1="13" x2="28" y2="22" stroke="#2f6b43" stroke-width="2.2"/></g>
+<marker id="m" markerWidth="10" markerHeight="10" refX="7.5" refY="3.4" orient="auto"><path d="M0,0 L7.5,3.4 L0,6.8 z" fill="#8a5a1a"/></marker>
+<marker id="n" markerWidth="10" markerHeight="10" refX="7.5" refY="3.4" orient="auto"><path d="M0,0 L7.5,3.4 L0,6.8 z" fill="#444"/></marker>
+</defs>
+<text x="34" y="34" font-size="25" font-weight="700" fill="#111">Sixty disciplines looked at one company. Three routes I would not have taken.</text>
+<rect x="26" y="52" width="1228" height="252" rx="10" fill="#f7faf8" stroke="#cfe0d4" stroke-width="1.2"/>
+<text x="42" y="74" font-size="14.5" font-weight="700" fill="#2f6b43">60 agents working alone &#8212; discipline specialists, plus one generalist as a control</text>
+<rect x="47" y="86" width="186" height="80" rx="10" fill="#ffffff" stroke="#9cc0a8" stroke-width="1.3"/>
+<path d="M133,166 L147,166 L140,175 z" fill="#ffffff" stroke="#9cc0a8" stroke-width="1.3"/>
+<text x="140" y="112" text-anchor="middle" font-size="13" fill="#1f5132">Faraday&#8217;s law: substrate</text>
+<text x="140" y="132" text-anchor="middle" font-size="13" fill="#1f5132">area becomes a</text>
+<text x="140" y="152" text-anchor="middle" font-size="13" fill="#1f5132">financial variable</text>
+<use href="#bot" x="140" y="217"/>
+<text x="140" y="271" text-anchor="middle" font-size="15" font-weight="700" fill="#222">Physics</text>
+<rect x="247" y="86" width="186" height="80" rx="10" fill="#ffffff" stroke="#9cc0a8" stroke-width="1.3"/>
+<path d="M333,166 L347,166 L340,175 z" fill="#ffffff" stroke="#9cc0a8" stroke-width="1.3"/>
+<text x="340" y="112" text-anchor="middle" font-size="13" fill="#1f5132">Electroless Pd is</text>
+<text x="340" y="132" text-anchor="middle" font-size="13" fill="#1f5132">consumed in proportion</text>
+<text x="340" y="152" text-anchor="middle" font-size="13" fill="#1f5132">to plated area</text>
+<use href="#bot" x="340" y="217"/>
+<text x="340" y="271" text-anchor="middle" font-size="15" font-weight="700" fill="#222">Chemistry</text>
+<rect x="447" y="86" width="186" height="80" rx="10" fill="#ffffff" stroke="#9cc0a8" stroke-width="1.3"/>
+<path d="M533,166 L547,166 L540,175 z" fill="#ffffff" stroke="#9cc0a8" stroke-width="1.3"/>
+<text x="540" y="122" text-anchor="middle" font-size="13" fill="#1f5132">Customer advances</text>
+<text x="540" y="142" text-anchor="middle" font-size="13" fill="#1f5132">lead equipment orders</text>
+<use href="#bot" x="540" y="217"/>
+<text x="540" y="271" text-anchor="middle" font-size="15" font-weight="700" fill="#222">Queueing</text>
+<rect x="647" y="86" width="186" height="80" rx="10" fill="#ffffff" stroke="#9cc0a8" stroke-width="1.3"/>
+<path d="M733,166 L747,166 L740,175 z" fill="#ffffff" stroke="#9cc0a8" stroke-width="1.3"/>
+<text x="740" y="122" text-anchor="middle" font-size="13" fill="#1f5132">Decompose the segment</text>
+<text x="740" y="142" text-anchor="middle" font-size="13" fill="#1f5132">as a weighted average</text>
+<use href="#bot" x="740" y="217"/>
+<text x="740" y="271" text-anchor="middle" font-size="15" font-weight="700" fill="#222">Accounting</text>
+<rect x="847" y="86" width="186" height="80" rx="10" fill="#ffffff" stroke="#9cc0a8" stroke-width="1.3"/>
+<path d="M933,166 L947,166 L940,175 z" fill="#ffffff" stroke="#9cc0a8" stroke-width="1.3"/>
+<text x="940" y="122" text-anchor="middle" font-size="13" fill="#1f5132">Export-control expiry</text>
+<text x="940" y="142" text-anchor="middle" font-size="13" fill="#1f5132">dates are datable events</text>
+<use href="#bot" x="940" y="217"/>
+<text x="940" y="271" text-anchor="middle" font-size="15" font-weight="700" fill="#222">Regulation</text>
+<rect x="1047" y="86" width="186" height="80" rx="10" fill="#ffffff" stroke="#9cc0a8" stroke-width="1.3"/>
+<path d="M1133,166 L1147,166 L1140,175 z" fill="#ffffff" stroke="#9cc0a8" stroke-width="1.3"/>
+<text x="1140" y="122" text-anchor="middle" font-size="13" fill="#1f5132">~300 proposals</text>
+<text x="1140" y="142" text-anchor="middle" font-size="13" fill="#1f5132">across 60 disciplines</text>
+<use href="#bot" x="1140" y="217"/>
+<text x="1140" y="271" text-anchor="middle" font-size="15" font-weight="700" fill="#222">+54 more</text>
+<line x1="640" y1="306" x2="640" y2="322" stroke="#8a5a1a" stroke-width="2.4" marker-end="url(#m)"/>
+<rect x="250" y="330" width="780" height="62" rx="9" fill="#fdf3ec" stroke="#d9a877" stroke-width="1.6"/>
+<text x="640" y="354" text-anchor="middle" font-size="16.5" font-weight="700" fill="#8a4b12">Measured: 1 of 60 reached the route. 0 completed it.</text>
+<text x="640" y="378" text-anchor="middle" font-size="14.5" fill="#6b3d12">The binding constraint was access to primary sources, not expertise.</text>
+<line x1="640" y1="394" x2="640" y2="416" stroke="#444" stroke-width="2.4" marker-end="url(#n)"/>
+<text x="656" y="410" font-size="13" fill="#555">I handed every agent the filings, and sent all search outward.</text>
+<rect x="26" y="426" width="1228" height="158" rx="10" fill="#fbfbfb" stroke="#ccc" stroke-width="1.2"/>
+<text x="42" y="448" font-size="14.5" font-weight="700" fill="#333">A research agent working with me &#8212; the same reverse index, on an axis the panel never proposed</text>
+<rect x="40" y="458" width="376" height="112" rx="8" fill="#ffffff" stroke="#bbb" stroke-width="1.2"/>
+<text x="56" y="482" font-size="15" font-weight="700" fill="#1f5132">Another language</text>
+<text x="56" y="504" font-size="13.5" fill="#444">Uyemura &amp; JCU, 13 annual</text>
+<text x="56" y="522" font-size="13.5" fill="#444">reports on EDINET</text>
+<text x="56" y="554" font-size="20" font-weight="700" fill="#1f5132">3.9&#8211;32.2pt</text>
+<rect x="452" y="458" width="376" height="112" rx="8" fill="#ffffff" stroke="#bbb" stroke-width="1.2"/>
+<text x="468" y="482" font-size="15" font-weight="700" fill="#1f5132">The previous owner</text>
+<text x="468" y="504" font-size="13.5" fill="#444">Atotech FY2021 20-F, filed</text>
+<text x="468" y="522" font-size="13.5" fill="#444">before MKS bought it</text>
+<text x="468" y="554" font-size="20" font-weight="700" fill="#1f5132">87% / 13%</text>
+<rect x="864" y="458" width="376" height="112" rx="8" fill="#ffffff" stroke="#bbb" stroke-width="1.2"/>
+<text x="880" y="482" font-size="15" font-weight="700" fill="#1f5132">Physics</text>
+<text x="880" y="504" font-size="13.5" fill="#444">JEITA shipment-area</text>
+<text x="880" y="522" font-size="13.5" fill="#444">statistics</text>
+<text x="880" y="554" font-size="20" font-weight="700" fill="#8a5a1a">Rate of change only</text>
+<rect x="26" y="596" width="1228" height="56" rx="9" fill="#fdf3ec" stroke="#d9a877" stroke-width="1.6"/>
+<text x="44" y="620" font-size="15.5" font-weight="700" fill="#8a4b12">The same filing cut against me.</text>
+<text x="282" y="620" font-size="15.5" fill="#6b3d12">Atotech discloses that palladium is contractually passed through to nearly all customers:</text>
+<text x="44" y="642" font-size="15.5" fill="#6b3d12">a price move changes gross margin percent and leaves gross profit dollars untouched. I revised my thesis down.</text>
+</svg>
