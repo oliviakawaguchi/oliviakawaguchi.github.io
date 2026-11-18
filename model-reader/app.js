@@ -32,7 +32,7 @@
   }
   const useInput = k => withActuals || M.inputKind(k) === "forecast";
   function label(k) {
-    const r = M.rowLabel(k), h = M.colHeader(k);
+    const r = M.niceLabel(k), h0 = M.colHeader(k), h = /[A-Za-z0-9]/.test(h0) ? h0 : "";
     return h && h !== r && !/^(value|item|unit|source)$/i.test(h) ? (r ? r + " · " + h : h) : (r || k);
   }
   function tagOf(note) {
@@ -281,11 +281,104 @@
         <div class="chips"><span class="chip k">=${esc(m.cell(k).f.length > 90 ? m.cell(k).f.slice(0, 90) + "…" : m.cell(k).f)}</span></div></div>`;
     }).join("");
   }
+  /* plain-language summary, generated from the same numbers */
+  function describeRow(m, g, name) {
+    const vals = g.cells.map(k => ({ k, v: m.cell(k).v, p: m.periodOf(k) }));
+    const f = x => fmtA(m, x.k, x.v, name);
+    if (vals.length === 1) return f(vals[0]);
+    const same = vals.every(x => Math.abs(x.v - vals[0].v) < 1e-12);
+    const first = vals[0], last = vals[vals.length - 1], pl = x => x.p ? " in " + x.p.label : "";
+    if (same) return f(first) + " in every period" + (first.p && last.p ? " from " + first.p.label + " to " + last.p.label : "");
+    const rest = vals.slice(1);
+    const lo = rest.reduce((a, b) => b.v < a.v ? b : a), hi = rest.reduce((a, b) => b.v > a.v ? b : a);
+    if (Math.abs(first.v - (lo.v + hi.v) / 2) > Math.abs(hi.v - lo.v))
+      return f(first) + pl(first) + ", then " + f(lo) + " to " + f(hi) + (last.p ? " through " + last.p.label : "");
+    return "between " + f(lo) + " and " + f(hi) + (first.p && last.p ? " from " + first.p.label + " to " + last.p.label : "");
+  }
+  function joinAnd(xs) { return xs.length > 1 ? xs.slice(0, -1).join(", ") + " and " + xs[xs.length - 1] : xs[0]; }
+  function summary(m, isA) {
+    const out = [], IM = m.impliedMetrics();
+    const pc = v => (v * 100).toFixed(1) + "%";
+    if (isA && outKey) out.push("The answer is <b>" + esc(label(outKey)) + "</b>, currently <b>" + esc(fmt(outKey, M.safeValue(outKey))) + "</b>.");
+    if (IM) {
+      const yrs = IM.years, row = k => IM.rows.find(r => r.key === k);
+      const g = row("revg");
+      if (g) {
+        const xs = yrs.map((y, i) => [y, g.values[i]]).filter(x => x[0].forecast && x[1] !== null).map(x => pc(x[1]) + " in FY" + x[0].year);
+        if (xs.length) out.push("It has revenue growing " + joinAnd(xs) + ".");
+      }
+      const mg = row("ebm") || row("gm");
+      if (mg) {
+        const ok = yrs.map((y, i) => [y, mg.values[i]]).filter(x => x[1] !== null);
+        if (ok.length >= 2) out.push((mg.key === "ebm" ? "EBITDA" : "Gross") + " margin goes from " + pc(ok[0][1]) + " in FY" + ok[0][0].year + " to " + pc(ok[ok.length - 1][1]) + " in FY" + ok[ok.length - 1][0].year + ".");
+      }
+      const ep = row("eps");
+      if (ep) {
+        const ok = yrs.map((y, i) => [y, ep.values[i]]).filter(x => x[1] !== null && x[0].forecast);
+        if (ok.length) out.push("EPS reaches $" + ok[ok.length - 1][1].toFixed(2) + " by FY" + ok[ok.length - 1][0].year + ".");
+      }
+    }
+    const rowsAll = m.forecastRows();
+    const zero = rowsAll.filter(g => g.cells.every(k => m.cell(k).v === 0));
+    const live = rowsAll.filter(g => !zero.includes(g));
+    if (live.length) {
+      let ranked = live.map(g => ({ g, name: m.assumptionName(g.cells[0]), imp: isA ? rowImpact(g.cells) : null }));
+      if (isA && outKey) ranked = ranked.filter(r => r.imp !== null && Math.abs(r.imp) > 1e-9).sort((a, b) => Math.abs(b.imp) - Math.abs(a.imp));
+      const top = ranked.slice(0, 3);
+      if (top.length) out.push((isA && outKey ? "The forecast assumptions that move the answer most" : "Its typed forecast assumptions include") + ": " +
+        top.map(r => "<b>" + esc(r.name) + "</b> (" + esc(describeRow(m, r.g, r.name)) + (r.imp !== null && isA ? "; 10% higher moves the answer " + fmtImp(r.imp) : "") + ")").join("; ") + ".");
+    }
+    const cs = m.formulaConstants().sort((a, b) => b.cells.length - a.cells.length);
+    if (cs.length) {
+      const c = cs[0];
+      out.push(cs.length + " number" + (cs.length > 1 ? "s are" : " is") + " written straight into forecast formulas rather than kept in their own cell. The most used is <b>" +
+        esc(String(c.value)) + "</b> in " + esc(m.niceLabel(c.cells[0]) || (c.sheet + "!" + c.row)) + " (" + c.cells.length + " cell" + (c.cells.length > 1 ? "s" : "") + ").");
+    }
+    if (zero.length) out.push(zero.length + " forecast line" + (zero.length > 1 ? "s are" : " is") + " simply set to zero, for example " + esc(m.assumptionName(zero[0].cells[0])) + ".");
+    if (isA && outKey) {
+      const facts = M.inputsOf(outKey).inputs.filter(k => M.inputKind(k) !== "forecast")
+        .map(k => { try { return { k, imp: impact(k, 1.1) }; } catch (e) { return null; } })
+        .filter(Boolean).sort((a, b) => Math.abs(b.imp) - Math.abs(a.imp));
+      if (facts.length && Math.abs(facts[0].imp) >= (isPct(outKey) ? 0.02 : 0.03))
+      { const fk = facts[0].k, p = M.periodOf(fk), h = M.colHeader(fk), when = p ? p.label : (/[A-Za-z0-9]/.test(h) && !/^(value|item|unit|source)$/i.test(h) ? h : "");
+        out.push("Outside the forecast, <b>" + esc(M.assumptionName(fk)) + (when ? " (" + esc(when) + ")" : "") + "</b> moves the answer most: 10% higher moves it " + fmtImp(facts[0].imp) + "."); }
+    }
+    return out;
+  }
+  function compareSummary() {
+    const A = M.impliedMetrics(), B = M2 && M2.impliedMetrics();
+    if (!A || !B) return [];
+    const out = [];
+    for (const [key, nm, kind] of [["revg", "Revenue growth", "pt"], ["ebm", "EBITDA margin", "pt"], ["gm", "Gross margin", "pt"], ["eps", "EPS", "pct"]]) {
+      const ra = A.rows.find(r => r.key === key), rb = B.rows.find(r => r.key === key);
+      if (!ra || !rb) continue;
+      let best = null;
+      A.years.forEach((y, i) => {
+        if (!y.forecast) return;
+        const j = B.years.findIndex(z => z.year === y.year); if (j < 0) return;
+        const a = ra.values[i], b = rb.values[j]; if (a === null || b === null) return;
+        const d = kind === "pt" ? a - b : (b ? a / b - 1 : 0);
+        if (!best || Math.abs(d) > Math.abs(best.d)) best = { y: y.year, a, b, d };
+      });
+      if (!best) continue;
+      const f = v => kind === "pt" ? (v * 100).toFixed(1) + "%" : "$" + v.toFixed(2);
+      const sign = best.d >= 0 ? "+" : "−";
+      const dd = sign + Math.abs(best.d * 100).toFixed(1) + (kind === "pt" ? "pt" : "%");
+      out.push(nm + ": the widest gap is FY" + best.y + ", " + f(best.a) + " in A against " + f(best.b) + " in B (" + dd + ").");
+    }
+    return out;
+  }
   function renderAssumes() {
     if (!M) return;
     const two = !!M2;
     const it = impliedTable();
-    let h = it ? `<h2 class="sec">What the forecast adds up to</h2><p class="hint">Backed out of the model's own statement rows, by fiscal year. Nobody typed these; they are what the assumptions below produce.</p>${it}` : "";
+    const sA = summary(M, true), sB = M2 ? summary(M2, false) : [], sC = M2 ? compareSummary() : [];
+    const li = xs => "<ul>" + xs.map(x => "<li>" + x + "</li>").join("") + "</ul>";
+    let h = '<div class="plain"><h2 class="sec">In plain words</h2>' +
+      (M2 ? '<p class="colh">A · ' + esc(name1) + '</p>' : "") + li(sA) +
+      (M2 ? '<p class="colh">B · ' + esc(name2) + '</p>' + li(sB) + (sC.length ? '<p class="colh">A against B</p>' + li(sC.map(esc)) : "") : "") +
+      '<p class="hint">Written from the numbers in the file each time it opens; nothing is typed by hand.</p></div>';
+    h += it ? `<h2 class="sec">What the forecast adds up to</h2><p class="hint">Backed out of the model's own statement rows, by fiscal year. Nobody typed these; they are what the assumptions below produce.</p>${it}` : "";
     h += `<h2 class="sec">Typed into the forecast</h2><p class="hint">Numbers someone typed into forecast periods, one line per row. ${outKey ? "Ranked by how far the answer moves if the whole row is 10% higher." : ""} Reported actuals are left out.</p>`;
     h += `<div class="two ${two ? "on" : ""}"><div>${two ? `<p class="colh">A · ${esc(name1)}</p>` : ""}${assumptionList(M, true)}</div>${two ? `<div><p class="colh">B · ${esc(name2)}</p>${assumptionList(M2, false)}</div>` : ""}</div>`;
     h += `<h2 class="sec">Written inside formulas</h2><p class="hint">Numbers hard-coded into forecast formulas rather than kept in their own cell. Easy to miss, and you can't change them without editing the formula.</p>`;

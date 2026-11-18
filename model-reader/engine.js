@@ -471,11 +471,16 @@
       let txt = null, nums = 0;
       for (let c = bd.c0; c <= Math.min(bd.c1, bd.c0 + 60); c++) { const x = this.cells.get(ME.key(sn, ME.numToCol(c) + r)); if (!x) continue;
         if (typeof x.v === "number") nums++; else if (typeof x.v === "string" && /[A-Za-z]/.test(x.v) && !txt) txt = x.v.trim(); }
-      if (txt && nums === 0 && !GENERIC.test(txt) && !WEAK.test(txt)) return txt;
+      if (txt && nums === 0 && !GENERIC.test(txt) && !WEAK.test(txt) && !/dollars in|in (millions|thousands)|^\(?\$|unaudited|except per share/i.test(txt)) return txt;
     }
     return "";
   };
-  M.niceLabel = function (k) { const l = this.rowLabel(k); if (l && GENERIC.test(l.trim())) { const s = this.sectionOf(k); if (s) return s + " · " + l; } return l; };
+  M.niceLabel = function (k) {
+    const l = this.rowLabel(k); if (!l) return l;
+    if (GENERIC.test(l.trim())) { const s = this.sectionOf(k); if (s) return s + " · " + l; }
+    if (!/\b(our|ours)\b|consensus/i.test(l)) { const s = this.sectionOf(k); if (s && /consensus|capital iq|bloomberg|factset|street|broker/i.test(s)) return "Consensus (" + s.replace(/^consensus,?\s*/i, "").replace(/\(.*?\)/g, "").trim() + ") · " + l; }
+    return l;
+  };
   M.assumptionName = function (k) {
     const own = this.niceLabel(k);
     if (own && !WEAK.test(own.trim()) && own.trim().length > 2) return own;
