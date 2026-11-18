@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Thesis Monitor</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+/* Layout: one instrument-panel column; three tool tiles, then the case library as a ledger. Single dark look, matching the app. */
+:root{
+  --bg:#0b0f14;--panel:#111821;--panel2:#16202b;--line:#223041;--ink:#e6edf3;--muted:#8796a8;
+  --accent:#4cc9d6;--good:#3ecf8e;--warn:#f2b84b;--bad:#ff6b5e;
+  --display:"IBM Plex Sans Condensed",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6}
+.wrap{max-width:980px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+.brand{font-family:var(--mono);font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(2rem,6vw,3rem);line-height:1.05;margin:6px 0 10px;text-wrap:balance}
+.lead{color:var(--muted);max-width:62ch;margin:0}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+a.tool{display:grid;gap:6px;align-content:start;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;color:var(--ink);text-decoration:none;min-width:0}
+a.tool:hover{border-color:var(--accent)}
+a.tool:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tool .k{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tool h2{font-family:var(--display);font-size:1.35rem;font-weight:600;margin:0}
+.tool p{margin:0;color:var(--muted);font-size:.9rem}
+.tool .go{font-family:var(--mono);font-size:.8rem;color:var(--accent);margin-top:6px}
+h3{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:0 0 8px}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:.88rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--panel)}
+tr:last-child td{border-bottom:0}
+td a{color:var(--ink);font-family:var(--mono);font-weight:600;text-decoration:none;border-bottom:1px solid var(--accent)}
+td.r{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pos{color:var(--good)}.neg{color:var(--bad)}
+.pat{font-family:var(--mono);font-size:.72rem;color:var(--warn);white-space:nowrap}
+.foot{color:var(--muted);font-size:.8rem;max-width:75ch;margin:0}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">Thesis Monitor · UNC Alpha Challenge AI Showcase</div>
+    <h1>Watch the thesis, not just the P&amp;L</h1>
+    <p class="lead">An AI breaks an investment thesis into claims, gives each one a deadline and a way to check it, then reads every piece of news and every earnings report against those claims. It flags a broken thesis even while the stock is still beating the market.</p>
+  </header>
+
+  <section class="tools" aria-label="Tools">
+    <a class="tool" href="timemachine.html">
+      <span class="k">Replay · 7 real cases</span>
+      <h2>Time Machine</h2>
+      <p>Judge funds' published theses, replayed against what actually happened and the funds' real trades from SEC filings.</p>
+      <span class="go">Open →</span>
+    </a>
+    <a class="tool" href="diagnose.html">
+      <span class="k">Entry check · MKSI</span>
+      <h2>Pitch Diagnosis</h2>
+      <p>Our MKSI long pitch, split into claims, red flags, kill criteria and headwind timers.</p>
+      <span class="go">Open →</span>
+    </a>
+    <a class="tool" href="monitor.html">
+      <span class="k">Live · since Nov 13, 2026</span>
+      <h2>Live Monitor</h2>
+      <p>The same MKSI thesis tracked from our entry at $215.65, with each news item scored against a claim.</p>
+      <span class="go">Open →</span>
+    </a>
+  </section>
+
+  <section aria-labelledby="lib">
+    <h3 id="lib">Time Machine case library</h3>
+    <div class="scroll"><table>
+      <thead><tr><th>Case</th><th>Fund</th><th>How the thesis broke</th><th class="r">Fund P&amp;L (est.)</th><th class="r">Same flows in S&amp;P</th></tr></thead>
+      <tbody>
+        <tr><td><a href="timemachine.html?case=nxpi">NXPI</a></td><td>T. Rowe Price</td><td><span class="pat">Headwind lasted 3+ yrs</span><br>Sold after the deadline passed</td><td class="r pos">+27%</td><td class="r">gap +17pt</td></tr>
+        <tr><td><a href="timemachine.html?case=fbin">FBIN</a></td><td>Oakmark</td><td><span class="pat">Headwind lasted 3+ yrs</span><br>Added after the deadline passed</td><td class="r neg">−12%</td><td class="r">gap −75pt</td></tr>
+        <tr><td><a href="timemachine.html?case=ctsh">CTSH</a></td><td>Brandes</td><td><span class="pat">Unwritten risk</span><br>Generative AI was never in the thesis</td><td class="r neg">−5%</td><td class="r">+45%</td></tr>
+        <tr><td><a href="timemachine.html?case=wmg">WMG</a></td><td>Cooke &amp; Bieler</td><td><span class="pat">KPIs hit, no re-rating</span><br>Earnings grew, the multiple fell</td><td class="r pos">+4%</td><td class="r">+60%</td></tr>
+        <tr><td><a href="timemachine.html?case=nvda">NVDA</a></td><td>William Blair</td><td><span class="pat">No exit criteria</span><br>Sold with every claim intact, bought back ~2.6x higher</td><td class="r pos">+128%</td><td class="r">+24%</td></tr>
+        <tr><td><a href="timemachine.html?case=trex">TREX</a></td><td>The London Company</td><td><span class="pat">No exit rule on a winner</span><br>+136% at the peak, then growth stalled</td><td class="r pos">+38%</td><td class="r">+41%</td></tr>
+        <tr><td><a href="timemachine.html?case=slb">SLB</a></td><td>American Century</td><td><span class="pat">Bought near a cycle peak</span><br>Thesis named New Energy, returns tracked oil</td><td class="r pos">+15%</td><td class="r">+33%</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <p class="foot">Share counts come from SEC N-PORT and 13F filings. Fund P&amp;L is estimated by assuming trades at each quarter's average price, excluding dividends and options. "Same flows in S&amp;P" puts the same dollars into the S&amp;P 500 on the same dates. AI reads in the replays were computed in advance; live mode runs them through the Claude API. Prototype for discussion, not investment advice.</p>
+</div><link rel="stylesheet" href="phone-fix.css">
+

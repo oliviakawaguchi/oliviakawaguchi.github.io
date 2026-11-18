@@ -33,3 +33,4 @@ a.primary{display:inline-block;padding:8px 16px;border-radius:6px;text-decoratio
 @keyframes rise{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
 .rise{animation:rise .45s ease-out both}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+a.lang{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:3px 9px}a.lang:hover{color:var(--ink);border-color:var(--accent)}

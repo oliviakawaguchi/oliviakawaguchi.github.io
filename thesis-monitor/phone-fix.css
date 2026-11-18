@@ -11,3 +11,20 @@
   .summary .grid{grid-template-columns:1fr}
   .chartwrap{height:240px}
 }
+
+/* English build: long case names and the fund P&L row */
+@media (max-width:760px){
+  html,body{max-width:100%;overflow-x:hidden}
+  header{flex-wrap:wrap;min-width:0}
+  header > *{min-width:0;max-width:100%}
+  .controls{width:100%}
+  .controls select#casesel{width:100%;flex:1 1 100%}
+  .clock{width:100%;text-align:left}
+  .thesisbar{grid-template-columns:minmax(0,1fr) !important}
+  .thesisbar > *{min-width:0;grid-column:auto !important}
+  .pnl,.pnl .row{max-width:100%}
+  .tools{grid-template-columns:1fr !important}
+}
+/* home page: let the case table scroll instead of widening the column */
+.wrap{grid-template-columns:minmax(0,1fr)}
+.wrap > *{min-width:0}

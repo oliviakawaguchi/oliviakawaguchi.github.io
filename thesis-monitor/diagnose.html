@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Thesis Monitor · ピッチ診断</title>
+<title>Thesis Monitor · Pitch Diagnosis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="common.css">
@@ -49,6 +49,10 @@
 .flag .cases span{font-family:var(--mono);font-size:.66rem;border:1px solid var(--line);border-radius:4px;padding:0 6px;color:var(--ink)}
 .flag .stress{background:var(--badbg);border-radius:6px;padding:6px 8px;margin:6px 0;color:var(--ink);font-size:.78rem}
 .flag .stress b{font-family:var(--mono);font-size:.66rem;color:var(--bad);display:block}
+.flag .upd{margin:0 12px 10px 32px;border-radius:6px;padding:7px 9px;font-size:.78rem;background:var(--panel);border:1px solid var(--line)}
+.flag .upd b{display:block;font-family:var(--mono);font-size:.64rem;letter-spacing:.04em;margin-bottom:2px}
+.flag .upd.support b{color:var(--good)}.flag .upd.contradict b{color:var(--bad)}.flag .upd.neutral b{color:var(--warn)}
+.flag .upd a{color:var(--dim);font-size:.66rem;text-decoration:none}
 .flag .fix{background:var(--accentbg);padding:8px 12px 8px 32px;font-size:.8rem}
 .flag .fix b{font-family:var(--mono);font-size:.64rem;color:var(--accent);letter-spacing:.06em;display:block}
 ol.kill{margin:0;padding-left:1.2em;font-size:.82rem}
@@ -68,45 +72,45 @@ ol.kill li{margin-bottom:6px}
 <div class="wrap">
   <div class="top">
     <div class="brand"><b>Thesis Monitor</b></div>
-    <nav class="tabs"><a href="index.html">タイムマシン</a><a href="diagnose.html" class="on">ピッチ診断</a><a href="monitor.html">ライブ監視</a></nav>
+    <nav class="tabs"><a href="timemachine.html">Time machine</a><a href="diagnose.html" class="on">Pitch diagnosis</a><a href="monitor.html">Live monitor</a></nav>
   </div>
 
   <section id="intake" class="intake">
-    <h1>ピッチを読み込んで、仮説を診断する</h1>
-    <p>ジャッジ6社の59銘柄から作った失敗パターンと照らし合わせます。</p>
+    <h1>Load a pitch. Diagnose the thesis.</h1>
+    <p>Checked against patterns from 59 positions at six of this year's judges' funds.</p>
     <div class="file"><div class="ic">PPTX</div><div><div class="nm" id="fname"></div><div class="sub" id="fsub"></div></div></div>
-    <button class="primary" id="go" type="button">AIで診断する</button>
+    <button class="primary" id="go" type="button">Diagnose with AI</button>
     <div class="steps" id="steps"></div>
   </section>
 
   <section id="result" class="result" hidden>
     <div class="pane rise">
-      <h2><span>抽出した仮説</span><span>3つの柱</span></h2>
+      <h2><span>Extracted thesis</span><span>3 pillars</span></h2>
       <div class="call" id="call"></div>
       <div id="theses"></div>
     </div>
     <div class="pane rise" style="animation-delay:.15s">
-      <h2><span>診断結果</span><span id="flagcount"></span></h2>
-      <p class="scan">59件の過去事例と照合済み · 半導体の似た事例 5件</p>
+      <h2><span>Diagnosis</span><span id="flagcount"></span></h2>
+      <p class="scan">Checked against 59 past cases · 5 similar semiconductor cases · 27 monitored news items applied (2026.11.17)</p>
       <div class="checks" id="checks"></div>
       <div id="flags"></div>
     </div>
     <div class="pane rise" style="animation-delay:.3s">
-      <h2><span>AIが提案する撤退条件</span></h2>
+      <h2><span>Kill criteria suggested by AI</span></h2>
       <ol class="kill" id="kill"></ol>
-      <h2 style="margin-top:16px"><span>逆風タイマー（期限）</span></h2>
+      <h2 style="margin-top:16px"><span>Headwind timers (deadlines)</span></h2>
       <div id="timers"></div>
-      <div class="cta"><a class="primary" href="monitor.html">この内容で監視を始める →</a><p>監視リスト14項目、イベント予定4件を作成しました</p></div>
+      <div class="cta"><a class="primary" href="monitor.html">Start monitoring →</a><p>Created a 14-item watchlist and 5 scheduled events</p></div>
     </div>
   </section>
 </div>
 <script src="mksi.js"></script>
 <script>
 const M=window.MKSI, $=id=>document.getElementById(id);
-$("fname").textContent=M.file; $("fsub").textContent=`${M.slides}枚 · ${M.ticker} ${M.call.side} · 目標 $${M.call.target}（+${M.call.upside}%）`;
+$("fname").textContent=M.file; $("fsub").textContent=`${M.slides} slides · ${M.ticker} ${M.call.side} · Target $${M.call.target} (+${M.call.upside}%)`;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function run(){
-  $("go").disabled=true; $("go").textContent="診断中…";
+  $("go").disabled=true; $("go").textContent="Diagnosing…";
   for(const s of M.steps){
     const d=document.createElement("div"); d.innerHTML=`<span class="s">…</span><span class="typing">${s}</span>`; $("steps").append(d);
     await sleep(750);
@@ -117,19 +121,20 @@ async function run(){
 }
 function render(){
   const c=M.call;
-  $("call").innerHTML=`<span class="tk">${M.ticker}</span><span class="side">${c.side}</span><span class="px">$${c.price}（${c.priceDate.replaceAll("-",".")}）→ 目標 $${c.target} <span class="pos">+${c.upside}%</span></span><span class="px">ベア $${c.bear} ／ ブル $${c.bull}</span>`;
+  $("call").innerHTML=`<span class="tk">${M.ticker}</span><span class="side">${c.side}</span><span class="px">$${c.price} (${c.priceDate.replaceAll("-",".")}) → Target $${c.target} <span class="pos">+${c.upside}%</span></span><span class="px">Bear $${c.bear} / Bull $${c.bull}</span>`;
   $("theses").innerHTML=M.theses.map(t=>`<div class="thesis"><div class="h"><b><span class="id">${t.id}</span>${t.title}</b><span class="pts">${t.pts}</span></div>${t.claims.map(x=>`<div class="claim"><span class="ly">${x.layer}</span><span>${x.text}</span></div>`).join("")}</div>`).join("");
   const mark=o=>o===true?['✓','pos']:o===false?['✕','neg']:['△','wrn'];
   $("checks").innerHTML=M.checklist.map(k=>{const [m,cl]=mark(k.ok);return `<div class="ck"><span class="m ${cl}">${m}</span><span>${k.label}<small>${k.note}</small></span></div>`}).join("");
   const n={red:0,yellow:0,green:0}; M.flags.forEach(f=>n[f.sev]++);
-  $("flagcount").innerHTML=`<span class="neg">赤 ${n.red}</span> · <span class="wrn">黄 ${n.yellow}</span> · <span class="pos">緑 ${n.green}</span>`;
+  $("flagcount").innerHTML=`<span class="neg">Red ${n.red}</span> · <span class="wrn">Amber ${n.yellow}</span> · <span class="pos">Green ${n.green}</span>`;
   $("flags").innerHTML=M.flags.map((f,i)=>`<div class="flag ${f.sev} rise" style="animation-delay:${.3+i*.18}s">
-    <div class="fh"><span class="dot"></span><div><div class="t">${f.title}</div><div class="pt">過去の型：${f.pattern}（${f.base}）</div></div></div>
+    <div class="fh"><span class="dot"></span><div><div class="t">${f.title}</div><div class="pt">Past pattern: ${f.pattern}（${f.base}）</div></div></div>
     <div class="body"><p style="margin:4px 0">${f.why}</p>${f.stress?`<div class="stress"><b>${f.stress.label}</b>${f.stress.text}</div>`:""}<div class="cases">${f.cases.map(x=>`<span>${x}</span>`).join("")}</div></div>
-    <div class="fix"><b>AIの提案</b>${f.fix}</div></div>`).join("");
+    ${f.update?`<div class="upd ${f.update.verdict}"><b>Confirmed by monitoring · ${f.update.date.replaceAll("-",".")} · ${{support:"Supports",contradict:"Contradicts",neutral:"Neutral"}[f.update.verdict]}</b>${f.update.text}${f.update.source?` <a href="${f.update.source}" target="_blank" rel="noopener">Source ↗</a>`:""}</div>`:""}
+    <div class="fix"><b>AI suggestion</b>${f.fix}</div></div>`).join("");
   $("kill").innerHTML=M.killCriteria.map(k=>`<li>${k}</li>`).join("");
   const today=new Date("2026-11-17");
-  $("timers").innerHTML=M.timers.map(t=>{const d=Math.ceil((new Date(t.deadline)-today)/864e5);return `<div class="timer"><div class="l">${t.label}</div><div class="m">${t.metric}</div><div class="d">${t.deadline.replaceAll("-",".")} · 残り ${d} 日</div></div>`}).join("");
+  $("timers").innerHTML=M.timers.map(t=>{const d=Math.ceil((new Date(t.deadline)-today)/864e5);return `<div class="timer"><div class="l">${t.label}</div><div class="m">${t.metric}</div><div class="d">${t.deadline.replaceAll("-",".")} · ${d} days left</div></div>`}).join("");
 }
 $("go").onclick=run;
 if(location.hash==="#done"){$("intake").hidden=true;render();$("result").hidden=false}
