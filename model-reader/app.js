@@ -74,25 +74,36 @@
 
   /* ---------- answer cell ---------- */
   function guessOutputs() {
-    const re = /(price target|target price|fair value|implied (share )?price|value per share|upside|\bPT\b)/i, out = [];
-    for (const k of M.ast.keys()) { const l = M.rowLabel(k); if (re.test(l)) out.push([k, label(k)]); if (out.length > 30) break; }
-    if (!out.length) { // sell-side models label earnings rows, not a target: take the furthest-out forecasts
-      const re2 = /^(adj(usted)?\.?\s*|pro ?forma\s*|non-gaap\s*|diluted\s*)?(EBITDA|EPS|earnings per share)\b/i, rows = new Map();
-      for (const k of M.ast.keys()) {
-        const l = M.rowLabel(k); if (!re2.test(l) || /guid|consensus|street/i.test(l)) continue;
-        const [s, a] = k.split("!"), A = E.splitAddr(a), rk = s + "|" + A.r;
-        const v = M.cell(k).v; if (typeof v !== "number") continue;
-        if (!rows.has(rk) || E.splitAddr(rows.get(rk).split("!")[1]).c < A.c) rows.set(rk, k);
-      }
-      const score = k => { const l = M.rowLabel(k); return (/EPS|earnings per share/i.test(l) ? 2 : 0) + (/oper|adj|pro ?forma|non-gaap/i.test(l) ? 1 : 0) + (M.isForecastCol(k) ? 4 : 0); };
-      for (const k of [...rows.values()].sort((x, y) => score(y) - score(x)).slice(0, 10)) out.push([k, label(k)]);
+    const TGT = /(price target|target price|fair value per share|implied (share )?price|value per share|upside|\bPT\b|12.?month target)/i;
+    const EARN = /^(adj(usted)?\.?\s*|pro ?forma\s*|non-gaap\s*|diluted\s*|operating\s*)?(EBITDA|EPS|earnings per share)\b/i;
+    const cand = new Map(); // key -> {tgt, earn}
+    const add = (k, tgt, earn) => { const c = M.cell(k); if (!c || !c.f) return; const v = M.safeValue(k); if (typeof v !== "number") return; const o = cand.get(k) || { tgt: 0, earn: 0 }; o.tgt = Math.max(o.tgt, tgt); o.earn = Math.max(o.earn, earn); cand.set(k, o); };
+    for (const k of M.ast.keys()) {                      // rows labelled as a target or upside
+      const l = M.rowLabel(k); if (TGT.test(l) && !/guid|consensus|street|convert/i.test(l)) add(k, 1, 0);
     }
-    if (!out.length) { // fall back to the formula cells nothing else depends on, biggest cones first
-      const sinks = [...M.ast.keys()].filter(k => !M.dep.has(k)).slice(0, 300)
-        .map(k => [k, M.inputsOf(k).inputs.length]).sort((a, b) => b[1] - a[1]).slice(0, 8);
-      for (const [k] of sinks) out.push([k, label(k)]);
+    for (const [k, c] of M.cells) {                      // column headers labelled as a target or upside
+      if (c.f || typeof c.v !== "string" || !TGT.test(c.v)) continue;
+      const [sn, a] = k.split("!"), A = E.splitAddr(a);
+      for (let r = A.r + 1; r <= A.r + 40; r++) add(E.key(sn, E.numToCol(A.c) + r), 1, 0);
     }
-    return out.slice(0, 12);
+    const rows = new Map();                              // earnings rows: furthest-out forecast in each
+    for (const k of M.ast.keys()) {
+      const l = M.rowLabel(k); if (!EARN.test(l) || /guid|consensus|street/i.test(l)) continue;
+      const [sn, a] = k.split("!"), A = E.splitAddr(a), rk = sn + "|" + A.r;
+      if (typeof M.cell(k).v !== "number" && typeof M.safeValue(k) !== "number") continue;
+      if (!rows.has(rk) || E.splitAddr(rows.get(rk).split("!")[1]).c < A.c) rows.set(rk, k);
+    }
+    for (const k of rows.values()) { const l = M.rowLabel(k); add(k, 0, (/EPS|earnings per share/i.test(l) ? 2 : 1) + (/oper|adj|pro ?forma|non-gaap/i.test(l) ? 0.5 : 0)); }
+    let list = [...cand.entries()].slice(0, 120).map(([k, o]) => ({ k, ...o, n: M.inputsOf(k).inputs.length }));
+    list = list.filter(x => x.n >= 3);
+    if (!list.length) { // last resort: the formula cells nothing else depends on, biggest cones first
+      list = [...M.ast.keys()].filter(k => !M.dep.has(k)).slice(0, 300).map(k => ({ k, tgt: 0, earn: 0, n: M.inputsOf(k).inputs.length }));
+    }
+    list.sort((x, y) => (y.tgt - x.tgt) || (y.earn - x.earn) || (y.n - x.n));
+    // within the best class, the cell with the most inputs behind it is the model's real answer
+    const best = list.filter(x => x.tgt === (list[0] || {}).tgt && x.earn === (list[0] || {}).earn).sort((x, y) => y.n - x.n);
+    const rest = list.filter(x => !best.includes(x));
+    return [...best, ...rest].slice(0, 12).map(x => [x.k, label(x.k)]);
   }
   function setupOutputs() {
     const opts = isSample ? SAMPLE_OUTS : guessOutputs();

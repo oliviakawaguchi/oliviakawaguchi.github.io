@@ -266,7 +266,7 @@
     const c = this.cells.get(k); if (!c) return ""; const A = splitAddr(c.addr);
     for (let r = A.r - 1; r >= Math.max(1, A.r - 40); r--) {
       const x = this.cells.get(key(c.sheet, numToCol(A.c) + r)); if (!x) continue;
-      if ((typeof x.v === "string" && x.v.trim()) || (typeof x.v === "number" && x.v >= 1990 && x.v <= 2100 && !x.f)) return String(x.v).trim();
+      if ((typeof x.v === "string" && x.v.trim()) || (typeof x.v === "number" && Number.isInteger(x.v) && x.v >= 1990 && x.v <= 2100 && !x.f)) return String(x.v).trim();
     }
     return "";
   };
@@ -429,7 +429,10 @@
     if (rp) return rp.kind;
     const lab = this.rowLabel(k) + " " + this.colHeader(k), note = this.note(k);
     if (ASSUME_NOTE.test(note)) return "forecast";
-    if (FACT.test(lab)) return "fact";
+    const yrs = [...lab.matchAll(/\b(?:FY|CY)?\s?'?(20\d{2}|\d{2})\s?E\b|\b(?:FY|CY)\s?(20\d{2})\b|\b(20\d{2})\b/gi)].map(m => +(m[1] || m[2] || m[3]) < 100 ? 2000 + +(m[1] || m[2] || m[3]) : +(m[1] || m[2] || m[3]));
+    const bnd = this.wbBoundary() || this.periods()[sn].boundary, firstOpenYear = Math.floor(bnd / 100) + (bnd % 100 === 12 ? 1 : 0);
+    if (FACT.test(lab) && !/\d\s?E\b/.test(lab)) return "fact";
+    if (/\d\s?E\b/.test(lab) || (yrs.length && Math.max(...yrs) >= firstOpenYear && !/actual|reported/i.test(lab))) return "forecast";
     return FWD.test(lab + " " + note) ? "forecast" : "fact";
   };
   /* a readable name for an assumption row, following what it drives when the row label is generic */
