@@ -1,0 +1,698 @@
+symbol,name,cik,sic,sic_desc,bucket
+ADSK,Autodesk Inc. Common Stock,769397,7372,Services-Prepackaged Software,TECH
+HONA,Honeywell Aerospace Inc. Common Stock,2089271,3724,Aircraft Engines & Engine Parts,INDUSTRIAL
+ROK,Rockwell Automation Inc. Common Stock,1024478,3829,"Measuring & Controlling Devices, NEC",INDUSTRIAL
+F,Ford Motor Company Common Stock,37996,3711,Motor Vehicles & Passenger Car Bodies,B_AUTO
+WAB,Westinghouse Air Brake Technologies Corporation Common Stock,943452,3743,Railroad Equipment,INDUSTRIAL
+VEEV,Veeva Systems Inc. Class A Common Stock,1393052,7372,Services-Prepackaged Software,TECH
+CARR,Carrier Global Corporation Common Stock,1783180,3585,Air-Cond & Warm Air Heatg Equip & Comm & Indl Refrig Equip,INDUSTRIAL
+NTAP,NetApp Inc. Common Stock,1002047,3572,Computer Storage Devices,TECH
+WDAY,Workday Inc. Class A Common Stock,1327811,7374,Services-Computer Processing & Data Preparation,TECH
+XYZ,Block Inc. Class A Common Stock,1512673,7372,Services-Prepackaged Software,TECH
+CRWV,CoreWeave Inc. Class A Common Stock,1769628,7372,Services-Prepackaged Software,TECH
+LHX,L3Harris Technologies Inc. Common Stock,202058,3812,"Search, Detection, Navigation, Guidance, Aeronautical Sys",INDUSTRIAL
+RKLB,Rocket Lab Corporation Common Stock,1819994,3760,Guided Missiles & Space Vehicles & Parts,INDUSTRIAL
+FLEX,Flex Ltd. Ordinary Shares,866374,3672,Printed Circuit Boards,TECH
+TWLO,Twilio Inc. Class A Common Stock,1447669,7372,Services-Prepackaged Software,TECH
+FERG,Ferguson Enterprises Inc. Common Stock,2011641,5070,Wholesale-Hardware & Plumbing & Heating Equipment & Supplies,INDUSTRIAL
+HEI,Heico Corporation Common Stock,46619,3724,Aircraft Engines & Engine Parts,INDUSTRIAL
+MCHP,Microchip Technology Incorporated Common Stock,827054,3674,Semiconductors & Related Devices,TECH
+CLS,Celestica Inc. Common Stock,1030894,3672,Printed Circuit Boards,TECH
+CBRS,Cerebras Systems Inc. Class A Common Stock,2021728,3674,Semiconductors & Related Devices,TECH
+CRDO,Credo Technology Group Holding Ltd Ordinary Shares,1807794,3674,Semiconductors & Related Devices,TECH
+WCN,Waste Connections Inc. Common Shares,1318220,4953,Refuse Systems,INDUSTRIAL
+TTWO,Take-Two Interactive Software Inc. Common Stock,946581,7372,Services-Prepackaged Software,TECH
+UI,Ubiquiti Inc. Common Stock,1511737,3663,Radio & Tv Broadcasting & Communications Equipment,TECH
+OKTA,Okta Inc. Class A Common Stock,1660134,7372,Services-Prepackaged Software,TECH
+CCJ,Cameco Corporation Common Stock,1009001,1090,Miscellaneous Metal Ores,B_NUCLEAR_FUEL
+ODFL,Old Dominion Freight Line Inc. Common Stock,878927,4213,Trucking (No Local),INDUSTRIAL
+ROP,Roper Technologies Inc. Common Stock,882835,3823,"Industrial Instruments For Measurement, Display, and Control",INDUSTRIAL
+ZS,Zscaler Inc. Common Stock,1713683,7371,Services-Computer Programming Services,TECH
+UAL,United Airlines Holdings Inc. Common Stock,100517,4512,"Air Transportation, Scheduled",INDUSTRIAL
+AXON,Axon Enterprise Inc. Common Stock,1069183,3480,"Ordnance & Accessories, (No Vehicles/Guided Missiles)",INDUSTRIAL
+EQT,EQT Corporation Common Stock,33213,1311,Crude Petroleum & Natural Gas,ENERGY
+RBLX,Roblox Corporation Class A Common Stock,1315098,7372,Services-Prepackaged Software,TECH
+JBL,Jabil Inc. Common Stock,898293,3672,Printed Circuit Boards,TECH
+EXPE,Expedia Group Inc. Common Stock,1324424,4700,Transportation Services,INDUSTRIAL
+ON,ON Semiconductor Corporation Common Stock,1097864,3674,Semiconductors & Related Devices,TECH
+SUNB,Sunbelt Rentals Holdings Inc. Common Stock,2083785,7359,"Services-Equipment Rental & Leasing, NEC",INDUSTRIAL
+IR,Ingersoll Rand Inc. Common Stock,1699150,3560,General Industrial Machinery & Equipment,INDUSTRIAL
+RDDT,Reddit Inc. Class A Common Stock,1713445,7374,Services-Computer Processing & Data Preparation,TECH
+MDB,MongoDB Inc. Class A Common Stock,1441816,7372,Services-Prepackaged Software,TECH
+HPQ,HP Inc. Common Stock,47217,3570,Computer & office Equipment,TECH
+SMCI,Super Micro Computer Inc. Common Stock,1375365,3571,Electronic Computers,TECH
+TDY,Teledyne Technologies Incorporated Common Stock,1094285,3812,"Search, Detection, Navigation, Guidance, Aeronautical Sys",INDUSTRIAL
+ZM,Zoom Communications Inc. Class A Common Stock,1585521,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+PBA,Pembina Pipeline Corp. Ordinary Shares (Canada),1546066,1382,Oil & Gas Field Exploration Services,ENERGY
+FTI,TechnipFMC plc Ordinary Share,1681459,3533,Oil & Gas Field Machinery & Equipment,ENERGY
+HAL,Halliburton Company Common Stock,45012,1389,"Oil & Gas Field Services, NEC",ENERGY
+CTSH,Cognizant Technology Solutions Corporation Class A Common Stock,1058290,7371,Services-Computer Programming Services,TECH
+VRSN,VeriSign Inc. Common Stock,1014473,7371,Services-Computer Programming Services,TECH
+NVT,nVent Electric plc Ordinary Shares,1720635,3550,Special Industry Machinery (No Metalworking Machinery),INDUSTRIAL
+Q,Qnity Electronics Inc. Common Stock,2058873,3674,Semiconductors & Related Devices,TECH
+FFIV,F5 Inc. Common Stock,1048695,3576,Computer Communications Equipment,TECH
+SN,SharkNinja Inc. Ordinary Shares,1957132,3630,Household Appliances,B_APPLIANCE
+DOV,Dover Corporation Common Stock,29905,3530,"Construction, Mining & Materials Handling Machinery & Equip",INDUSTRIAL
+SYM,Symbotic Inc. Class A Common Stock,1837240,3569,"General Industrial Machinery & Equipment, NEC",INDUSTRIAL
+EXPD,Expeditors International of Washington Inc. Common Stock,746515,4731,Arrangement of  Transportation of  Freight & Cargo,INDUSTRIAL
+OTIS,Otis Worldwide Corporation Common Stock,1781335,3600,Electronic & Other Electrical Equipment (No Computer Equip),INDUSTRIAL
+HUBB,Hubbell Inc Common Stock,48898,3670,Electronic Components & Accessories,TECH
+RBRK,Rubrik Inc. Class A Common Stock,1943896,7372,Services-Prepackaged Software,TECH
+MTSI,MACOM Technology Solutions Holdings Inc. Common Stock,1493594,3674,Semiconductors & Related Devices,TECH
+IOT,Samsara Inc. Class A Common Stock,1642896,7373,Services-Computer Integrated Systems Design,TECH
+XYL,Xylem Inc. Common Stock New,1524472,3561,Pumps & Pumping Equipment,INDUSTRIAL
+VLTO,Veralto Corp Common Stock,1967680,3825,Instruments For Meas & Testing of  Electricity & Elec Signals,INDUSTRIAL
+VRSK,Verisk Analytics Inc. Common Stock,1442145,7374,Services-Computer Processing & Data Preparation,TECH
+NRG,NRG Energy Inc. Common Stock,1013871,4911,Electric Services,POWER
+DINO,HF Sinclair Corporation Common Stock,1915657,4610,Pipe Lines (No Natural Gas),ENERGY
+JBHT,J.B. Hunt Transport Services Inc. Common Stock,728535,4213,Trucking (No Local),INDUSTRIAL
+SNX,TD SYNNEX Corporation Common Stock,1177394,5045,Wholesale-Computers & Peripheral Equipment & Software,TECH
+XPO,XPO Inc. Common Stock,1166003,4700,Transportation Services,INDUSTRIAL
+PTC,PTC Inc. Common Stock,857005,7372,Services-Prepackaged Software,TECH
+RIVN,Rivian Automotive Inc. Class A Common Stock,1874178,3711,Motor Vehicles & Passenger Car Bodies,B_AUTO
+EXE,Expand Energy Corporation Common Stock,895126,1311,Crude Petroleum & Natural Gas,ENERGY
+RS,Reliance Inc. Common Stock,861884,5051,Wholesale-Metals Service Centers & of fices,INDUSTRIAL
+LUV,Southwest Airlines Company Common Stock,92380,4512,"Air Transportation, Scheduled",INDUSTRIAL
+U,Unity Software Inc. Common Stock,1810806,7372,Services-Prepackaged Software,TECH
+NTNX,Nutanix Inc. Class A Common Stock,1618732,7372,Services-Prepackaged Software,TECH
+ARXS,Arxis Inc. Class A Common Stock,2093536,3728,"Aircraft Parts & Auxiliary Equipment, NEC",INDUSTRIAL
+SITM,SiTime Corporation Common Stock,1451809,3674,Semiconductors & Related Devices,TECH
+AMCR,Amcor plc Ordinary Shares,1748790,3990,Miscellaneous Manufacturing Industries,INDUSTRIAL
+FSLR,First Solar Inc. Common Stock,1274494,3674,Semiconductors & Related Devices,TECH
+PR,Permian Resources Corporation Class A Common Stock,1658566,1311,Crude Petroleum & Natural Gas,ENERGY
+WWD,Woodward Inc. Common Stock,108312,3620,Electrical Industrial Apparatus,INDUSTRIAL
+GFL,GFL Environmental Inc. Subordinate voting shares no par value,1780232,4953,Refuse Systems,INDUSTRIAL
+SSNC,SS&C Technologies Holdings Inc. Common Stock,1402436,7372,Services-Prepackaged Software,TECH
+CW,Curtiss-Wright Corporation Common Stock,26324,3590,Misc Industrial & Commercial Machinery & Equipment,INDUSTRIAL
+SNA,Snap-On Incorporated Common Stock,91440,3420,"Cutlery, Handtools & General Hardware",INDUSTRIAL
+NDSN,Nordson Corporation Common Stock,72331,3569,"General Industrial Machinery & Equipment, NEC",INDUSTRIAL
+ZBRA,Zebra Technologies Corporation Class A Common Stock,877212,3560,General Industrial Machinery & Equipment,INDUSTRIAL
+OVV,Ovintiv Inc. (DE),1792580,1311,Crude Petroleum & Natural Gas,ENERGY
+ITT,ITT Inc. Common Stock,216228,3561,Pumps & Pumping Equipment,INDUSTRIAL
+LSCC,Lattice Semiconductor Corporation Common Stock,855658,3674,Semiconductors & Related Devices,TECH
+DT,Dynatrace Inc. Common Stock,1773383,7372,Services-Prepackaged Software,TECH
+TOST,Toast Inc. Class A Common Stock,1650164,7374,Services-Computer Processing & Data Preparation,TECH
+MKSI,MKS Inc. Common Stock,1049502,3823,"Industrial Instruments For Measurement, Display, and Control",INDUSTRIAL
+FTAI,FTAI Aviation Ltd. Common Stock,1590364,7350,Services-Miscellaneous Equipment Rental & Leasing,INDUSTRIAL
+SMTC,Semtech Corporation Common Stock,88941,3674,Semiconductors & Related Devices,TECH
+FN,Fabrinet Ordinary Shares,1408710,3661,Telephone & Telegraph Apparatus,TECH
+MTZ,MasTec Inc. Common Stock,15615,1623,"Water, Sewer, Pipeline, Comm & Power Line Construction",INDUSTRIAL
+WCC,WESCO International Inc. Common Stock,929008,5063,"Wholesale-Electrical Apparatus & Equipment, Wiring Supplies ",INDUSTRIAL
+TLN,Talen Energy Corporation Common Stock,1622536,4911,Electric Services,POWER
+IEX,IDEX Corporation Common Stock,832101,3561,Pumps & Pumping Equipment,INDUSTRIAL
+FTV,Fortive Corporation Common Stock,1659166,3823,"Industrial Instruments For Measurement, Display, and Control",INDUSTRIAL
+MGA,Magna International Inc. Common Stock,749098,3714,Motor Vehicle Parts & Accessories,B_AUTO
+CLH,Clean Harbors Inc. Common Stock,822818,4955,Hazardous Waste Management,INDUSTRIAL
+CHRW,C.H. Robinson Worldwide Inc. Common Stock,1043277,4731,Arrangement of  Transportation of  Freight & Cargo,INDUSTRIAL
+J,Jacobs Solutions Inc. Common Stock,52988,1600,Heavy Construction Other Than Bldg Const - Contractors,INDUSTRIAL
+GIB,CGI Inc. Common Stock,1061574,8742,Services-Management Consulting Services,INDUSTRIAL
+APA,APA Corporation Common Stock,1841666,1311,Crude Petroleum & Natural Gas,ENERGY
+STRL,Sterling Infrastructure Inc. Common Stock,874238,1600,Heavy Construction Other Than Bldg Const - Contractors,INDUSTRIAL
+RBC,RBC Bearings Incorporated Common Stock,1324948,3562,Ball & Roller Bearings,INDUSTRIAL
+BALL,Ball Corporation Common Stock,9389,3411,Metal Cans,INDUSTRIAL
+VNOM,Viper Energy Inc. Class A Common Stock,2074176,1311,Crude Petroleum & Natural Gas,ENERGY
+IONQ,IonQ Inc. Common Stock,1824920,7373,Services-Computer Integrated Systems Design,TECH
+CNH,CNH Industrial N.V. Common Shares,1567094,3531,Construction Machinery & Equip,INDUSTRIAL
+LDOS,Leidos Holdings Inc. Common Stock,1336920,7373,Services-Computer Integrated Systems Design,TECH
+DOCN,DigitalOcean Holdings Inc. Common Stock,1582961,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+LOGI,Logitech International S.A. Ordinary Shares,1032975,3577,"Computer Peripheral Equipment, NEC",TECH
+INIO,INNIO N.V. Ordinary Shares,2109150,3621,Motors & Generators,INDUSTRIAL
+ONTO,Onto Innovation Inc. Common Stock,704532,3829,"Measuring & Controlling Devices, NEC",INDUSTRIAL
+FLUT,Flutter Entertainment plc Ordinary Shares,1635327,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+LECO,Lincoln Electric Holdings Inc. Common Shares,59527,3540,Metalworkg Machinery & Equipment,INDUSTRIAL
+TRMB,Trimble Inc. Common Stock,864749,3829,"Measuring & Controlling Devices, NEC",INDUSTRIAL
+MAS,Masco Corporation Common Stock,62996,3430,"Heating Equip, Except Elec & Warm Air; & Plumbing Fixtures",INDUSTRIAL
+GEN,Gen Digital Inc. Common Stock,849399,7372,Services-Prepackaged Software,TECH
+TYL,Tyler Technologies Inc. Common Stock,860731,7372,Services-Prepackaged Software,TECH
+GWRE,Guidewire Software Inc. Common Stock,1528396,7372,Services-Prepackaged Software,TECH
+SWK,Stanley Black & Decker Inc. Common Stock,93556,3420,"Cutlery, Handtools & General Hardware",INDUSTRIAL
+DOCU,DocuSign Inc. Common Stock,1261333,7372,Services-Prepackaged Software,TECH
+CACI,CACI International Inc. Class A Common Stock,16058,7373,Services-Computer Integrated Systems Design,TECH
+GNRC,Generac Holdlings Inc. Common Stock,1474735,3621,Motors & Generators,INDUSTRIAL
+GDDY,GoDaddy Inc. Class A Common Stock,1609711,7373,Services-Computer Integrated Systems Design,TECH
+BWXT,BWX Technologies Inc. Common Stock,1486957,3510,Engines & Turbines,INDUSTRIAL
+NXT,Nextpower Inc. Common Stock,1852131,3674,Semiconductors & Related Devices,TECH
+GGG,Graco Inc. Common Stock,42888,3561,Pumps & Pumping Equipment,INDUSTRIAL
+AMKR,Amkor Technology Inc. Common Stock,1047127,3674,Semiconductors & Related Devices,TECH
+TXT,Textron Inc. Common Stock,217346,3720,Aircraft & Parts,INDUSTRIAL
+TEM,Tempus AI Inc. Class A Common Stock,1717115,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+BWA,BorgWarner Inc. Common Stock,908255,3714,Motor Vehicle Parts & Accessories,B_AUTO
+LII,Lennox International Inc. Common Stock,1069202,3585,Air-Cond & Warm Air Heatg Equip & Comm & Indl Refrig Equip,INDUSTRIAL
+TTMI,TTM Technologies Inc. Common Stock,1116942,3672,Printed Circuit Boards,TECH
+AIT,Applied Industrial Technologies Inc. Common Stock,109563,5080,"Wholesale-Machinery, Equipment & Supplies",INDUSTRIAL
+FPS,Forgent Power Solutions Inc. Class A Common Stock,2080126,3620,Electrical Industrial Apparatus,INDUSTRIAL
+VICR,Vicor Corporation Common Stock,751978,3679,"Electronic Components, NEC",TECH
+FIG,Figma Inc. Class A Common Stock,1579878,7372,Services-Prepackaged Software,TECH
+MANH,Manhattan Associates Inc. Common Stock,1056696,7372,Services-Prepackaged Software,TECH
+MAIR,Madison Air Solutions Corporation Class A Common Stock,2098430,3564,Industrial & Commercial Fans & Blowers & Air Purifing Equip,INDUSTRIAL
+SWKS,Skyworks Solutions Inc. Common Stock,4127,3674,Semiconductors & Related Devices,TECH
+FROG,JFrog Ltd. Ordinary Shares,1800667,7372,Services-Prepackaged Software,TECH
+CCK,Crown Holdings Inc.,1219601,3411,Metal Cans,INDUSTRIAL
+RMBS,Rambus Inc. Common Stock,917273,3674,Semiconductors & Related Devices,TECH
+CR,Crane Company Common Stock,1944013,3490,Miscellaneous Fabricated Metal Products,INDUSTRIAL
+WSO,Watsco Inc. Common Stock,105016,5070,Wholesale-Hardware & Plumbing & Heating Equipment & Supplies,INDUSTRIAL
+PINS,Pinterest Inc. Class A Common Stock,1506293,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+WTS,Watts Water Technologies Inc. Class A Common Stock,795403,3490,Miscellaneous Fabricated Metal Products,INDUSTRIAL
+HUBS,HubSpot Inc. Common Stock,1404655,7372,Services-Prepackaged Software,TECH
+ARW,Arrow Electronics Inc. Common Stock,7536,5065,"Wholesale-Electronic Parts & Equipment, NEC",INDUSTRIAL
+QXO,QXO Inc. Common Stock,1236275,5030,Wholesale-Lumber & Other Construction Materials,INDUSTRIAL
+AUR,Aurora Innovation Inc. Class A Common Stock,1828108,7373,Services-Computer Integrated Systems Design,TECH
+SAIL,SailPoint Inc. Common Stock,2030781,7372,Services-Prepackaged Software,TECH
+AEIS,Advanced Energy Industries Inc. Common Stock,927003,3679,"Electronic Components, NEC",TECH
+SANM,Sanmina Corporation Common Stock,897723,3672,Printed Circuit Boards,TECH
+AR,Antero Resources Corporation Common Stock,1433270,1311,Crude Petroleum & Natural Gas,ENERGY
+QNT,Quantinuum Inc. Class A Common Stock,2110105,7373,Services-Computer Integrated Systems Design,TECH
+VIAV,Viavi Solutions Inc. Common Stock,912093,3674,Semiconductors & Related Devices,TECH
+LFUS,Littelfuse Inc. Common Stock,889331,3613,Switchgear & Switchboard Apparatus,INDUSTRIAL
+FORM,FormFactor Inc. FormFactor Inc. Common Stock,1039399,3674,Semiconductors & Related Devices,TECH
+RRX,Regal Rexnord Corporation Common Stock,82811,3569,"General Industrial Machinery & Equipment, NEC",INDUSTRIAL
+PBF,PBF Energy Inc. Class A Common Stock,1534504,2911,Petroleum Refining,ENERGY
+KNX,Knight-Swift Transportation Holdings Inc.,1492691,4213,Trucking (No Local),INDUSTRIAL
+BSY,Bentley Systems Incorporated Class B Common Stock,1031308,7372,Services-Prepackaged Software,TECH
+JKHY,Jack Henry & Associates Inc. Common Stock,779152,7373,Services-Computer Integrated Systems Design,TECH
+HII,Huntington Ingalls Industries Inc. Common Stock,1501585,3730,Ship & Boat Building & Repairing,INDUSTRIAL
+PAYC,Paycom Software Inc. Common Stock,1590955,7372,Services-Prepackaged Software,TECH
+CGNX,Cognex Corporation Common Stock,851205,3823,"Industrial Instruments For Measurement, Display, and Control",INDUSTRIAL
+FDS,FactSet Research Systems Inc. Common Stock,1013237,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+DCI,Donaldson Company Inc. Common Stock,29644,3564,Industrial & Commercial Fans & Blowers & Air Purifing Equip,INDUSTRIAL
+ESTC,Elastic N.V. Ordinary Shares,1707753,7372,Services-Prepackaged Software,TECH
+SNAP,Snap Inc. Class A Common Stock,1564408,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+MOD,Modine Manufacturing Company Common Stock,67347,3714,Motor Vehicle Parts & Accessories,B_AUTO
+DRS,Leonardo DRS Inc. Common Stock,1833756,3812,"Search, Detection, Navigation, Guidance, Aeronautical Sys",INDUSTRIAL
+RRC,Range Resources Corporation Common Stock,315852,1311,Crude Petroleum & Natural Gas,ENERGY
+MTCH,Match Group Inc. Common Stock,891103,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+TFII,TFI International Inc. Common Shares,1588823,4210,Trucking & Courier Services (No Air),INDUSTRIAL
+APTV,Aptiv PLC Ordinary Shares,1521332,3714,Motor Vehicle Parts & Accessories,B_AUTO
+TTC,Toro Company (The) Common Stock,737758,3524,Lawn & Garden Tractors & Home Lawn & Gardens Equip,INDUSTRIAL
+SAIA,Saia Inc. Common Stock,1177702,4213,Trucking (No Local),INDUSTRIAL
+VMI,Valmont Industries Inc. Common Stock,102729,3440,Fabricated Structural Metal Products,INDUSTRIAL
+ALSN,Allison Transmission Holdings Inc. Common Stock,1411207,3714,Motor Vehicle Parts & Accessories,B_AUTO
+AYI,Acuity Inc. Common Stock,1144215,3640,Electric Lighting & Wiring Equipment,INDUSTRIAL
+AAOI,Applied Optoelectronics Inc. Common Stock,1158114,3674,Semiconductors & Related Devices,TECH
+GTLB,GitLab Inc. Class A Common Stock,1653482,7372,Services-Prepackaged Software,TECH
+FLS,Flowserve Corporation Common Stock,30625,3561,Pumps & Pumping Equipment,INDUSTRIAL
+S,SentinelOne Inc. Class A Common Stock,1583708,7372,Services-Prepackaged Software,TECH
+SM,SM Energy Company Common Stock,893538,1311,Crude Petroleum & Natural Gas,ENERGY
+BAH,Booz Allen Hamilton Holding Corporation Common Stock,1443646,8742,Services-Management Consulting Services,INDUSTRIAL
+TTEK,Tetra Tech Inc. Common Stock,831641,8711,Services-Engineering Services,INDUSTRIAL
+MXL,MaxLinear Inc. Common Stock,1288469,3674,Semiconductors & Related Devices,TECH
+AAL,American Airlines Group Inc. Common Stock,6201,4512,"Air Transportation, Scheduled",INDUSTRIAL
+SPXC,SPX Technologies Inc. Common Stock,88205,3540,Metalworkg Machinery & Equipment,INDUSTRIAL
+DY,Dycom Industries Inc. Common Stock,67215,1623,"Water, Sewer, Pipeline, Comm & Power Line Construction",INDUSTRIAL
+PNR,Pentair plc. Ordinary Share,77360,3550,Special Industry Machinery (No Metalworking Machinery),INDUSTRIAL
+PCOR,Procore Technologies Inc. Common Stock,1611052,7372,Services-Prepackaged Software,TECH
+ZETA,Zeta Global Holdings Corp. Class A Common Stock,1851003,7372,Services-Prepackaged Software,TECH
+AVT,Avnet Inc. Common Stock,8858,5065,"Wholesale-Electronic Parts & Equipment, NEC",INDUSTRIAL
+ALV,Autoliv Inc. Common Stock,1034670,3714,Motor Vehicle Parts & Accessories,B_AUTO
+PCTY,Paylocity Holding Corporation Common Stock,1591698,7372,Services-Prepackaged Software,TECH
+NTSK,Netskope Inc. Class A Common Stock,2063196,7372,Services-Prepackaged Software,TECH
+RAL,Ralliant Corporation Common Stock,2041385,3823,"Industrial Instruments For Measurement, Display, and Control",INDUSTRIAL
+TKR,Timken Company (The) Common Stock,98362,3562,Ball & Roller Bearings,INDUSTRIAL
+HNGE,Hinge Health Inc. Class A Common Stock,1673743,7374,Services-Computer Processing & Data Preparation,TECH
+ESE,ESCO Technologies Inc. Common Stock,866706,3669,"Communications Equipment, NEC",TECH
+KTOS,Kratos Defense & Security Solutions Inc. Common Stock,1069258,3760,Guided Missiles & Space Vehicles & Parts,INDUSTRIAL
+OSK,Oshkosh Corporation (Holding Company)Common Stock,775158,3711,Motor Vehicles & Passenger Car Bodies,B_AUTO
+CHRD,Chord Energy Corporation Common Stock,1486159,1311,Crude Petroleum & Natural Gas,ENERGY
+DBX,Dropbox Inc. Class A Common Stock,1467623,7372,Services-Prepackaged Software,TECH
+CNM,Core & Main Inc. Class A Common Stock,1856525,5099,"Wholesale-Durable Goods, NEC",INDUSTRIAL
+AOS,A.O. Smith Corporation Common Stock,91142,3630,Household Appliances,B_APPLIANCE
+ZWS,Zurn Elkay Water Solutions Corporation Common Stock,1439288,3560,General Industrial Machinery & Equipment,INDUSTRIAL
+ACM,AECOM Common Stock,868857,8711,Services-Engineering Services,INDUSTRIAL
+STN,Stantec Inc Common Stock,1131383,8711,Services-Engineering Services,INDUSTRIAL
+AGCO,AGCO Corporation Common Stock,880266,3523,Farm Machinery & Equipment,INDUSTRIAL
+CAE,CAE Inc. Common Shares,1173382,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+APLD,Applied Digital Corporation Common Stock,1144879,7374,Services-Computer Processing & Data Preparation,TECH
+MSM,MSC Industrial Direct Company Inc. Common Stock,1003078,5084,Wholesale-Industrial Machinery & Equipment,INDUSTRIAL
+AAON,AAON Inc. Common Stock,824142,3585,Air-Cond & Warm Air Heatg Equip & Comm & Indl Refrig Equip,INDUSTRIAL
+DUOL,Duolingo Inc. Class A Common Stock,1562088,7372,Services-Prepackaged Software,TECH
+SOBO,South Bow Corporation Common Shares,2019061,4610,Pipe Lines (No Natural Gas),ENERGY
+SSD,Simpson Manufacturing Company Inc. Common Stock,920371,3420,"Cutlery, Handtools & General Hardware",INDUSTRIAL
+TTAN,ServiceTitan Inc. Class A Common Stock,1638826,7372,Services-Prepackaged Software,TECH
+APPF,AppFolio Inc. Class A Common Stock,1433195,7372,Services-Prepackaged Software,TECH
+AVAV,AeroVironment Inc. Common Stock,1368622,3721,Aircraft,INDUSTRIAL
+PLXS,Plexus Corp. Common Stock,785786,3672,Printed Circuit Boards,TECH
+DSGX,Descartes Systems Group Inc. (The) Common Stock,1050140,7372,Services-Prepackaged Software,TECH
+PATH,UiPath Inc. Class A Common Stock,1734722,7372,Services-Prepackaged Software,TECH
+POWL,Powell Industries Inc. Common Stock,80420,3613,Switchgear & Switchboard Apparatus,INDUSTRIAL
+FSS,Federal Signal Corporation Common Stock,277509,3711,Motor Vehicles & Passenger Car Bodies,B_AUTO
+FLR,Fluor Corporation Common Stock,1124198,1600,Heavy Construction Other Than Bldg Const - Contractors,INDUSTRIAL
+NOV,NOV Inc. Common Stock,1021860,3533,Oil & Gas Field Machinery & Equipment,ENERGY
+GTES,Gates Industrial Corporation Ltd. Common Shares,1718512,3560,General Industrial Machinery & Equipment,INDUSTRIAL
+ALGM,Allegro MicroSystems Inc. Common Stock,866291,3674,Semiconductors & Related Devices,TECH
+MTDR,Matador Resources Company Common Stock,1520006,1311,Crude Petroleum & Natural Gas,ENERGY
+NE,Noble Corporation plc A Ordinary Shares,1895262,1381,Drilling Oil & Gas Wells,ENERGY
+SARO,StandardAero Inc. Common Stock,2025410,3724,Aircraft Engines & Engine Parts,INDUSTRIAL
+QLYS,Qualys Inc. Common Stock,1107843,7372,Services-Prepackaged Software,TECH
+MGY,Magnolia Oil & Gas Corporation Class A Common Stock,1698990,1311,Crude Petroleum & Natural Gas,ENERGY
+RNG,RingCentral Inc. Class A Common Stock,1384905,7374,Services-Computer Processing & Data Preparation,TECH
+ENS,EnerSys Common Stock,1289308,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+OKLO,Oklo Inc. Class A common stock,1849056,4911,Electric Services,POWER
+INGM,Ingram Micro Holding Corporation Common Stock,1897762,5045,Wholesale-Computers & Peripheral Equipment & Software,TECH
+CVLT,Commvault Systems Inc. Common Stock,1169561,7372,Services-Prepackaged Software,TECH
+PL,Planet Labs PBC Class A Common Stock,1836833,3663,Radio & Tv Broadcasting & Communications Equipment,TECH
+ST,Sensata Technologies Holding plc Ordinary Shares,1477294,3823,"Industrial Instruments For Measurement, Display, and Control",INDUSTRIAL
+NAVN,Navan Inc. Class A Common Stock,1639723,7372,Services-Prepackaged Software,TECH
+MBLY,Mobileye Global Inc. Class A Common Stock,1910139,7372,Services-Prepackaged Software,TECH
+CVI,CVR Energy Inc. Common Stock,1376139,2911,Petroleum Refining,ENERGY
+TEX,Terex Corporation Common Stock,97216,3537,"Industrial Trucks, Tractors, Trailors & Stackers",INDUSTRIAL
+EPAM,EPAM Systems Inc. Common Stock,1352010,7371,Services-Computer Programming Services,TECH
+LEA,Lear Corporation Common Stock,842162,3714,Motor Vehicle Parts & Accessories,B_AUTO
+PEGA,Pegasystems Inc. Common Stock,1013857,7374,Services-Computer Processing & Data Preparation,TECH
+TTD,The Trade Desk Inc. Class A Common Stock,1671933,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+YOU,Clear Secure Inc. Class A Common Stock,1856314,7372,Services-Prepackaged Software,TECH
+OTEX,Open Text Corporation Common Shares,1002638,7373,Services-Computer Integrated Systems Design,TECH
+NXE,Nexgen Energy Ltd. Common Shares,1698535,1090,Miscellaneous Metal Ores,B_NUCLEAR_FUEL
+G,Genpact Limited Common Stock,1398659,8742,Services-Management Consulting Services,INDUSTRIAL
+MTRN,Materion Corporation,1104657,3460,Metal Forgings & Stampings,INDUSTRIAL
+LOAR,Loar Holdings Inc. Common Stock,2000178,3728,"Aircraft Parts & Auxiliary Equipment, NEC",INDUSTRIAL
+LSTR,Landstar System Inc. Common Stock,853816,4213,Trucking (No Local),INDUSTRIAL
+GATX,GATX Corporation Common Stock,40211,4700,Transportation Services,INDUSTRIAL
+JOBY,Joby Aviation Inc. Common Stock,1819848,3721,Aircraft,INDUSTRIAL
+CRUS,Cirrus Logic Inc. Common Stock,772406,3674,Semiconductors & Related Devices,TECH
+VRNS,Varonis Systems Inc. Common Stock,1361113,7372,Services-Prepackaged Software,TECH
+PI,Impinj Inc. Common Stock,1114995,3679,"Electronic Components, NEC",TECH
+XE,X-Energy Inc. Class A Common Stock,2088896,3443,Fabricated Plate Work (Boiler Shops),INDUSTRIAL
+SEI,Solaris Energy Infrastructure Inc. Class A Common Stock,1697500,3533,Oil & Gas Field Machinery & Equipment,ENERGY
+SNDR,Schneider National Inc. Common Stock,1692063,4213,Trucking (No Local),INDUSTRIAL
+QBTS,D-Wave Quantum Inc. Common Stock,1907982,7374,Services-Computer Processing & Data Preparation,TECH
+MUR,Murphy Oil Corporation Common Stock,717423,1311,Crude Petroleum & Natural Gas,ENERGY
+WFRD,Weatherford International plc Ordinary Shares,1603923,3533,Oil & Gas Field Machinery & Equipment,ENERGY
+JBTM,JBT Marel Corporation Common Stock,1433660,3550,Special Industry Machinery (No Metalworking Machinery),INDUSTRIAL
+ORA,Ormat Technologies Inc. Common Stock,1296445,4911,Electric Services,POWER
+SAIC,Science Applications International Corporation Common Stock,1571123,7373,Services-Computer Integrated Systems Design,TECH
+OCTV,Octave Intelligence plc Class B Ordinary Shares,2083632,7372,Services-Prepackaged Software,TECH
+CWST,Casella Waste Systems Inc. Class A Common Stock,911177,4953,Refuse Systems,INDUSTRIAL
+GXO,GXO Logistics Inc. Common Stock,1852244,4700,Transportation Services,INDUSTRIAL
+VSH,Vishay Intertechnology Inc. Common Stock,103730,3670,Electronic Components & Accessories,TECH
+NIQ,NIQ Global Intelligence plc Ordinary Shares,2054696,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+DOCS,Doximity Inc. Class A Common Stock,1516513,7371,Services-Computer Programming Services,TECH
+MWH,SOLV Energy Inc. Class A Common Stock,2065636,1600,Heavy Construction Other Than Bldg Const - Contractors,INDUSTRIAL
+ACIW,ACI Worldwide Inc. Common Stock,935036,7372,Services-Prepackaged Software,TECH
+NOVT,Novanta Inc. Common Stock,1076930,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+WAY,Waystar Holding Corp. Common Stock,1990354,7373,Services-Computer Integrated Systems Design,TECH
+CLMT,Calumet Inc. Common Stock,2013745,2911,Petroleum Refining,ENERGY
+WHD,Cactus Inc. Class A Common Stock,1699136,3533,Oil & Gas Field Machinery & Equipment,ENERGY
+ROAD,Construction Partners Inc. Class A Common Stock,1718227,1600,Heavy Construction Other Than Bldg Const - Contractors,INDUSTRIAL
+BB,BlackBerry Limited Common Stock,1070235,7372,Services-Prepackaged Software,TECH
+CNX,CNX Resources Corporation Common Stock,1070412,1311,Crude Petroleum & Natural Gas,ENERGY
+KVYO,Klaviyo Inc. Series A Common Stock,1835830,7372,Services-Prepackaged Software,TECH
+BOX,Box Inc. Class A Common Stock,1372612,7372,Services-Prepackaged Software,TECH
+GVA,Granite Construction Incorporated Common Stock,861459,1600,Heavy Construction Other Than Bldg Const - Contractors,INDUSTRIAL
+ACMR,ACM Research Inc. Class A Common Stock,1680062,3559,"Special Industry Machinery, NEC",INDUSTRIAL
+CWEN,Clearway Energy Inc. Class C Common Stock,1567683,4911,Electric Services,POWER
+MYRG,MYR Group Inc. Common Stock,700923,1623,"Water, Sewer, Pipeline, Comm & Power Line Construction",INDUSTRIAL
+GTX,Garrett Motion Inc. Common Stock,1735707,3714,Motor Vehicle Parts & Accessories,B_AUTO
+BETA,Beta Technologies Inc. Class A Common Stock,1784570,3721,Aircraft,INDUSTRIAL
+MRCY,Mercury Systems Inc Common Stock,1049521,3670,Electronic Components & Accessories,TECH
+RXO,RXO Inc. Common Stock,1929561,4700,Transportation Services,INDUSTRIAL
+VSEC,VSE Corporation Common Stock,102752,8711,Services-Engineering Services,INDUSTRIAL
+MIDD,Middleby Corporation (The) Common Stock,769520,3580,Refrigeration & Service Industry Machinery,INDUSTRIAL
+KLIC,Kulicke and Soffa Industries Inc. Common Stock,56978,3674,Semiconductors & Related Devices,TECH
+HCC,Warrior Met Coal Inc. Common Stock,1691303,1220,Silver Ores,ENERGY
+IEP,Icahn Enterprises L.P. Common Stock,813762,2911,Petroleum Refining,ENERGY
+RGTI,Rigetti Computing Inc. Common Stock,1838359,7371,Services-Computer Programming Services,TECH
+CRC,California Resources Corporation Common Stock,1609253,1311,Crude Petroleum & Natural Gas,ENERGY
+AXTI,AXT Inc Common Stock,1051627,3674,Semiconductors & Related Devices,TECH
+DK,Delek US Holdings Inc. Common Stock,1694426,2911,Petroleum Refining,ENERGY
+PSN,Parsons Corporation Common Stock,275880,7373,Services-Computer Integrated Systems Design,TECH
+UEC,Uranium Energy Corp. Common Stock,1334933,1090,Miscellaneous Metal Ores,B_NUCLEAR_FUEL
+GNTX,Gentex Corporation Common Stock,355811,3714,Motor Vehicle Parts & Accessories,B_AUTO
+PRIM,Primoris Services Corporation Common Stock,1361538,1623,"Water, Sewer, Pipeline, Comm & Power Line Construction",INDUSTRIAL
+OII,Oceaneering International Inc. Common Stock,73756,1389,"Oil & Gas Field Services, NEC",ENERGY
+KBR,KBR Inc. Common Stock,1357615,1600,Heavy Construction Other Than Bldg Const - Contractors,INDUSTRIAL
+DIOD,Diodes Incorporated Common Stock,29002,3674,Semiconductors & Related Devices,TECH
+ALK,Alaska Air Group Inc. Common Stock,766421,4512,"Air Transportation, Scheduled",INDUSTRIAL
+CNR,Core Natural Resources Inc. Common Stock,1710366,1220,Silver Ores,ENERGY
+PARR,Par Pacific Holdings Inc.  Common Stock,821483,1311,Crude Petroleum & Natural Gas,ENERGY
+PTEN,Patterson-UTI Energy Inc. Common Stock,889900,1381,Drilling Oil & Gas Wells,ENERGY
+HESM,Hess Midstream LP Class A Representing Limited Partner Interests,1789832,1311,Crude Petroleum & Natural Gas,ENERGY
+VNT,Vontier Corporation Common Stock,1786842,3824,Totalizing Fluid Meters & Counting Devices,INDUSTRIAL
+ENPH,Enphase Energy Inc. Common Stock,1463101,3674,Semiconductors & Related Devices,TECH
+CRGY,Crescent Energy Company Class A Common Stock,1866175,1311,Crude Petroleum & Natural Gas,ENERGY
+TENB,Tenable Holdings Inc. Common Stock,1660280,7372,Services-Prepackaged Software,TECH
+FELE,Franklin Electric Co. Inc. Common Stock,38725,3621,Motors & Generators,INDUSTRIAL
+ALH,Alliance Laundry Holdings Inc. Common Stock,1317685,3580,Refrigeration & Service Industry Machinery,INDUSTRIAL
+BCO,Brinks Company (The) Common Stock,78890,4731,Arrangement of  Transportation of  Freight & Cargo,INDUSTRIAL
+KRMN,Karman Holdings Inc. Common Stock,2040127,3728,"Aircraft Parts & Auxiliary Equipment, NEC",INDUSTRIAL
+GFF,Griffon Corporation Common Stock,50725,3442,"Metal Doors, Sash, Frames, Moldings & Trim",INDUSTRIAL
+HRI,Herc Holdings Inc. Common Stock,1364479,7350,Services-Miscellaneous Equipment Rental & Leasing,INDUSTRIAL
+ACLS,Axcelis Technologies Inc. Common Stock,1113232,3559,"Special Industry Machinery, NEC",INDUSTRIAL
+AZZ,AZZ Inc.,8947,3470,"Coating, Engraving & Allied Services",INDUSTRIAL
+AIR,AAR Corp. Common Stock,1750,3720,Aircraft & Parts,INDUSTRIAL
+TAC,TransAlta Corporation Ordinary Shares,1144800,4911,Electric Services,POWER
+FRVO,Fervo Energy Company Class A common stock,1853868,4911,Electric Services,POWER
+BC,Brunswick Corporation Common Stock,14930,3510,Engines & Turbines,INDUSTRIAL
+MIR,Mirion Technologies Inc. Class A Common Stock,1809987,3829,"Measuring & Controlling Devices, NEC",INDUSTRIAL
+ESAB,ESAB Corporation Common Stock,1877322,3569,"General Industrial Machinery & Equipment, NEC",INDUSTRIAL
+FSLY,Fastly Inc. Class A Common Stock,1517413,7372,Services-Prepackaged Software,TECH
+CRK,Comstock Resources Inc. Common Stock,23194,1311,Crude Petroleum & Natural Gas,ENERGY
+HP,Helmerich & Payne Inc. Common Stock,46765,1381,Drilling Oil & Gas Wells,ENERGY
+WK,Workiva Inc. Class A Common Stock,1445305,7372,Services-Prepackaged Software,TECH
+ONDS,Ondas Inc. Common Stock,1646188,3663,Radio & Tv Broadcasting & Communications Equipment,TECH
+EQPT,EquipmentShare.com Inc Class A Common Stock,1693736,7359,"Services-Equipment Rental & Leasing, NEC",INDUSTRIAL
+BRC,Brady Corporation Common Stock,746598,3990,Miscellaneous Manufacturing Industries,INDUSTRIAL
+VVV,Valvoline Inc. Common Stock,1674910,2990,Miscellaneous Products of  Petroleum & Coal,ENERGY
+AQN,Algonquin Power & Utilities Corp. Common Shares,1174169,4911,Electric Services,POWER
+FCN,FTI Consulting Inc. Common Stock,887936,8742,Services-Management Consulting Services,INDUSTRIAL
+DOO,BRP Inc. Common Subordinate Voting Shares,1748797,3790,Miscellaneous Transportation Equipment,B_AUTO
+CCC,CCC Intelligent Solutions Holdings Inc. Common Stock,1818201,7372,Services-Prepackaged Software,TECH
+CECO,CECO Environmental Corp. Common Stock,3197,3564,Industrial & Commercial Fans & Blowers & Air Purifing Equip,INDUSTRIAL
+BILL,BILL Holdings Inc. Common Stock,1786352,7372,Services-Prepackaged Software,TECH
+SITE,SiteOne Landscape Supply Inc. Common Stock,1650729,5040,Wholesale-Professional & Commercial Equipment & Supplies,INDUSTRIAL
+SLGN,Silgan Holdings Inc. Common Stock,849869,3411,Metal Cans,INDUSTRIAL
+GEF,Greif Inc. Class A Common Stock,43920,3412,"Metal Shipping Barrels, Drums, Kegs & Pails",INDUSTRIAL
+SKYW,SkyWest Inc. Common Stock,793733,4512,"Air Transportation, Scheduled",INDUSTRIAL
+BMI,Badger Meter Inc. Common Stock,9092,3824,Totalizing Fluid Meters & Counting Devices,INDUSTRIAL
+ITRI,Itron Inc. Common Stock,780571,3825,Instruments For Meas & Testing of  Electricity & Elec Signals,INDUSTRIAL
+WBI,WaterBridge Infrastructure LLC Class A Shares Representing Limited Liability Company Interests,2064947,1389,"Oil & Gas Field Services, NEC",ENERGY
+ACHR,Archer Aviation Inc. Class A Common Stock,1824502,3721,Aircraft,INDUSTRIAL
+PENG,Penguin Solutions Inc. Common Stock,1616533,3674,Semiconductors & Related Devices,TECH
+QTWO,Q2 Holdings Inc. Common Stock,1410384,7372,Services-Prepackaged Software,TECH
+MGNI,Magnite Inc. Common Stock,1595974,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+DORM,Dorman Products Inc. Common Stock,868780,3714,Motor Vehicle Parts & Accessories,B_AUTO
+FRSH,Freshworks Inc. Class A Common Stock,1544522,7372,Services-Prepackaged Software,TECH
+BELFB,Bel Fuse Inc. Class B Common Stock,729580,3677,"Electronic Coils, Transformers & Other Inductors",TECH
+ATMU,Atmus Filtration Technologies Inc. Common Stock,1921963,3714,Motor Vehicle Parts & Accessories,B_AUTO
+RUM,RUM Group Inc. Class A Common Stock,1830081,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+FLY,Firefly Aerospace Inc. Common Stock,1860160,3760,Guided Missiles & Space Vehicles & Parts,INDUSTRIAL
+SXI,Standex International Corporation Common Stock,310354,3580,Refrigeration & Service Industry Machinery,INDUSTRIAL
+LIF,Life360 Inc. Common Stock,1581760,7374,Services-Computer Processing & Data Preparation,TECH
+THO,Thor Industries Inc. Common Stock,730263,3716,Motor Homes,B_AUTO
+MWA,MUELLER WATER PRODUCTS Common Stock,1350593,3490,Miscellaneous Fabricated Metal Products,INDUSTRIAL
+BTE,Baytex Energy Corp Common Shares,1279495,1381,Drilling Oil & Gas Wells,ENERGY
+OLED,Universal Display Corporation Common Stock,1005284,3670,Electronic Components & Accessories,TECH
+EXPO,Exponent Inc. Common Stock,851520,8742,Services-Management Consulting Services,INDUSTRIAL
+IPGP,IPG Photonics Corporation Common Stock,1111928,3674,Semiconductors & Related Devices,TECH
+COHU,Cohu Inc. Common Stock,21535,3825,Instruments For Meas & Testing of  Electricity & Elec Signals,INDUSTRIAL
+BRZE,Braze Inc. Class A Common Stock,1676238,7372,Services-Prepackaged Software,TECH
+FA,First Advantage Corporation Common Stock,1210677,7374,Services-Computer Processing & Data Preparation,TECH
+EXTR,Extreme Networks Inc. Common Stock,1078271,3576,Computer Communications Equipment,TECH
+SMR,NuScale Power Corporation Class A Common Stock,1822966,3443,Fabricated Plate Work (Boiler Shops),INDUSTRIAL
+BSM,Black Stone Minerals L.P. Common units representing limited partner interests,1621434,1311,Crude Petroleum & Natural Gas,ENERGY
+LUNR,Intuitive Machines Inc. Class A Common Stock,1844452,3812,"Search, Detection, Navigation, Guidance, Aeronautical Sys",INDUSTRIAL
+VGNT,Versigent PLC Ordinary Shares,2078008,3714,Motor Vehicle Parts & Accessories,B_AUTO
+DAN,Dana Incorporated Common Stock,26780,3714,Motor Vehicle Parts & Accessories,B_AUTO
+OSIS,OSI Systems Inc. Common Stock (DE),1039065,3674,Semiconductors & Related Devices,TECH
+KAI,Kadant Inc Common Stock,886346,3550,Special Industry Machinery (No Metalworking Machinery),INDUSTRIAL
+LBRT,Liberty Energy Inc. Class A common stock,1694028,1389,"Oil & Gas Field Services, NEC",ENERGY
+UCTT,Ultra Clean Holdings Inc. Common Stock,1275014,3674,Semiconductors & Related Devices,TECH
+WSC,WillScot Holdings Corporation Class A Common Stock,1647088,7350,Services-Miscellaneous Equipment Rental & Leasing,INDUSTRIAL
+AVPT,AvePoint Inc. Class A Common Stock,1777921,7372,Services-Prepackaged Software,TECH
+PPLI,People Incorporated Common Stock,1800227,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+BTU,Peabody Energy Corporation Common Stock,1064728,1221,Bituminous Coal & Lignite Surface Mining,ENERGY
+PII,Polaris Inc. Common Stock,931015,3790,Miscellaneous Transportation Equipment,B_AUTO
+SPSC,SPS Commerce Inc. Common Stock,1092699,7372,Services-Prepackaged Software,TECH
+INTA,Intapp Inc. Common Stock,1565687,7372,Services-Prepackaged Software,TECH
+EFXT,Enerflex Ltd Common Shares,1904856,3560,General Industrial Machinery & Equipment,INDUSTRIAL
+BHE,Benchmark Electronics Inc. Common Stock,863436,3672,Printed Circuit Boards,TECH
+GPOR,Gulfport Energy Corporation Common Shares,874499,1311,Crude Petroleum & Natural Gas,ENERGY
+ARCB,ArcBest Corporation Common Stock,894405,4213,Trucking (No Local),INDUSTRIAL
+CSQR,Csquare Inc. Common Stock,2105398,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+AGYS,Agilysys Inc. Common Stock (DE),78749,7373,Services-Computer Integrated Systems Design,TECH
+NTCT,NetScout Systems Inc. Common Stock,1078075,7373,Services-Computer Integrated Systems Design,TECH
+NVTS,Navitas Semiconductor Corporation Common Stock,1821769,3674,Semiconductors & Related Devices,TECH
+SDRL,Seadrill Limited Common Shares,1737706,1381,Drilling Oil & Gas Wells,ENERGY
+OUST,Ouster Inc. Common Stock,1816581,3569,"General Industrial Machinery & Equipment, NEC",INDUSTRIAL
+AEHR,Aehr Test Systems Common Stock,1040470,3825,Instruments For Meas & Testing of  Electricity & Elec Signals,INDUSTRIAL
+DGII,Digi International Inc. Common Stock,854775,3576,Computer Communications Equipment,TECH
+QS,QuantumScape Corporation Class A Common Stock,1811414,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+TALO,Talos Energy Inc. Common Stock,1724965,1311,Crude Petroleum & Natural Gas,ENERGY
+DNOW,DNOW Inc. Common Stock,1599617,3533,Oil & Gas Field Machinery & Equipment,ENERGY
+BELFA,Bel Fuse Inc. Class A Common Stock,729580,3677,"Electronic Coils, Transformers & Other Inductors",TECH
+TDC,Teradata Corporation Common Stock,816761,7372,Services-Prepackaged Software,TECH
+LEU,Centrus Energy Corp. Class A Common Stock,1065059,1400,Mining & Quarrying of  Nonmetallic Minerals (No Fuels),B_NUCLEAR_FUEL
+POWI,Power Integrations Inc. Common Stock,833640,3674,Semiconductors & Related Devices,TECH
+AMBA,Ambarella Inc. Ordinary Shares,1280263,3674,Semiconductors & Related Devices,TECH
+CXT,Crane NXT Co. Common Stock,25445,3490,Miscellaneous Fabricated Metal Products,INDUSTRIAL
+ATRO,Astronics Corporation Common Stock,8063,3728,"Aircraft Parts & Auxiliary Equipment, NEC",INDUSTRIAL
+DXPE,DXP Enterprises Inc. Common Stock,1020710,5084,Wholesale-Industrial Machinery & Equipment,INDUSTRIAL
+APPN,Appian Corporation Class A Common Stock,1441683,7372,Services-Prepackaged Software,TECH
+MGRC,McGrath RentCorp Common Stock,752714,7359,"Services-Equipment Rental & Leasing, NEC",INDUSTRIAL
+LFTO,Liftoff Mobile Inc. Common Stock,1850351,7374,Services-Computer Processing & Data Preparation,TECH
+KWR,Quaker Houghton Common Stock,81362,2990,Miscellaneous Products of  Petroleum & Coal,ENERGY
+WTTR,Select Water Solutions Inc. Class A common stock,1693256,1389,"Oil & Gas Field Services, NEC",ENERGY
+ALRM,Alarm.com Holdings Inc. Common Stock,1459200,7372,Services-Prepackaged Software,TECH
+EROC,ERock Inc. Class A Common Stock,2110029,3620,Electrical Industrial Apparatus,INDUSTRIAL
+NOG,Northern Oil and Gas Inc. Common Stock,1104485,1311,Crude Petroleum & Natural Gas,ENERGY
+SOUN,SoundHound AI Inc Class A Common Stock,1840856,7372,Services-Prepackaged Software,TECH
+HURN,Huron Consulting Group Inc. Common Stock,1289848,8742,Services-Management Consulting Services,INDUSTRIAL
+FIVN,Five9 Inc. Common Stock,1288847,7374,Services-Computer Processing & Data Preparation,TECH
+REZI,Resideo Technologies Inc. Common Stock,1740332,5072,Wholesale-Hardware,INDUSTRIAL
+CARG,CarGurus Inc. Class A Common Stock,1494259,7374,Services-Computer Processing & Data Preparation,TECH
+GRND,Grindr Inc. Common Stock,1820144,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+BCC,Boise Cascade L.L.C. Common Stock,1328581,5030,Wholesale-Lumber & Other Construction Materials,INDUSTRIAL
+KD,Kyndryl Holdings Inc. Common Stock,1867072,7373,Services-Computer Integrated Systems Design,TECH
+DCO,Ducommun Incorporated Common Stock,30305,3728,"Aircraft Parts & Auxiliary Equipment, NEC",INDUSTRIAL
+VIA,Via Transportation Inc. Class A Common Stock,1603015,7372,Services-Prepackaged Software,TECH
+INFQ,Infleqtion Inc. Common Stock,2007825,7374,Services-Computer Processing & Data Preparation,TECH
+LPG,Dorian LPG Ltd. Common Stock,1596993,4412,Deep Sea Foreign Transportation of  Freight,INDUSTRIAL
+UUUU,Energy Fuels Inc Ordinary Shares (Canada),1385849,1400,Mining & Quarrying of  Nonmetallic Minerals (No Fuels),B_NUCLEAR_FUEL
+RDW,Redwire Corporation Common Stock,1819810,3760,Guided Missiles & Space Vehicles & Parts,INDUSTRIAL
+HAYW,Hayward Holdings Inc. Common Stock,1834622,3580,Refrigeration & Service Industry Machinery,INDUSTRIAL
+KMT,Kennametal Inc. Common Stock,55242,3541,"Machine Tools, Metal Cutting Types",INDUSTRIAL
+PLUG,Plug Power Inc. Common Stock,1093691,3620,Electrical Industrial Apparatus,INDUSTRIAL
+PLUS,ePlus inc. Common Stock,1022408,5045,Wholesale-Computers & Peripheral Equipment & Software,TECH
+NESR,National Energy Services Reunited Corp Ordinary Shares,1698514,1389,"Oil & Gas Field Services, NEC",ENERGY
+LIND,Lindblad Expeditions Holdings Inc. Common Stock,1512499,4700,Transportation Services,INDUSTRIAL
+PBI,Pitney Bowes Inc. Common Stock,78814,3579,"Office Machines, NEC",TECH
+VC,Visteon Corporation Common Stock,1111335,3714,Motor Vehicle Parts & Accessories,B_AUTO
+CNXN,PC Connection Inc. Common Stock,1050377,5045,Wholesale-Computers & Peripheral Equipment & Software,TECH
+DJT,Trump Media & Technology Group Corp. Common Stock,1849635,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+ASAN,Asana Inc. Class A Common Stock,1477720,7372,Services-Prepackaged Software,TECH
+HLIO,Helios Technologies Inc. Common Stock,1024795,3490,Miscellaneous Fabricated Metal Products,INDUSTRIAL
+LASR,nLIGHT Inc. Common Stock,1124796,3674,Semiconductors & Related Devices,TECH
+AMR,Alpha Metallurgical Resources Inc. Common Stock,1704715,1221,Bituminous Coal & Lignite Surface Mining,ENERGY
+PRLB,Proto Labs Inc. Common stock,1443669,3440,Fabricated Structural Metal Products,INDUSTRIAL
+ICHR,Ichor Holdings Ordinary Shares,1652535,3674,Semiconductors & Related Devices,TECH
+PDFS,PDF Solutions Inc. Common Stock,1120914,7372,Services-Prepackaged Software,TECH
+PHIN,PHINIA Inc. Common Stock,1968915,3714,Motor Vehicle Parts & Accessories,B_AUTO
+DBD,Diebold Nixdorf Incorporated Common stock,28823,3578,Calculating & Accounting Machines (No Electronic Computers),TECH
+DNN,Denison Mines Corp Ordinary Shares (Canada),1063259,1090,Miscellaneous Metal Ores,B_NUCLEAR_FUEL
+CTOS,Custom Truck One Source Inc. Common Stock,1709682,7359,"Services-Equipment Rental & Leasing, NEC",INDUSTRIAL
+INOD,Innodata Inc. Common Stock,903651,7374,Services-Computer Processing & Data Preparation,TECH
+PATK,Patrick Industries Inc. Common Stock,76605,3714,Motor Vehicle Parts & Accessories,B_AUTO
+ALGT,Allegiant Travel Company Common Stock,1362468,4512,"Air Transportation, Scheduled",INDUSTRIAL
+NCNO,nCino Inc. Common Stock,1902733,7372,Services-Prepackaged Software,TECH
+VERX,Vertex Inc. Class A Common Stock,1806837,7372,Services-Prepackaged Software,TECH
+BLKB,Blackbaud Inc. Common Stock,1280058,7372,Services-Prepackaged Software,TECH
+ATEN,A10 Networks Inc. Common Stock,1580808,3576,Computer Communications Equipment,TECH
+TRN,Trinity Industries Inc. Common Stock,99780,3743,Railroad Equipment,INDUSTRIAL
+SEDG,SolarEdge Technologies Inc. Common Stock,1419612,3674,Semiconductors & Related Devices,TECH
+WERN,Werner Enterprises Inc. Common Stock,793074,4213,Trucking (No Local),INDUSTRIAL
+DXC,DXC Technology Company Common Stock,1688568,7374,Services-Computer Processing & Data Preparation,TECH
+NN,NextNav Inc. Common Stock,1865631,3812,"Search, Detection, Navigation, Guidance, Aeronautical Sys",INDUSTRIAL
+LCII,LCI Industries,763744,3714,Motor Vehicle Parts & Accessories,B_AUTO
+PLPC,Preformed Line Products Company Common Stock,80035,1623,"Water, Sewer, Pipeline, Comm & Power Line Construction",INDUSTRIAL
+GRC,Gorman-Rupp Company (The) Common Stock,42682,3561,Pumps & Pumping Equipment,INDUSTRIAL
+INVX,Innovex International Inc. Common Stock,1042893,3533,Oil & Gas Field Machinery & Equipment,ENERGY
+AADX,Applied Aerospace & Defense Inc. Common Stock,2118195,3728,"Aircraft Parts & Auxiliary Equipment, NEC",INDUSTRIAL
+AMPL,Amplitude Inc. Class A Common Stock,1866692,7372,Services-Prepackaged Software,TECH
+LIME,Neutron Holdings Inc. Common Stock,1699963,7372,Services-Prepackaged Software,TECH
+WHR,Whirlpool Corporation Common Stock,106640,3630,Household Appliances,B_APPLIANCE
+ALG,Alamo Group Inc. Common Stock,897077,3523,Farm Machinery & Equipment,INDUSTRIAL
+ALNT,Allient Inc. Common Stock,46129,3825,Instruments For Meas & Testing of  Electricity & Elec Signals,INDUSTRIAL
+XPRO,Expro Ltd Ordinary Shares,2126198,1389,"Oil & Gas Field Services, NEC",ENERGY
+MFP,Midera Food Processing Inc. Common Stock,2088281,3580,Refrigeration & Service Industry Machinery,INDUSTRIAL
+AI,C3.ai Inc. Class A Common Stock,1577526,7372,Services-Prepackaged Software,TECH
+VET,Vermilion Energy Inc. Common (Canada),1293135,1311,Crude Petroleum & Natural Gas,ENERGY
+MQ,Marqeta Inc. Class A Common Stock,1522540,7372,Services-Prepackaged Software,TECH
+AVEX,AEVEX Corp. Class A Common Stock,2096300,3721,Aircraft,INDUSTRIAL
+EPAC,Enerpac Tool Group Corp. Common Stock,6955,3590,Misc Industrial & Commercial Machinery & Equipment,INDUSTRIAL
+SPB,Spectrum Brands Holdings Inc. Common Stock,109177,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+ASTH,Astrana Health Inc. Common Stock,1083446,8742,Services-Management Consulting Services,INDUSTRIAL
+BLBD,Blue Bird Corporation Common Stock,1589526,3713,Truck & Bus Bodies,B_AUTO
+EVTC,Evertec Inc. Common Stock,1559865,7374,Services-Computer Processing & Data Preparation,TECH
+PLAB,Photronics Inc. Common Stock,810136,3674,Semiconductors & Related Devices,TECH
+VOYG,Voyager Technologies Inc. Class A Common Stock,1788060,3760,Guided Missiles & Space Vehicles & Parts,INDUSTRIAL
+FLOC,Flowco Holdings Inc. Class A Common Stock,2035149,3533,Oil & Gas Field Machinery & Equipment,ENERGY
+ATS,ATS Corporation Common Shares,1394832,3569,"General Industrial Machinery & Equipment, NEC",INDUSTRIAL
+BL,BlackLine Inc. Common Stock,1666134,7372,Services-Prepackaged Software,TECH
+HOS,Hornbeck Offshore Services Inc. Common Stock,866829,1389,"Oil & Gas Field Services, NEC",ENERGY
+QUBT,Quantum Computing Inc. Common Stock,1758009,7372,Services-Prepackaged Software,TECH
+BAND,Bandwidth Inc. Class A Common Stock,1514416,7372,Services-Prepackaged Software,TECH
+WOLF,Wolfspeed Inc. Common Stock New,895419,3674,Semiconductors & Related Devices,TECH
+CTS,CTS Corporation Common Stock,26058,3672,Printed Circuit Boards,TECH
+THRM,Gentherm Inc Common Stock,903129,3714,Motor Vehicle Parts & Accessories,B_AUTO
+GIC,Global Industrial Company Common Stock,945114,5084,Wholesale-Industrial Machinery & Equipment,INDUSTRIAL
+HUBG,Hub Group Inc. Class A Common Stock,940942,4731,Arrangement of  Transportation of  Freight & Cargo,INDUSTRIAL
+KOS,Kosmos Energy Ltd. Common Shares (DE),1509991,1311,Crude Petroleum & Natural Gas,ENERGY
+EVCM,EverCommerce Inc. Common Stock,1853145,7372,Services-Prepackaged Software,TECH
+OMCL,Omnicell Inc. Common Stock ($0.001 par value),926326,3571,Electronic Computers,TECH
+AZTA,Azenta Inc.,933974,3559,"Special Industry Machinery, NEC",INDUSTRIAL
+PRGS,Progress Software Corporation Common Stock (DE),876167,7372,Services-Prepackaged Software,TECH
+ICFI,ICF International Inc. Common Stock,1362004,8742,Services-Management Consulting Services,INDUSTRIAL
+ALKT,Alkami Technology Inc. Common Stock,1529274,7372,Services-Prepackaged Software,TECH
+AESI,Atlas Energy Solutions Inc. Common Stock,1984060,1311,Crude Petroleum & Natural Gas,ENERGY
+LCID,Lucid Group Inc. Common Stock,1811210,3711,Motor Vehicles & Passenger Car Bodies,B_AUTO
+GFR,Greenfire Resources Ltd. Common Shares,1966287,1311,Crude Petroleum & Natural Gas,ENERGY
+AMSC,American Superconductor Corporation Common Stock,880807,3621,Motors & Generators,INDUSTRIAL
+JBLU,JetBlue Airways Corporation Common Stock,1158463,4512,"Air Transportation, Scheduled",INDUSTRIAL
+NRP,Natural Resource Partners LP Limited Partnership,1171486,1221,Bituminous Coal & Lignite Surface Mining,ENERGY
+ENR,Energizer Holdings Inc. Common Stock,1632790,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+XZO,Exzeo Group Inc. Common Stock,1873951,7372,Services-Prepackaged Software,TECH
+AMBQ,Ambiq Micro Inc. Common Stock,1500412,3674,Semiconductors & Related Devices,TECH
+SHLS,Shoals Technologies Group Inc. Class A Common Stock,1831651,3674,Semiconductors & Related Devices,TECH
+CRSR,Corsair Gaming Inc. Common Stock,1743759,3577,"Computer Peripheral Equipment, NEC",TECH
+SHAZ,SharonAI Holdings Inc. Class A Common Stock,2068385,7374,Services-Computer Processing & Data Preparation,TECH
+COUR,Coursera Inc. Common Stock,1651562,7372,Services-Prepackaged Software,TECH
+VISN,Vistance Networks Inc. Common Stock,1517228,3663,Radio & Tv Broadcasting & Communications Equipment,TECH
+LSPD,Lightspeed Commerce Inc. Subordinate Voting Shares,1823306,7372,Services-Prepackaged Software,TECH
+TRS,TriMas Corporation Common Stock,842633,3460,Metal Forgings & Stampings,INDUSTRIAL
+FCEL,FuelCell Energy Inc. Common Stock,886128,3620,Electrical Industrial Apparatus,INDUSTRIAL
+FLNC,Fluence Energy Inc. Class A Common Stock,1868941,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+AMPX,Amprius Technologies Inc. Common Stock,1899287,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+HAWK,HawkEye 360 Inc. Common Stock,1750704,7374,Services-Computer Processing & Data Preparation,TECH
+NBR,Nabors Industries Ltd.,1163739,1381,Drilling Oil & Gas Wells,ENERGY
+ULCC,Frontier Group Holdings Inc. Common Stock,1670076,4512,"Air Transportation, Scheduled",INDUSTRIAL
+HLMN,Hillman Solutions Corp. Common Stock,1822492,3420,"Cutlery, Handtools & General Hardware",INDUSTRIAL
+ADNT,Adient plc Ordinary Shares,1670541,3714,Motor Vehicle Parts & Accessories,B_AUTO
+DCH,Dauch Corporation Common Stock,1062231,3714,Motor Vehicle Parts & Accessories,B_AUTO
+RYZ,Ryerson Holding Corporation Common Stock,1481582,5051,Wholesale-Metals Service Centers & of fices,INDUSTRIAL
+CRCT,Cricut Inc. Class A Common Stock,1828962,3559,"Special Industry Machinery, NEC",INDUSTRIAL
+RES,RPC Inc. Common Stock,742278,1389,"Oil & Gas Field Services, NEC",ENERGY
+CERT,Certara Inc. Common Stock,1827090,7372,Services-Prepackaged Software,TECH
+ADIG,ADI Global Distribution Inc. Common Stock,2105139,5072,Wholesale-Hardware,INDUSTRIAL
+RDVT,Red Violet Inc. Common Stock,1720116,7372,Services-Prepackaged Software,TECH
+CXM,Sprinklr Inc. Class A Common Stock,1569345,7372,Services-Prepackaged Software,TECH
+NSSC,NAPCO Security Technologies Inc. Common Stock,69633,3669,"Communications Equipment, NEC",TECH
+PD,PagerDuty Inc. Common Stock,1568100,7372,Services-Prepackaged Software,TECH
+XPEL,XPEL Inc. Common Stock,1767258,3470,"Coating, Engraving & Allied Services",INDUSTRIAL
+PRG,PROG Holdings Inc. Common Stock,1808834,7359,"Services-Equipment Rental & Leasing, NEC",INDUSTRIAL
+ODC,Oil-Dri Corporation Of America Common Stock,74046,3990,Miscellaneous Manufacturing Industries,INDUSTRIAL
+CDNL,Cardinal Infrastructure Group Inc. Class A Common Stock,2079999,1600,Heavy Construction Other Than Bldg Const - Contractors,INDUSTRIAL
+HLIT,Harmonic Inc. Common Stock,851310,3663,Radio & Tv Broadcasting & Communications Equipment,TECH
+VTOL,Bristow Group Inc. Common Stock,1525221,4522,"Air Transportation, Nonscheduled",INDUSTRIAL
+GBX,Greenbrier Companies Inc. (The) Common Stock,923120,3743,Railroad Equipment,INDUSTRIAL
+SCSC,ScanSource Inc. Common Stock,918965,5045,Wholesale-Computers & Peripheral Equipment & Software,TECH
+LNN,Lindsay Corporation Common Stock,836157,3523,Farm Machinery & Equipment,INDUSTRIAL
+BBAI,BigBear.ai Inc. Common Stock,1836981,7372,Services-Prepackaged Software,TECH
+QMCO,Quantum Corporation Common Stock,709283,3572,Computer Storage Devices,TECH
+GDRX,GoodRx Holdings Inc. Class A Common Stock,1809519,7374,Services-Computer Processing & Data Preparation,TECH
+WLDN,Willdan Group Inc. Common Stock,1370450,8711,Services-Engineering Services,INDUSTRIAL
+TNC,Tennant Company Common Stock,97134,3580,Refrigeration & Service Industry Machinery,INDUSTRIAL
+AIP,Arteris Inc. Common Stock,1667011,3674,Semiconductors & Related Devices,TECH
+PSIX,Power Solutions International Inc. Common Stock,1137091,3510,Engines & Turbines,INDUSTRIAL
+GTM,ZoomInfo Technologies Inc Common Stock,1794515,7372,Services-Prepackaged Software,TECH
+PUMP,ProPetro Holding Corp. Common Stock,1680247,1389,"Oil & Gas Field Services, NEC",ENERGY
+HPK,HighPeak Energy Inc. Common Stock,1792849,1381,Drilling Oil & Gas Wells,ENERGY
+NPK,National Presto Industries Inc. Common Stock,80172,3480,"Ordnance & Accessories, (No Vehicles/Guided Missiles)",INDUSTRIAL
+DEC,Diversified Energy Company Common Stock,1922446,1311,Crude Petroleum & Natural Gas,ENERGY
+EMAT,Evolution Metals & Technologies Corp. Common Stock,1866226,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+UPWK,Upwork Inc. Common Stock,1627475,7374,Services-Computer Processing & Data Preparation,TECH
+UMAC,Unusual Machines Inc. Common Stock,1956955,3663,Radio & Tv Broadcasting & Communications Equipment,TECH
+PDS,Precision Drilling Corporation Common Stock,1013605,1381,Drilling Oil & Gas Wells,ENERGY
+TRIP,TripAdvisor Inc. Common Stock,1526520,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+MRTN,Marten Transport Ltd. Common Stock,799167,4213,Trucking (No Local),INDUSTRIAL
+CLVT,Clarivate Plc Ordinary Shares,1764046,7374,Services-Computer Processing & Data Preparation,TECH
+TE,T1 Energy Inc. Common Stock,1992243,3674,Semiconductors & Related Devices,TECH
+LZ,LegalZoom.com Inc. Common Stock,1286139,7374,Services-Computer Processing & Data Preparation,TECH
+EOSE,Eos Energy Enterprises Inc. Class A Common Stock,1805077,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+HSTM,HealthStream Inc. Common Stock,1095565,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+YSS,York Space Systems Inc. Common Stock,2086587,3760,Guided Missiles & Space Vehicles & Parts,INDUSTRIAL
+REPX,Riley Exploration Permian Inc. Common Stock,1001614,1311,Crude Petroleum & Natural Gas,ENERGY
+NPKI,NPK International Inc. Common Stock,71829,7350,Services-Miscellaneous Equipment Rental & Leasing,INDUSTRIAL
+NXDR,Nextdoor Holdings Inc. Class A Common Stock,1846069,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+FET,Forum Energy Technologies Inc. Common Stock,1401257,3533,Oil & Gas Field Machinery & Equipment,ENERGY
+VPG,Vishay Precision Group Inc. Common Stock,1487952,3670,Electronic Components & Accessories,TECH
+BRUN,Boost Run Inc. Class A Common Stock,2090646,7374,Services-Computer Processing & Data Preparation,TECH
+GHM,Graham Corporation Common Stock,716314,3560,General Industrial Machinery & Equipment,INDUSTRIAL
+AEVA,Aeva Technologies Inc. Common Stock,1789029,3714,Motor Vehicle Parts & Accessories,B_AUTO
+VYX,NCR Voyix Corporation Common Stock,70866,3578,Calculating & Accounting Machines (No Electronic Computers),TECH
+CEVA,CEVA Inc. Common Stock,1173489,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+ITG,ITG Inc. Class A Common Stock,2110117,1623,"Water, Sewer, Pipeline, Comm & Power Line Construction",INDUSTRIAL
+RXT,Rackspace Technology Inc. Common Stock,1810019,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+UPBD,Upbound Group Inc. Common Stock,933036,7359,"Services-Equipment Rental & Leasing, NEC",INDUSTRIAL
+PLOW,Douglas Dynamics Inc. Common Stock,1287213,3531,Construction Machinery & Equip,INDUSTRIAL
+TTI,Tetra Technologies Inc. Common Stock,844965,1311,Crude Petroleum & Natural Gas,ENERGY
+RCAT,Red Cat Holdings Inc. Common Stock,748268,7372,Services-Prepackaged Software,TECH
+ASTE,Astec Industries Inc. Common Stock,792987,3531,Construction Machinery & Equip,INDUSTRIAL
+TBLA,Taboola.com Ltd. Ordinary Shares,1840502,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+HTLD,Heartland Express Inc. Common Stock,799233,4213,Trucking (No Local),INDUSTRIAL
+PLTK,Playtika Holding Corp. Common Stock,1828016,7374,Services-Computer Processing & Data Preparation,TECH
+DSP,Viant Technology Inc. Class A Common Stock,1828791,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+RPD,Rapid7 Inc. Common Stock,1560327,7372,Services-Prepackaged Software,TECH
+BKSY,BlackSky Technology Inc. Class A Common Stock,1753539,3663,Radio & Tv Broadcasting & Communications Equipment,TECH
+AOSL,Alpha and Omega Semiconductor Limited Common Shares,1387467,3674,Semiconductors & Related Devices,TECH
+DAKT,Daktronics Inc. Common Stock,915779,3990,Miscellaneous Manufacturing Industries,INDUSTRIAL
+ACDC,ProFrac Holding Corp. Class A Common Stock,1881487,1389,"Oil & Gas Field Services, NEC",ENERGY
+AEBI,Aebi Schmidt Holding AG Common Stock,2048519,3531,Construction Machinery & Equip,INDUSTRIAL
+PUBM,PubMatic Inc. Class A Common Stock,1422930,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+NABL,N-able Inc. Common Stock,1834488,7372,Services-Prepackaged Software,TECH
+INR,Infinity Natural Resources Inc. Class A Common Stock,2029118,1311,Crude Petroleum & Natural Gas,ENERGY
+WLFC,Willis Lease Finance Corporation Common Stock,1018164,5080,"Wholesale-Machinery, Equipment & Supplies",INDUSTRIAL
+FEIM,Frequency Electronics Inc. Common Stock,39020,3825,Instruments For Meas & Testing of  Electricity & Elec Signals,INDUSTRIAL
+CVLG,Covenant Logistics Group Inc. Class A Common Stock,928658,4213,Trucking (No Local),INDUSTRIAL
+EVLV,Evolv Technologies Holdings Inc. Class A Common Stock,1805385,3577,"Computer Peripheral Equipment, NEC",TECH
+SMP,Standard Motor Products Inc. Common Stock,93389,3714,Motor Vehicle Parts & Accessories,B_AUTO
+HMH,HMH Holding Inc. Class A Common Stock,2021880,3533,Oil & Gas Field Machinery & Equipment,ENERGY
+NNE,Nano Nuclear Energy Inc. Common Stock,1923891,4911,Electric Services,POWER
+BW,Babcock & Wilcox Enterprises Inc. Common Stock,1630805,3433,"Heating Equipment, Except Electric & Warm Air Furnaces",INDUSTRIAL
+TRNS,Transcat Inc. Common Stock,99302,3825,Instruments For Meas & Testing of  Electricity & Elec Signals,INDUSTRIAL
+RJET,Republic Airways Holdings Inc. Common Stock,810332,4512,"Air Transportation, Scheduled",INDUSTRIAL
+BLZE,Backblaze Inc. Class A Common Stock,1462056,7372,Services-Prepackaged Software,TECH
+WHK,WhiteHawk Minerals Corp Class A Common Stock,1921603,1311,Crude Petroleum & Natural Gas,ENERGY
+MTW,Manitowoc Company Inc. (The) Common Stock,61986,3531,Construction Machinery & Equip,INDUSTRIAL
+SATL,Satellogic Inc. Class A Common Stock,1874315,3663,Radio & Tv Broadcasting & Communications Equipment,TECH
+KOPN,Kopin Corporation Common Stock,771266,3674,Semiconductors & Related Devices,TECH
+SABR,Sabre Corporation Common Stock,1597033,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+MITK,Mitek Systems Inc. Common Stock,807863,3577,"Computer Peripheral Equipment, NEC",TECH
+LYTS,LSI Industries Inc. Common Stock,763532,3640,Electric Lighting & Wiring Equipment,INDUSTRIAL
+OBE,Obsidian Energy Ltd. Common Shares,1334388,1311,Crude Petroleum & Natural Gas,ENERGY
+SOC,Sable Offshore Corp. Common Stock,1831481,1311,Crude Petroleum & Natural Gas,ENERGY
+EVER,EverQuote Inc. Class A Common Stock,1640428,7370,"Services-Computer Programming, Data Processing, Etc.",TECH
+VTS,Vitesse Energy Inc. Common Stock,1944558,1311,Crude Petroleum & Natural Gas,ENERGY
+MLAB,Mesa Laboratories Inc. Common Stock,724004,3823,"Industrial Instruments For Measurement, Display, and Control",INDUSTRIAL
+PKOH,Park-Ohio Holdings Corp. Common Stock,76282,3460,Metal Forgings & Stampings,INDUSTRIAL
+WGO,Winnebago Industries Inc. Common Stock,107687,3716,Motor Homes,B_AUTO
+KE,Kimball Electronics Inc. Common Stock,1606757,3672,Printed Circuit Boards,TECH
+HNRG,Hallador Energy Company Common Stock,788965,4911,Electric Services,POWER
+LPTH,LightPath Technologies Inc. Class A Common Stock,889971,3674,Semiconductors & Related Devices,TECH
+BLDP,Ballard Power Systems Inc. Common Shares,1453015,3620,Electrical Industrial Apparatus,INDUSTRIAL
+YEXT,Yext Inc. Common Stock,1614178,7374,Services-Computer Processing & Data Preparation,TECH
+HYLN,Hyliion Holdings Corp. Class A Common Stock,1759631,3713,Truck & Bus Bodies,B_AUTO
+SPT,Sprout Social Inc Class A Common Stock,1517375,7372,Services-Prepackaged Software,TECH
+CCSI,Consensus Cloud Solutions Inc. Common Stock,1866633,7372,Services-Prepackaged Software,TECH
+OSPN,OneSpan Inc. Common Stock,1044777,7373,Services-Computer Integrated Systems Design,TECH
+MG,Mistras Group Inc Common Stock,1436126,8711,Services-Engineering Services,INDUSTRIAL
+GDYN,Grid Dynamics Holdings Inc. Class A Common Stock,1743725,7372,Services-Prepackaged Software,TECH
+PKE,Park Aerospace Corp. Common Stock,76267,3728,"Aircraft Parts & Auxiliary Equipment, NEC",INDUSTRIAL
+SWBI,Smith & Wesson Brands Inc. Common Stock,1092796,3480,"Ordnance & Accessories, (No Vehicles/Guided Missiles)",INDUSTRIAL
+PAR,PAR Technology Corporation Common Stock,708821,3578,Calculating & Accounting Machines (No Electronic Computers),TECH
+GRNT,Granite Ridge Resources Inc. Common Stock,1928446,1311,Crude Petroleum & Natural Gas,ENERGY
+EGY,VAALCO Energy Inc.  Common Stock,894627,1311,Crude Petroleum & Natural Gas,ENERGY
+NTGR,NETGEAR Inc. Common Stock,1122904,3576,Computer Communications Equipment,TECH
+NRDS,NerdWallet Inc. Class A Common Stock,1625278,7374,Services-Computer Processing & Data Preparation,TECH
+ELMT,The Elmet Group Co. Common Stock,2101698,3490,Miscellaneous Fabricated Metal Products,INDUSTRIAL
+HELE,Helen of Troy Limited Common Stock,916789,3634,Electric Housewares & Fans,B_APPLIANCE
+ADTN,ADTRAN Holdings Inc. Common Stock,926282,3661,Telephone & Telegraph Apparatus,TECH
+CLMB,Climb Global Solutions Inc. Common Stock,945983,5045,Wholesale-Computers & Peripheral Equipment & Software,TECH
+DCBO,Docebo Inc. Common Shares,1829959,7372,Services-Prepackaged Software,TECH
+ISOU,IsoEnergy Ltd. Common Shares,1997377,1090,Miscellaneous Metal Ores,B_NUCLEAR_FUEL
+INDI,indie Semiconductor Inc. Class A Common Stock,1841925,3674,Semiconductors & Related Devices,TECH
+NRGV,Energy Vault Holdings Inc. Common Stock,1828536,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+MLR,Miller Industries Inc. Common Stock,924822,3713,Truck & Bus Bodies,B_AUTO
+IBEX,IBEX Limited Common Shares,1720420,7374,Services-Computer Processing & Data Preparation,TECH
+HY,Hyster-Yale Inc. Class A common stock,1173514,3537,"Industrial Trucks, Tractors, Trailors & Stackers",INDUSTRIAL
+EVEX,Eve Holding Inc. Common Stock,1823652,3721,Aircraft,INDUSTRIAL
+JBI,Janus International Group Inc. Common Stock,1839839,3442,"Metal Doors, Sash, Frames, Moldings & Trim",INDUSTRIAL
+ARRY,Array Technologies Inc. Common Stock,1820721,3674,Semiconductors & Related Devices,TECH
+GMRS,GMR Solutions Inc. Class A Common Stock,1898718,4700,Transportation Services,INDUSTRIAL
+RMR,The RMR Group Inc. Class A Common Stock,1644378,8742,Services-Management Consulting Services,INDUSTRIAL
+PANL,Pangaea Logistics Solutions Ltd. Common Shares,1606909,4412,Deep Sea Foreign Transportation of  Freight,INDUSTRIAL
+BXC,Bluelinx Holdings Inc. Common Stock,1301787,5031,"Wholesale-Lumber, Plywood, Millwork & Wood Panels",INDUSTRIAL
+WTI,W&T Offshore Inc. Common Stock,1288403,1311,Crude Petroleum & Natural Gas,ENERGY
+NVRI,Enviri Corporation Common Stock,2104052,4953,Refuse Systems,INDUSTRIAL
+DDD,3D Systems Corporation Common Stock,910638,7372,Services-Prepackaged Software,TECH
+OOMA,Ooma Inc. Common Stock,1327688,7374,Services-Computer Processing & Data Preparation,TECH
+GFUZ,General Fusion Group Ltd. Common Shares,2074850,4911,Electric Services,POWER
+SLDP,Solid Power Inc. Class A Common Stock,1844862,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+FWRD,Forward Air Corporation Common Stock,912728,4731,Arrangement of  Transportation of  Freight & Cargo,INDUSTRIAL
+ENVX,Enovix Corporation Common Stock,1828318,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+WNC,Wabash National Corporation Common Stock,879526,3715,Truck Trailers,B_AUTO
+FAC,Factorial Energy Inc. Class A Common Stock,2049662,3690,"Miscellaneous Electrical Machinery, Equipment & Supplies",INDUSTRIAL
+MEI,Methode Electronics Inc. Common Stock,65270,3678,Electronic Connectors,TECH
+METC,Ramaco Resources Inc. Class A Common Stock,1687187,1220,Silver Ores,ENERGY
+NVEC,NVE Corporation Common Stock,724910,3674,Semiconductors & Related Devices,TECH
+SD,SandRidge Energy Inc. Common Stock,1349436,1311,Crude Petroleum & Natural Gas,ENERGY
+CARS,Cars.com Inc. Common Stock,1683606,7374,Services-Computer Processing & Data Preparation,TECH
+NUAI,New Era Energy & Digital Inc. Common Stock,2028336,1311,Crude Petroleum & Natural Gas,ENERGY

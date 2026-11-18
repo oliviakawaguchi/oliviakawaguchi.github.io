@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Live Screen</title>
+<meta name="description" content="697 US companies re-ranked every trading day on how unusual their latest operating move is and how cheap they trade against peers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f7f5; --surface:#fff; --ink:#15171a; --muted:#646a71; --faint:#9aa0a6; --line:#e4e4e0;
+  --accent:#0f5c63; --accent-soft:#e1efef; --up:#15803d; --down:#b91c1c; --new:#b45309; --new-soft:#fdf0dc;
+  --sans:"Inter",system-ui,-apple-system,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111316; --surface:#1a1d21; --ink:#eceef0; --muted:#a3aab1; --faint:#6f767d; --line:#2a2e34;
+  --accent:#6cc3c9; --accent-soft:#16302f; --up:#6fd59a; --down:#f08a80; --new:#f0b45a; --new-soft:#33281a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111316; --surface:#1a1d21; --ink:#eceef0; --muted:#a3aab1; --faint:#6f767d; --line:#2a2e34;
+  --accent:#6cc3c9; --accent-soft:#16302f; --up:#6fd59a; --down:#f08a80; --new:#f0b45a; --new-soft:#33281a; color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.wrap{max-width:860px;margin:0 auto;padding:22px max(16px,env(safe-area-inset-left)) 64px max(16px,env(safe-area-inset-right))}
+.back{font-size:13px;color:var(--muted);text-decoration:none}
+h1{font:600 26px/1.2 var(--sans);margin:10px 0 4px}
+.lead{color:var(--muted);margin:0 0 14px;max-width:42em}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.asof{font:500 13px var(--mono);color:var(--accent)}
+.funnel{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:12px 0 4px;font:13px var(--mono)}
+.funnel span{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.funnel b{font-weight:500;color:var(--ink)}
+.funnel i{font-style:normal;color:var(--faint)}
+.player{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:16px 0 10px}
+.player button{font:inherit;font-weight:600;font-size:14px;border:0;background:var(--accent);color:var(--surface);border-radius:8px;padding:8px 12px;cursor:pointer;white-space:nowrap}
+.player input{flex:1;min-width:0}
+.player .d{font:500 13px var(--mono);white-space:nowrap;min-width:6.5em;text-align:right}
+.hint{font-size:13px;color:var(--muted);margin:0 0 8px}
+.list{position:relative}
+.row{position:absolute;left:0;right:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;transition:transform .5s ease,opacity .4s;cursor:pointer}
+.row .l1{display:grid;grid-template-columns:2.2em 3.2em minmax(0,1fr) auto;gap:8px;align-items:baseline}
+.rk{font:600 17px var(--mono);text-align:right}
+.mv{font:500 12px var(--mono);white-space:nowrap}
+.mv.up{color:var(--up)} .mv.down{color:var(--down)} .mv.new{color:var(--new)}
+.tk{font-weight:600}
+.nm{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.val{font:500 13px var(--mono);text-align:right;white-space:nowrap}
+.spark{display:block;margin-top:4px}
+.badge{font:500 10.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.05em;background:var(--new-soft);color:var(--new);border-radius:4px;padding:3px 5px;margin-left:6px;vertical-align:1px}
+.more{display:none;margin-top:8px;border-top:1px dashed var(--line);padding-top:8px;font-size:13px}
+.row.open .more{display:block}
+.more table{width:100%;border-collapse:collapse;font:12.5px var(--mono)}
+.more td{padding:3px 0;border-bottom:1px solid var(--line)}
+.more td:last-child{text-align:right}
+.flagged{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13.5px}
+.flagged h2{font:600 15px var(--sans);margin:0 0 4px}
+.flagged p{margin:0 0 6px;color:var(--muted)}
+.flagged span{display:inline-block;font:12.5px var(--mono);background:var(--new-soft);color:var(--new);border-radius:4px;padding:2px 6px;margin:2px 4px 2px 0}
+.method{margin-top:30px;font-size:13.5px;color:var(--muted)}
+.method h2{font:600 16px var(--sans);color:var(--ink);margin:0 0 6px}
+.method li{margin:4px 0}
+footer{margin-top:30px;font-size:12px;color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../">← Olivia Kawaguchi</a>
+  <h1>Live Screen</h1>
+  <p class="lead">The 697 US companies from our Alpha Challenge funnel, re-ranked every trading day. A company ranks high when its latest operating numbers moved in a way that is unusual for that company <em>and</em> it trades cheap against its peers. Prices move it daily; new filings move it the morning after.</p>
+  <div class="asof" id="asof">Loading…</div>
+  <div class="funnel" id="funnel"></div>
+
+  <div class="player">
+    <button type="button" id="play">▶ Replay 60 days</button>
+    <input type="range" id="day" min="0" max="0" value="0" aria-label="Trading day">
+    <span class="d" id="dlab"></span>
+  </div>
+  <p class="hint" id="hint">Top 20. Arrows compare with the previous trading day. Tap a row for the numbers behind it.</p>
+  <div class="list" id="list"></div>
+  <div class="flagged" id="flagged"></div>
+
+  <div class="method">
+    <h2>How it ranks</h2>
+    <ul>
+      <li><b>Change.</b> For revenue growth, operating margin, gross margin, inventory/revenue, contract assets/revenue and asset turnover, the latest year-on-year move is scored against the company's own previous twelve, using median and MAD so one odd quarter can't set the yardstick. A move counts when |z| ≥ 2 and it is economically large. Direction is recorded, not scored.</li>
+      <li><b>Price.</b> EV/EBITDA on trailing twelve months (GAAP operating income plus D&amp;A) against the median of at least five same-industry peers in the universe (SIC code).</li>
+      <li><b>Rank.</b> The average of the two percentile ranks, among companies with a material change and a usable EV/EBITDA.</li>
+      <li><b>Guards.</b> A company that pays interest but shows no readable debt is left out of the price test rather than called cheap. A margin move with |z| ≥ 10 is treated as a likely one-off and listed under “Read the filing first”.</li>
+      <li><b>No look-ahead.</b> Each past day only uses filings that had been filed by that day.</li>
+      <li><b>What it is not.</b> The original funnel's last steps (reading every filing, hand-built peer groups, a +30% return hurdle on consensus estimates) are not automated here. This is the front of the funnel, running live.</li>
+    </ul>
+    <p>Sources: SEC XBRL company facts; daily closes from Yahoo Finance. Debt and EBITDA are read from tagged filings and are approximate.</p>
+  </div>
+  <footer id="foot"></footer>
+</div>
+<script>
+(async function () {
+  const $ = s => document.querySelector(s), N = 20, H = 64;
+  const [L, Hs] = await Promise.all([fetch("data/latest.json", { cache: "no-store" }).then(r => r.json()), fetch("data/history.json", { cache: "no-store" }).then(r => r.json())]);
+  const days = Hs.days, det = Object.fromEntries(L.top.map(t => [t.symbol, t])), names = Hs.names || {};
+  const st = L.stats;
+  $("#asof").textContent = "Prices as of " + L.as_of;
+  $("#funnel").innerHTML = [["universe", "companies"], ["measurable", "measurable"], ["changed", "with a material change"], ["ranked", "ranked (change + price)"]]
+    .map(([k, l], i) => `${i ? "<i>→</i>" : ""}<span><b>${st[k]}</b> ${l}</span>`).join("");
+  $("#foot").textContent = "Generated " + L.generated + ". Built with Claude.";
+  const fl = (st.flagged_list || []);
+  if (fl.length) $("#flagged").innerHTML = `<h2>Read the filing first (${fl.length})</h2><p>The margin move is so far outside the company's own history (|z| ≥ 10) that it is probably a one-time gain or charge. The original funnel removed these by reading the filing; this screen takes them out of the ranking and lists them here instead.</p>` +
+    fl.map(f => `<span title="${esc(f.name)}">${esc(f.symbol)} · ${esc(f.metric.toLowerCase())} z ${f.z > 0 ? "+" : ""}${Math.round(f.z)}</span>`).join("");
+  const pct = x => x === null || x === undefined ? "–" : (x >= 0 ? "+" : "−") + Math.abs(x * 100).toFixed(1) + "%";
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const recent = new Set(L.recent_filers || []);
+
+  function spark(sym, upto) {
+    const pts = days.slice(0, upto + 1).map((d, i) => [i, (Hs.ranks[d] || {})[sym]]).filter(p => p[1]);
+    if (pts.length < 2) return "";
+    const W = 120, Hh = 18, max = 60, x = i => i / Math.max(1, days.length - 1) * W, y = r => Math.min(r, max) / max * Hh;
+    return `<svg class="spark" width="${W}" height="${Hh + 2}" viewBox="0 0 ${W} ${Hh + 2}" aria-hidden="true"><polyline fill="none" stroke="var(--accent)" stroke-width="1.5" points="${pts.map(p => x(p[0]).toFixed(1) + "," + (y(p[1]) + 1).toFixed(1)).join(" ")}"/></svg>`;
+  }
+  const rows = new Map(), list = $("#list");
+  list.style.height = (N * H) + "px";
+  function render(di) {
+    const d = days[di], prev = days[di - 1], R = Hs.ranks[d] || {}, P = prev ? Hs.ranks[prev] || {} : {};
+    const top = Object.entries(R).sort((a, b) => a[1] - b[1]).slice(0, N).map(e => e[0]);
+    const live = di === days.length - 1;
+    $("#dlab").textContent = d;
+    for (const [s, el] of rows) if (!top.includes(s)) { el.style.opacity = 0; el.style.transform = `translateY(${N * H}px)`; setTimeout(() => { if (!el.dataset.keep) el.remove(); }, 450); rows.delete(s); }
+    top.forEach((s, i) => {
+      let el = rows.get(s);
+      if (!el) { el = document.createElement("div"); el.className = "row"; el.style.transform = `translateY(${N * H}px)`; el.style.opacity = 0; list.appendChild(el); rows.set(s, el); el.addEventListener("click", () => el.classList.toggle("open")); }
+      const r = R[s], p = P[s], m = !prev ? "" : !p ? `<span class="mv new">new</span>` : p > r ? `<span class="mv up">↑${p - r}</span>` : p < r ? `<span class="mv down">↓${r - p}</span>` : `<span class="mv">–</span>`;
+      const t = live ? det[s] : null;
+      const moves = t && t.change ? t.change.moves.slice(0, 3).map(x => `<tr><td>${esc(x.metric)}${x.oneoff ? " (likely one-off)" : ""}</td><td>z ${x.z > 0 ? "+" : ""}${x.z} · ${x.metric === "Asset turnover" ? x.move.toFixed(2) : pct(x.move)} y/y</td></tr>`).join("") : "";
+      el.innerHTML = `<div class="l1"><span class="rk">${r}</span>${m || "<span></span>"}<span><span class="tk">${esc(s)}</span>${t && recent.has(s) ? '<span class="badge">new filing</span>' : ""}<div class="nm">${esc(names[s] || (t && t.name) || "")}</div></span>
+        <span class="val">${t ? `${t.ev_ebitda.toFixed(1)}x <span style="color:var(--muted)">vs ${t.peer_median.toFixed(1)}x</span>` : ""}${spark(s, di)}</span></div>
+        ${t ? `<div class="more"><table>${moves}<tr><td>EV/EBITDA vs peers (${t.peer_n}, SIC ${esc(t.peer_group.split(":")[1])})</td><td>${pct(t.discount)} cheaper</td></tr><tr><td>Price, 1-day</td><td>$${t.price.toFixed(2)} ${pct(t.price_1d)}</td></tr><tr><td>EV / TTM EBITDA ($mm)</td><td>${Math.round(t.ev_mm).toLocaleString()} / ${Math.round(t.ebitda_mm).toLocaleString()}</td></tr><tr><td>Latest filing</td><td>${esc(t.last_filed || "–")}</td></tr><tr><td>Industry</td><td>${esc(t.industry)}</td></tr></table></div>` : ""}`;
+      requestAnimationFrame(() => { el.style.transform = `translateY(${i * H}px)`; el.style.opacity = 1; });
+    });
+    $("#hint").textContent = live ? "Top 20. Arrows compare with the previous trading day. Tap a row for the numbers behind it." : "Replaying " + d + ". Numbers behind each row appear on the latest day.";
+  }
+  const slider = $("#day"); slider.max = days.length - 1; slider.value = days.length - 1;
+  slider.addEventListener("input", () => { stop(); render(+slider.value); });
+  let timer = null;
+  function stop() { if (timer) { clearInterval(timer); timer = null; $("#play").textContent = "▶ Replay 60 days"; } }
+  $("#play").addEventListener("click", () => {
+    if (timer) return stop();
+    let i = 0; slider.value = 0; render(0); $("#play").textContent = "❚❚ Pause";
+    timer = setInterval(() => { i++; if (i >= days.length) return stop(); slider.value = i; render(i); }, 700);
+  });
+  render(days.length - 1);
+})();
+</script>
+</body>
+</html>
