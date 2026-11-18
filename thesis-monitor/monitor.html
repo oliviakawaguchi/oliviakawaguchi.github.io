@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thesis Monitor · ライブ監視</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>
+/* Layout: status strip, then watchlist (wide) beside schedule + feed */
+.strip{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.strip .tk{font-family:var(--mono);font-size:1.5rem;font-weight:600}
+.strip .tk small{display:block;font-family:var(--body);font-size:.72rem;color:var(--muted);font-weight:400}
+.th{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.th .h{display:flex;justify-content:space-between;gap:8px;font-size:.82rem}
+.th .h b{font-weight:500}
+.meter{height:6px;background:var(--line);border-radius:3px;margin-top:7px;overflow:hidden}
+.meter span{display:block;height:100%}
+.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr);gap:12px;align-items:start}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:500;color:var(--muted);font-size:.7rem}
+td .now{display:block;color:var(--muted);font-size:.74rem;margin-top:3px}
+td .tag{font-family:var(--mono);font-size:.68rem;color:var(--accent)}
+.scroll{overflow-x:auto}
+.ev{display:grid;grid-template-columns:78px 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line);font-size:.82rem}
+.ev .d{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+.ev .c{font-family:var(--mono);font-size:.9rem;color:var(--warn)}
+.empty{border:1px dashed var(--line);border-radius:8px;padding:16px;text-align:center;color:var(--muted);font-size:.82rem}
+.empty b{display:block;color:var(--ink);margin-bottom:4px}
+.live{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--warn)}
+@media (max-width:1000px){.strip,.grid{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="phone-fix.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><b>Thesis Monitor</b></div>
+    <nav class="tabs"><a href="index.html">タイムマシン</a><a href="diagnose.html#done">ピッチ診断</a><a href="monitor.html" class="on">ライブ監視</a></nav>
+    <span class="live"><i></i>ニュース取り込み：APIキー未設定</span>
+  </div>
+
+  <div class="strip" id="strip"></div>
+
+  <div class="grid">
+    <section class="pane">
+      <h2><span>監視リスト</span><span id="wcount"></span></h2>
+      <div class="scroll"><table>
+        <thead><tr><th>柱</th><th>何を見るか</th><th>判定ルール</th><th>次の確認</th><th>状態</th></tr></thead>
+        <tbody id="watch"></tbody>
+      </table></div>
+    </section>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <section class="pane">
+        <h2><span>次のイベント</span><span>2026.11.17 時点</span></h2>
+        <div id="cal"></div>
+      </section>
+      <section class="pane">
+        <h2><span>逆風タイマー</span></h2>
+        <div id="timers"></div>
+      </section>
+      <section class="pane">
+        <h2><span>取り込んだニュース → AI判定</span></h2>
+        <div class="empty"><b>APIキーを設定すると、ここにニュースと開示が流れます</b>監視リストの各項目に関係するニュース、SECの開示、決算を定期的に取り込み、AIが「支持・中立・反証」を判定します。</div>
+      </section>
+    </div>
+  </div>
+</div>
+<script src="mksi.js"></script>
+<script>
+const M=window.MKSI,$=id=>document.getElementById(id),today=new Date("2026-11-17");
+const days=d=>Math.ceil((new Date(d)-today)/864e5);
+const st={ok:["ok","支持"],watch:["watch","要注意"],broken:["broken","反証"],pending:["pending","未判定"]};
+// thesis health from watch statuses
+const groups=["T1","T2","T3"];
+const score=g=>{const w=M.watch.filter(x=>x.thesis===g&&x.status!=="pending");if(!w.length)return 60;return Math.round(w.reduce((s,x)=>s+({ok:80,watch:50,broken:20}[x.status]),0)/w.length)};
+const col=h=>h>=60?"var(--good)":h>=35?"var(--warn)":"var(--bad)";
+$("strip").innerHTML=`<div class="tk">${M.ticker}<small>${M.name} · ${M.call.side} · 目標 $${M.call.target}</small></div>`+
+  groups.map(g=>{const t=M.theses.find(x=>x.id===g),h=score(g);return `<div class="th"><div class="h"><b>${g} ${t.title}</b><span class="mono" style="color:${col(h)}">${h}</span></div><div class="meter"><span style="width:${h}%;background:${col(h)}"></span></div></div>`}).join("");
+$("wcount").textContent=`${M.watch.length}項目`;
+$("watch").innerHTML=M.watch.map(w=>{const [c,l]=st[w.status];return `<tr><td class="tag">${w.thesis}</td><td>${w.item}${w.now?`<span class="now">現状：${w.now}</span>`:""}</td><td>${w.rule}</td><td class="mono" style="white-space:nowrap">${w.when}</td><td><span class="chip ${c}">${l}</span></td></tr>`}).join("");
+$("cal").innerHTML=M.calendar.map(e=>`<div class="ev"><span class="d">${e.date.replaceAll("-",".")}</span><span>${e.label}<br><span class="tag mono" style="font-size:.68rem;color:var(--accent)">${e.thesis}</span></span><span class="c">あと${days(e.date)}日</span></div>`).join("")+`<p style="font-size:.7rem;color:var(--dim);margin:6px 0 0">Investor Day以外の日付は例年の時期からの見込みです。</p>`;
+$("timers").innerHTML=M.timers.map(t=>`<div class="th" style="margin-bottom:8px;border-style:dashed"><div class="h"><b>${t.label}</b><span class="mono wrn">残り${days(t.deadline)}日</span></div><div style="font-size:.74rem;color:var(--muted);margin-top:3px">${t.metric}（期限 ${t.deadline.replaceAll("-",".")}）</div></div>`).join("");
+</script>
+</body>
+</html>

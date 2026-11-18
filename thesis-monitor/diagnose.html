@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thesis Monitor · ピッチ診断</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>
+/* Layout: intake card → staged AI steps → three-column result (thesis | diagnosis | actions) */
+.intake{max-width:640px;margin:60px auto;text-align:center}
+.file{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px dashed var(--line);border-radius:12px;padding:18px 20px;text-align:left;margin:18px 0}
+.file .ic{width:44px;height:54px;border-radius:6px;background:#c4512f;display:flex;align-items:flex-end;justify-content:center;font-family:var(--mono);font-size:.62rem;font-weight:600;padding-bottom:6px;color:#fff}
+.file .nm{font-family:var(--mono);font-size:.95rem}
+.file .sub{font-size:.78rem;color:var(--muted)}
+.intake h1{font-family:var(--display);font-size:1.6rem;margin:0}
+.intake p{color:var(--muted)}
+.steps{max-width:640px;margin:20px auto 0;text-align:left;font-family:var(--mono);font-size:.84rem}
+.steps div{padding:6px 0;border-bottom:1px dashed var(--line);display:flex;gap:10px;color:var(--muted)}
+.steps div.done{color:var(--ink)}
+.steps div .s{width:18px;color:var(--accent)}
+.result{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr) minmax(0,1fr);gap:12px;align-items:start}
+.call{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.call .tk{font-family:var(--mono);font-size:1.5rem;font-weight:600}
+.call .side{font-family:var(--mono);font-size:.72rem;background:var(--goodbg);color:var(--good);padding:1px 8px;border-radius:4px}
+.call .px{font-family:var(--mono);color:var(--muted);font-size:.82rem}
+.thesis{border-top:1px solid var(--line);padding:10px 0}
+.thesis .h{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.thesis .h b{font-size:.9rem;font-weight:500}
+.thesis .id{font-family:var(--mono);color:var(--accent);margin-right:6px}
+.thesis .pts{font-family:var(--mono);font-size:.78rem;color:var(--good)}
+.claim{display:grid;grid-template-columns:44px 1fr;gap:8px;font-size:.78rem;color:var(--muted);margin-top:6px}
+.claim .ly{font-family:var(--mono);font-size:.64rem;text-align:center;border:1px solid var(--line);border-radius:4px;padding:1px 0;height:fit-content;color:var(--ink)}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.ck{display:grid;grid-template-columns:20px 1fr;gap:6px;background:var(--panel2);border-radius:6px;padding:7px 8px;font-size:.78rem}
+.ck .m{font-family:var(--mono);font-weight:600}
+.ck small{display:block;color:var(--dim);font-size:.7rem}
+.flag{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden;background:var(--panel2)}
+.flag .fh{display:flex;gap:10px;align-items:flex-start;padding:10px 12px 4px}
+.flag .dot{width:10px;height:10px;border-radius:50%;margin-top:6px;flex:none}
+.flag.red{border-color:#5a2a26}.flag.red .dot{background:var(--bad)}
+.flag.yellow{border-color:#4d3d1c}.flag.yellow .dot{background:var(--warn)}
+.flag.green{border-color:#1d4a37}.flag.green .dot{background:var(--good)}
+.flag .t{font-weight:500;font-size:.92rem}
+.flag .pt{font-family:var(--mono);font-size:.68rem;color:var(--dim);margin-top:2px}
+.flag .body{padding:0 12px 10px 32px;font-size:.8rem;color:var(--muted)}
+.flag .cases{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
+.flag .cases span{font-family:var(--mono);font-size:.66rem;border:1px solid var(--line);border-radius:4px;padding:0 6px;color:var(--ink)}
+.flag .stress{background:var(--badbg);border-radius:6px;padding:6px 8px;margin:6px 0;color:var(--ink);font-size:.78rem}
+.flag .stress b{font-family:var(--mono);font-size:.66rem;color:var(--bad);display:block}
+.flag .fix{background:var(--accentbg);padding:8px 12px 8px 32px;font-size:.8rem}
+.flag .fix b{font-family:var(--mono);font-size:.64rem;color:var(--accent);letter-spacing:.06em;display:block}
+ol.kill{margin:0;padding-left:1.2em;font-size:.82rem}
+ol.kill li{margin-bottom:6px}
+.timer{background:var(--panel2);border:1px dashed var(--line);border-radius:8px;padding:8px 10px;margin-bottom:8px}
+.timer .l{font-size:.82rem;font-weight:500}
+.timer .m{font-size:.72rem;color:var(--muted)}
+.timer .d{font-family:var(--mono);font-size:1.05rem;color:var(--warn)}
+.cta{margin-top:14px;text-align:center}
+.cta p{font-size:.74rem;color:var(--dim)}
+.scan{font-family:var(--mono);font-size:.72rem;color:var(--accent);margin:0 0 10px}
+@media (max-width:1100px){.result{grid-template-columns:1fr}.checks{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="phone-fix.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><b>Thesis Monitor</b></div>
+    <nav class="tabs"><a href="index.html">タイムマシン</a><a href="diagnose.html" class="on">ピッチ診断</a><a href="monitor.html">ライブ監視</a></nav>
+  </div>
+
+  <section id="intake" class="intake">
+    <h1>ピッチを読み込んで、仮説を診断する</h1>
+    <p>ジャッジ6社の59銘柄から作った失敗パターンと照らし合わせます。</p>
+    <div class="file"><div class="ic">PPTX</div><div><div class="nm" id="fname"></div><div class="sub" id="fsub"></div></div></div>
+    <button class="primary" id="go" type="button">AIで診断する</button>
+    <div class="steps" id="steps"></div>
+  </section>
+
+  <section id="result" class="result" hidden>
+    <div class="pane rise">
+      <h2><span>抽出した仮説</span><span>3つの柱</span></h2>
+      <div class="call" id="call"></div>
+      <div id="theses"></div>
+    </div>
+    <div class="pane rise" style="animation-delay:.15s">
+      <h2><span>診断結果</span><span id="flagcount"></span></h2>
+      <p class="scan">59件の過去事例と照合済み · 半導体の似た事例 5件</p>
+      <div class="checks" id="checks"></div>
+      <div id="flags"></div>
+    </div>
+    <div class="pane rise" style="animation-delay:.3s">
+      <h2><span>AIが提案する撤退条件</span></h2>
+      <ol class="kill" id="kill"></ol>
+      <h2 style="margin-top:16px"><span>逆風タイマー（期限）</span></h2>
+      <div id="timers"></div>
+      <div class="cta"><a class="primary" href="monitor.html">この内容で監視を始める →</a><p>監視リスト14項目、イベント予定4件を作成しました</p></div>
+    </div>
+  </section>
+</div>
+<script src="mksi.js"></script>
+<script>
+const M=window.MKSI, $=id=>document.getElementById(id);
+$("fname").textContent=M.file; $("fsub").textContent=`${M.slides}枚 · ${M.ticker} ${M.call.side} · 目標 $${M.call.target}（+${M.call.upside}%）`;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function run(){
+  $("go").disabled=true; $("go").textContent="診断中…";
+  for(const s of M.steps){
+    const d=document.createElement("div"); d.innerHTML=`<span class="s">…</span><span class="typing">${s}</span>`; $("steps").append(d);
+    await sleep(750);
+    d.className="done"; d.querySelector(".s").textContent="✓"; d.querySelector(".typing").classList.remove("typing");
+  }
+  await sleep(400);
+  $("intake").hidden=true; render(); $("result").hidden=false;
+}
+function render(){
+  const c=M.call;
+  $("call").innerHTML=`<span class="tk">${M.ticker}</span><span class="side">${c.side}</span><span class="px">$${c.price}（${c.priceDate.replaceAll("-",".")}）→ 目標 $${c.target} <span class="pos">+${c.upside}%</span></span><span class="px">ベア $${c.bear} ／ ブル $${c.bull}</span>`;
+  $("theses").innerHTML=M.theses.map(t=>`<div class="thesis"><div class="h"><b><span class="id">${t.id}</span>${t.title}</b><span class="pts">${t.pts}</span></div>${t.claims.map(x=>`<div class="claim"><span class="ly">${x.layer}</span><span>${x.text}</span></div>`).join("")}</div>`).join("");
+  const mark=o=>o===true?['✓','pos']:o===false?['✕','neg']:['△','wrn'];
+  $("checks").innerHTML=M.checklist.map(k=>{const [m,cl]=mark(k.ok);return `<div class="ck"><span class="m ${cl}">${m}</span><span>${k.label}<small>${k.note}</small></span></div>`}).join("");
+  const n={red:0,yellow:0,green:0}; M.flags.forEach(f=>n[f.sev]++);
+  $("flagcount").innerHTML=`<span class="neg">赤 ${n.red}</span> · <span class="wrn">黄 ${n.yellow}</span> · <span class="pos">緑 ${n.green}</span>`;
+  $("flags").innerHTML=M.flags.map((f,i)=>`<div class="flag ${f.sev} rise" style="animation-delay:${.3+i*.18}s">
+    <div class="fh"><span class="dot"></span><div><div class="t">${f.title}</div><div class="pt">過去の型：${f.pattern}（${f.base}）</div></div></div>
+    <div class="body"><p style="margin:4px 0">${f.why}</p>${f.stress?`<div class="stress"><b>${f.stress.label}</b>${f.stress.text}</div>`:""}<div class="cases">${f.cases.map(x=>`<span>${x}</span>`).join("")}</div></div>
+    <div class="fix"><b>AIの提案</b>${f.fix}</div></div>`).join("");
+  $("kill").innerHTML=M.killCriteria.map(k=>`<li>${k}</li>`).join("");
+  const today=new Date("2026-11-17");
+  $("timers").innerHTML=M.timers.map(t=>{const d=Math.ceil((new Date(t.deadline)-today)/864e5);return `<div class="timer"><div class="l">${t.label}</div><div class="m">${t.metric}</div><div class="d">${t.deadline.replaceAll("-",".")} · 残り ${d} 日</div></div>`}).join("");
+}
+$("go").onclick=run;
+if(location.hash==="#done"){$("intake").hidden=true;render();$("result").hidden=false}
+</script>
+</body>
+</html>
