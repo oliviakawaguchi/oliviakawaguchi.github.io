@@ -250,6 +250,13 @@ def valuation(f, asof, price):
                g("conv") + g("convc") + g("notes") + g("notesc") + g("lbt") + g("stb"), g("tot"))
     # a company that pays real interest but shows no debt has it tagged somewhere we don't read: don't call it cheap
     it = ttm(quarterly(f, FLOW["int"], asof)); interest = it.get(max(it)) if it else 0
+    if not interest:  # no clean 12-month sum: fall back to the latest annual figure, or 4x the latest quarter
+        for tag in FLOW["int"]:
+            rows = [r for r in f.get(tag, []) if r[0] and r[3] <= asof]
+            ann = [r for r in rows if 350 <= (D(r[1]) - D(r[0])).days <= 380]
+            qtr = [r for r in rows if 80 <= (D(r[1]) - D(r[0])).days <= 100]
+            if ann: interest = max(ann, key=lambda r: r[1])[2]; break
+            if qtr: interest = 4 * max(qtr, key=lambda r: r[1])[2]; break
     rev = ttm(quarterly(f, FLOW["rev"], asof)); r = rev.get(max(rev)) if rev else 0
     if debt <= 0 and interest and r and interest > 0.003 * r: return {"debt_missing": True}
     if ebitda <= 0 or (r and ebitda > 0.6 * r): return {"ebitda_suspect": True}
