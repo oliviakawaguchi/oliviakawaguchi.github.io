@@ -98,6 +98,7 @@ footer{margin-top:30px;font-size:12px;color:var(--faint)}
 <script>
 (async function () {
   const $ = s => document.querySelector(s), N = 20, H = 64;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const [L, Hs] = await Promise.all([fetch("data/latest.json", { cache: "no-store" }).then(r => r.json()), fetch("data/history.json", { cache: "no-store" }).then(r => r.json())]);
   const days = Hs.days, det = Object.fromEntries(L.top.map(t => [t.symbol, t])), names = Hs.names || {};
   const st = L.stats;
@@ -109,7 +110,6 @@ footer{margin-top:30px;font-size:12px;color:var(--faint)}
   if (fl.length) $("#flagged").innerHTML = `<h2>Read the filing first (${fl.length})</h2><p>The margin move is so far outside the company's own history (|z| ≥ 10) that it is probably a one-time gain or charge. The original funnel removed these by reading the filing; this screen takes them out of the ranking and lists them here instead.</p>` +
     fl.map(f => `<span title="${esc(f.name)}">${esc(f.symbol)} · ${esc(f.metric.toLowerCase())} z ${f.z > 0 ? "+" : ""}${Math.round(f.z)}</span>`).join("");
   const pct = x => x === null || x === undefined ? "–" : (x >= 0 ? "+" : "−") + Math.abs(x * 100).toFixed(1) + "%";
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const recent = new Set(L.recent_filers || []);
 
   function spark(sym, upto) {
