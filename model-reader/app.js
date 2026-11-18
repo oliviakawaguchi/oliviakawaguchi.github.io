@@ -1,13 +1,7 @@
 (function () {
   "use strict";
   const E = window.ModelEngine, $ = s => document.querySelector(s);
-  const SAMPLE = "sample/MKSI_Public_Model.xlsx";
-  const SAMPLE_OUTS = [
-    ["Valuation!E23", "Upside to today's price, our case (Theses 1 and 2)"],
-    ["Valuation!D23", "12-month target price, our case"],
-    ["Valuation!B16", "FY2028 adjusted EBITDA with theses"],
-    ["Valuation!E21", "Upside, baseline roll with deleveraging"],
-  ];
+  const SAMPLE = "sample/MKSI_Public_Model_v8.xlsx";
   let M = null, M2 = null, name1 = "", name2 = "", outKey = null, isSample = true, sheet = null, selKey = null, openRow = null, withActuals = false;
 
   /* ---------- formatting ---------- */
@@ -70,7 +64,7 @@
   }
   async function loadSample() {
     const r = await fetch(SAMPLE); const b = await r.arrayBuffer();
-    await loadBuffer(b, "MKSI model, public-data version", true);
+    await loadBuffer(b, "MKSI pitch model (v8), public-data version", true);
   }
   function readFile(f) { if (!f) return; const fr = new FileReader(); fr.onload = () => loadBuffer(fr.result, f.name, false); fr.readAsArrayBuffer(f); }
 
@@ -112,7 +106,7 @@
     return [...best, ...rest].slice(0, 12).map(x => [x.k, label(x.k)]);
   }
   function setupOutputs() {
-    const opts = isSample ? SAMPLE_OUTS : guessOutputs();
+    const opts = guessOutputs();
     $("#outSel").innerHTML = opts.map(([k, l]) => `<option value="${esc(k)}">${esc(l)} (${esc(k)})</option>`).join("");
     $("#answerBox").hidden = false;
     setOutput(opts.length ? opts[0][0] : null);
