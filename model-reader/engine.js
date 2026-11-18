@@ -259,7 +259,7 @@
   /* ---------- labels ---------- */
   Model.prototype.rowLabel = function (k) {
     const c = this.cells.get(k); if (!c) return ""; const A = splitAddr(c.addr);
-    for (let col = A.c - 1; col >= 1; col--) { const x = this.cells.get(key(c.sheet, numToCol(col) + A.r)); if (x && typeof x.v === "string" && x.v.trim() && !x.f) return x.v.trim(); }
+    for (let col = A.c - 1; col >= 1; col--) { const x = this.cells.get(key(c.sheet, numToCol(col) + A.r)); if (x && typeof x.v === "string" && /[A-Za-z]/.test(x.v) && !x.f) return x.v.trim(); }
     return "";
   };
   Model.prototype.colHeader = function (k) {
@@ -278,3 +278,274 @@
 
   global.ModelEngine = { Model, splitAddr, numToCol, colToNum, key, Unsupported, XlErr, parse };
 })(window);
+
+/* ---------- periods: which column is which quarter/year, and where forecasts start ---------- */
+(function () {
+  "use strict";
+  const ME = window.ModelEngine, M = ME.Model.prototype;
+  const MON = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+  const yr = s => { let y = +s; return y < 100 ? 2000 + y : y; };
+  const endOf = (y, m) => y * 100 + m; // comparable yyyymm
+
+  // returns {label, end:yyyymm, kind:'q'|'h'|'y'|'m', flag:'E'|'A'|null} or null
+  function parsePeriod(text, num, fmtz, XLSX) {
+    let s = (text == null ? "" : String(text)).trim(), m, flag = null;
+    if (/[AEP]$/i.test(s) && /\d/.test(s)) { flag = /E|P/i.test(s.slice(-1)) ? "E" : "A"; }
+    if ((m = /^([1-4])Q\s?['’]?(\d{2,4})\s?[AEP]?$/i.exec(s)) || (m = /^Q([1-4])\s?['’]?(\d{2,4})\s?[AEP]?$/i.exec(s)))
+      return { label: s, end: endOf(yr(m[2]), +m[1] * 3), kind: "q", flag };
+    if ((m = /^([1-2])H\s?['’]?(\d{2,4})\s?[AEP]?$/i.exec(s)) || (m = /^H([1-2])\s?['’]?(\d{2,4})\s?[AEP]?$/i.exec(s)))
+      return { label: s, end: endOf(yr(m[2]), +m[1] * 6), kind: "h", flag };
+    if ((m = /^(?:FY|CY|F)\s?['’]?(\d{2}|20\d{2})\s?[AEP]?$/i.exec(s)) || (m = /^(20\d{2})\s?[AEP]?$/.exec(s)))
+      return { label: s, end: endOf(yr(m[1]), 12), kind: "y", flag };
+    if ((m = /^([A-Za-z]{3})[a-z]*[- ']?(\d{2,4})\s?[AEP]?$/.exec(s)) && MON[m[1].toLowerCase()])
+      return { label: s, end: endOf(yr(m[2]), MON[m[1].toLowerCase()]), kind: "m", flag };
+    if (typeof num === "number" && !s) s = String(num);
+    if (typeof num === "number" && Number.isInteger(num) && num >= 1990 && num <= 2100 && (!fmtz || !/[dmy]/i.test(fmtz)))
+      return { label: String(num), end: endOf(num, 12), kind: "y", flag: null };
+    if (typeof num === "number" && fmtz && /m{1,4}|yy/i.test(fmtz) && num > 20000 && num < 80000 && XLSX) {
+      const d = XLSX.SSF.parse_date_code(num); if (d) return { label: s || `${d.y}-${d.m}`, end: endOf(d.y, d.m), kind: "m", flag: null };
+    }
+    return null;
+  }
+
+  M.periods = function () {
+    if (this._periods) return this._periods;
+    const XLSX = this.XLSX, out = {};
+    const now = new Date(); // a quarter counts as reported ~45 days after it ends
+    const rep = new Date(now.getTime() - 45 * 864e5); const cutoff = endOf(rep.getFullYear(), Math.floor(rep.getMonth() / 3) * 3 || 12) - (Math.floor(rep.getMonth() / 3) === 0 ? 100 : 0);
+    for (const sn of this.sheets) {
+      const bd = this.bounds[sn]; if (!bd) continue;
+      const hdrRows = [];
+      for (let r = bd.r0; r <= Math.min(bd.r1, bd.r0 + 400); r++) {
+        const cols = new Map();
+        for (let c = bd.c0; c <= bd.c1; c++) {
+          const k = ME.key(sn, ME.numToCol(c) + r), cell = this.cells.get(k); if (!cell) continue;
+          const v = cell.f ? this.safeValue(k) : cell.v;
+          const p = parsePeriod(cell.w || (typeof v === "string" ? v : ""), typeof v === "number" ? v : null, cell.z, XLSX);
+          if (p) cols.set(c, p);
+        }
+        if (cols.size >= 3) {
+          const ent = [...cols.entries()].sort((a, b) => a[0] - b[0]);
+          const numericYears = ent.every(([c, p]) => p.kind === "y" && /^\d{4}$/.test(p.label));
+          const ok = !numericYears || ent.every(([c, p], i) => i === 0 || p.end - ent[i - 1][1].end === 100);
+          if (ok) hdrRows.push({ r, cols });
+        }
+      }
+      // forecast boundary: last quarterly/monthly column whose numbers are mostly typed, with every later one mostly formulas
+      let boundary = null;
+      if (hdrRows.length) {
+        const all = new Map(); for (const h of hdrRows) for (const [c, p] of h.cols) if (!all.has(c) && (p.kind === "q" || p.kind === "m")) all.set(c, p);
+        const qs = [...all.entries()].sort((a, b) => a[1].end - b[1].end || a[0] - b[0]);
+        const hr = new Set(hdrRows.map(h => h.r));
+        const ratio = c => { let t = 0, f = 0; for (let r = bd.r0; r <= bd.r1; r++) { if (hr.has(r)) continue; const x = this.cells.get(ME.key(sn, ME.numToCol(c) + r)); if (!x) continue; if (x.f) f++; else if (typeof x.v === "number") t++; } return t + f >= 3 ? t / (t + f) : null; };
+        const rs = qs.map(([c, p]) => [p, ratio(c)]).filter(x => x[1] !== null);
+        for (let i = rs.length - 1; i >= 0; i--) {
+          if (rs[i][1] >= 0.5) { if (rs.slice(i + 1).every(x => x[1] < 0.5) && i < rs.length - 1) boundary = rs[i][0].end; break; }
+        }
+      }
+      out[sn] = { hdrRows, boundary: boundary || cutoff, detected: !!boundary };
+    }
+    this._periods = out; return out;
+  };
+  M.isHeaderCell = function (k) { const [sn, a] = k.split("!"), P = this.periods()[sn]; if (!P) return false; const A = ME.splitAddr(a); return P.hdrRows.some(h => h.r === A.r && h.cols.has(A.c)); };
+  M.periodOf = function (k) {
+    const [sn, a] = k.split("!"), P = this.periods()[sn]; if (!P) return null; const A = ME.splitAddr(a);
+    let best = null; for (const h of P.hdrRows) if (h.r < A.r && h.cols.has(A.c) && (!best || h.r > best.r)) best = h;
+    return best ? best.cols.get(A.c) : null;
+  };
+  const FACT = /(actual|outstanding|cash and|term loan|senior notes|convertible notes|principal|share price|conversion|cap price|sale price condition|fair value|proceeds|prepayment|\bFY ?20(1\d|2[0-5])\b|\b20(1\d|2[0-5])\b|Atotech)/i;
+  const ASSUME_NOTE = /^(KEY )?ASSUMPTION|^ILLUSTRATIVE/i;
+  const FWD = /guid|assum|growth|margin|\brate\b|ramp|retention|illustrative|stand-in|attach|content|q\/q|y\/y|% ?change/i;
+
+  // aggregation formula = only same-row refs (e.g. annual SUM of the quarters)
+  M._isAgg = function (k) {
+    const c = this.cells.get(k); if (!c || !c.f) return false; const [sn, a] = k.split("!"), r = ME.splitAddr(a).r;
+    const pr = this.prec.get(k); if (!pr || !pr.size) return false;
+    for (const x of pr) { const [s2, a2] = x.split("!"); if (s2 !== sn || ME.splitAddr(a2).r !== r) return false; }
+    return /SUM|AVERAGE|\+/i.test(c.f);
+  };
+  // classify the numeric cells of a row: returns Map(col -> 'actual'|'forecast') for typed cells, or null if no clean pattern
+  M._rowPattern = function (sn, r) {
+    this._rp = this._rp || new Map(); const id = sn + "|" + r; if (this._rp.has(id)) return this._rp.get(id);
+    const bd = this.bounds[sn], seq = [];
+    for (let c = bd.c0; c <= bd.c1; c++) {
+      const k = ME.key(sn, ME.numToCol(c) + r), x = this.cells.get(k); if (!x) continue;
+      if (x.f) { if (!this._isAgg(k)) seq.push([c, "F"]); }
+      else if (typeof x.v === "number") seq.push([c, "T"]);
+    }
+    let res = null;
+    if (seq.length >= 4) {
+      const T = seq.filter(x => x[1] === "T").map(x => x[0]), F = seq.filter(x => x[1] === "F").map(x => x[0]);
+      if (T.length && F.length) {
+        // typed history then formula forecast: everything after the last typed cell is a formula (>=3), and most cells before it are typed
+        const iT = seq.map(x => x[1]).lastIndexOf("T"), after = seq.slice(iT + 1), before = seq.slice(0, iT + 1);
+        if (after.length >= 3 && before.filter(x => x[1] === "T").length >= 0.6 * before.length) res = { kind: "actual", lastT: seq[iT][0] };
+        // formula history then typed forecast: everything from the first typed cell on is typed (>=3), and most cells before it are formulas
+        const iF = seq.map(x => x[1]).lastIndexOf("F"), tail = seq.slice(iF + 1), head = seq.slice(0, iF + 1);
+        if (!res && tail.length >= 3 && head.filter(x => x[1] === "F").length >= 0.6 * head.length) res = { kind: "forecast", firstT: tail[0][0] };
+      }
+    }
+    this._rp.set(id, res); return res;
+  };
+  // sheet boundary = the most common last-actual period among clean line-item rows
+  M._sheetBoundary = function (sn) {
+    this._sb = this._sb || {}; if (sn in this._sb) return this._sb[sn];
+    const bd = this.bounds[sn], votes = new Map();
+    if (bd) for (let r = bd.r0; r <= bd.r1; r++) {
+      const p = this._rowPattern(sn, r); if (!p || p.kind !== "actual") continue;
+      const per = this.periodOf(ME.key(sn, ME.numToCol(p.lastT) + r)); if (!per) continue;
+      votes.set(per.end, (votes.get(per.end) || 0) + 1);
+    }
+    let best = null, n = 0; for (const [e, v] of votes) if (v > n || (v === n && e > best)) { best = e; n = v; }
+    return (this._sb[sn] = n >= 3 ? best : null);
+  };
+  M._sheetBoundaryCol = function (sn) {
+    this._sbc = this._sbc || {}; if (sn in this._sbc) return this._sbc[sn];
+    const bd = this.bounds[sn], votes = new Map();
+    if (bd) for (let r = bd.r0; r <= bd.r1; r++) { const p = this._rowPattern(sn, r); if (p && p.kind === "actual") votes.set(p.lastT, (votes.get(p.lastT) || 0) + 1); }
+    let best = null, n = 0; for (const [c, v] of votes) if (v > n || (v === n && c > best)) { best = c; n = v; }
+    return (this._sbc[sn] = n >= 5 ? best : null);
+  };
+  M._isSeries = function (sn, r) { const bd = this.bounds[sn]; let n = 0; for (let c = bd.c0; c <= bd.c1; c++) { const x = this.cells.get(ME.key(sn, ME.numToCol(c) + r)); if (x && typeof x.v === "number") if (++n >= 4) return true; } return false; };
+  M.wbBoundary = function () {
+    if (this._wbb !== undefined) return this._wbb;
+    const votes = new Map();
+    for (const sn of this.sheets) { const bd = this.bounds[sn]; if (!bd) continue;
+      for (let r = bd.r0; r <= bd.r1; r++) { const p = this._rowPattern(sn, r); if (!p || p.kind !== "actual") continue;
+        const per = this.periodOf(ME.key(sn, ME.numToCol(p.lastT) + r)); if (per && (per.kind === "q" || per.kind === "m")) votes.set(per.end, (votes.get(per.end) || 0) + 1); } }
+    let best = null, n = 0; for (const [e, v] of votes) if (v > n || (v === n && e > best)) { best = e; n = v; }
+    return (this._wbb = n >= 3 ? best : null);
+  };
+  /* 'forecast' | 'actual' | 'fact' */
+  M.inputKind = function (k) {
+    const c = this.cells.get(k); if (!c) return "fact";
+    const [sn, a] = k.split("!"), A = ME.splitAddr(a), p = this.periodOf(k);
+    if (p && p.flag === "E") return "forecast";
+    if (p && p.flag === "A") return "actual";
+    if (p) { const b = this.wbBoundary() || this.periods()[sn].boundary; return p.end > b ? "forecast" : "actual"; }
+    const bc = this._sheetBoundaryCol(sn);
+    const rp = this._rowPattern(sn, A.r);
+    if (bc && (rp || this._isSeries(sn, A.r))) return A.c > bc ? "forecast" : "actual";
+    if (rp) return rp.kind;
+    const lab = this.rowLabel(k) + " " + this.colHeader(k), note = this.note(k);
+    if (ASSUME_NOTE.test(note)) return "forecast";
+    if (FACT.test(lab)) return "fact";
+    return FWD.test(lab + " " + note) ? "forecast" : "fact";
+  };
+  /* a readable name for an assumption row, following what it drives when the row label is generic */
+  const WEAK = /^(--?|—|x|n\/a|q\/q( change)?|y\/y( change)?|yoy|qoq|growth|% ?(change|growth)?|change|y\/y %|q\/q %)$/i;
+  const GENERIC = /^(total|revenue|revenues|sales|net sales|net revenue|subtotal|gross profit|gross margin)$/i;
+  M.sectionOf = function (k) {
+    const [sn, a] = k.split("!"), A = ME.splitAddr(a), bd = this.bounds[sn];
+    for (let r = A.r - 1; r >= Math.max(bd.r0, A.r - 25); r--) {
+      let txt = null, nums = 0;
+      for (let c = bd.c0; c <= Math.min(bd.c1, bd.c0 + 60); c++) { const x = this.cells.get(ME.key(sn, ME.numToCol(c) + r)); if (!x) continue;
+        if (typeof x.v === "number") nums++; else if (typeof x.v === "string" && /[A-Za-z]/.test(x.v) && !txt) txt = x.v.trim(); }
+      if (txt && nums === 0 && !GENERIC.test(txt) && !WEAK.test(txt)) return txt;
+    }
+    return "";
+  };
+  M.niceLabel = function (k) { const l = this.rowLabel(k); if (l && GENERIC.test(l.trim())) { const s = this.sectionOf(k); if (s) return s + " · " + l; } return l; };
+  M.assumptionName = function (k) {
+    const own = this.niceLabel(k);
+    if (own && !WEAK.test(own.trim()) && own.trim().length > 2) return own;
+    const deps = [...(this.dep.get(k) || [])];
+    for (const d of deps) { const l = this.niceLabel(d); if (l && !WEAK.test(l.trim())) return (own && !/^-+$/.test(own.trim()) ? own.trim() + ", " : "") + "driver of " + l; }
+    return own || k;
+  };
+  ME.parsePeriod = parsePeriod;
+})();
+
+/* ---------- what the forecast assumes: typed rows, constants inside formulas, implied annual metrics ---------- */
+(function () {
+  "use strict";
+  const ME = window.ModelEngine, M = ME.Model.prototype;
+  const TRIVIAL = new Set([0, 1, -1, 2, 3, 4, 12, 52, 100, 1000, 1e6, 365, 360]);
+
+  M.isForecastCol = function (k) {
+    const p = this.periodOf(k); if (!p) return null;
+    if (p.flag === "E") return true; if (p.flag === "A") return false;
+    const b = this.wbBoundary() || this.periods()[k.split("!")[0]].boundary; return p.end > b;
+  };
+
+  /* typed forecast inputs grouped by row */
+  M.forecastRows = function () {
+    const rows = new Map();
+    for (const k of this.cells.keys()) {
+      if (!this.isInput(k) || !this.dep.has(k) || this.isHeaderCell(k) || this.inputKind(k) !== "forecast") continue;
+      const [sn, a] = k.split("!"), r = ME.splitAddr(a).r, id = sn + "!" + r;
+      if (!rows.has(id)) rows.set(id, { id, sheet: sn, row: r, cells: [] });
+      rows.get(id).cells.push(k);
+    }
+    for (const g of rows.values()) g.cells.sort((x, y) => ME.splitAddr(x.split("!")[1]).c - ME.splitAddr(y.split("!")[1]).c);
+    return [...rows.values()];
+  };
+
+  /* numbers written straight into forecast formulas */
+  M.formulaConstants = function () {
+    const groups = new Map();
+    const walk = (n, out, skip) => {
+      if (!n) return;
+      if (n.k === "num") { if (!skip && !TRIVIAL.has(n.v)) out.push(n.v); return; }
+      if (n.k === "neg") { if (n.e.k === "num") { if (!TRIVIAL.has(-n.e.v)) out.push(-n.e.v); return; } return walk(n.e, out); }
+      if (n.k === "pct") return walk(n.e, out);
+      if (n.k === "bin") { walk(n.l, out); walk(n.r, out); return; }
+      if (n.k === "fn") n.args.forEach((a, i) => walk(a, out, (/^(ROUND|ROUNDUP|ROUNDDOWN|TEXT)$/.test(n.n) && i === 1) || n.n === "INDEX" || n.n === "OFFSET"));
+    };
+    for (const [k, ast] of this.ast) {
+      if (this.isForecastCol(k) !== true) continue;
+      const vals = []; walk(ast, vals); if (!vals.length) continue;
+      const [sn, a] = k.split("!"), r = ME.splitAddr(a).r;
+      for (const v of vals) {
+        const id = sn + "!" + r + "|" + v;
+        if (!groups.has(id)) groups.set(id, { sheet: sn, row: r, value: v, cells: [] });
+        groups.get(id).cells.push(k);
+      }
+    }
+    return [...groups.values()];
+  };
+
+  /* implied annual metrics from the statement rows */
+  const PAT = {
+    revenue: /^(total )?(net )?(revenue|revenues|sales|net sales)( \(.*\))?$/i,
+    gp: /^gross profit/i, gm: /^gross margin/i,
+    ebitda: /^(adj(usted)?\.?\s*)?EBITDA(\s*\((adjusted|non-gaap)\))?$/i,
+    op: /^(adj(usted)?\.?\s*)?(operating income|EBIT)\b/i,
+    eps: /(EPS|earnings per share)/i,
+  };
+  M.impliedMetrics = function () {
+    let best = null;
+    for (const sn of this.sheets) {
+      const P = this.periods()[sn]; if (!P) continue;
+      const yh = P.hdrRows.find(h => [...h.cols.values()].filter(p => p.kind === "y").length >= 3); if (!yh) continue;
+      const ycols = [...yh.cols.entries()].filter(([c, p]) => p.kind === "y").sort((a, b) => a[1].end - b[1].end);
+      const bd = this.bounds[sn], found = {};
+      for (let r = yh.r + 1; r <= bd.r1; r++) {
+        const lab = this.rowLabel(ME.key(sn, ME.numToCol(ycols[0][0]) + r)); if (!lab) continue;
+        for (const [m, re] of Object.entries(PAT)) {
+          if (!re.test(lab.trim())) continue;
+          if (m === "eps") { const pref = /(adj|operating|non-gaap|pro.?forma)/i.test(lab); if (found.eps && !(pref && !found.epsPref)) continue; found.epsPref = pref; }
+          else if (found[m]) continue;
+          found[m] = { r, label: lab.trim() };
+        }
+      }
+      if (found.revenue && (!best || Object.keys(found).length > Object.keys(best.found).length)) best = { sn, ycols, found };
+    }
+    if (!best) return null;
+    const b = this.wbBoundary() || this.periods()[best.sn].boundary, lastActualYear = Math.floor(b / 100) - (b % 100 === 12 ? 0 : 1);
+    const years = best.ycols.filter(([c, p]) => Math.floor(p.end / 100) >= lastActualYear).slice(0, 4);
+    const val = (m, c) => { const f = best.found[m]; if (!f) return null; const v = this.safeValue(ME.key(best.sn, ME.numToCol(c) + f.r)); return typeof v === "number" ? v : null; };
+    const rows = [];
+    const series = m => years.map(([c]) => val(m, c));
+    const growth = arr => arr.map((v, i) => i === 0 || v === null || arr[i - 1] === null || !arr[i - 1] ? null : v / arr[i - 1] - 1);
+    const rev = series("revenue");
+    rows.push({ key: "rev", name: "Revenue", values: rev, kind: "money" });
+    rows.push({ key: "revg", name: "Revenue growth y/y", values: growth(rev), kind: "pct" });
+    const gmS = best.found.gm ? series("gm") : null, gmIsMoney = gmS && gmS.some(v => v !== null && Math.abs(v) > 1.5);
+    if (best.found.gp || gmIsMoney) rows.push({ key: "gm", name: "Gross margin (implied)", values: series(best.found.gp ? "gp" : "gm").map((v, i) => v === null || !rev[i] ? null : v / rev[i]), kind: "pct" });
+    else if (gmS) rows.push({ key: "gm", name: "Gross margin", values: gmS, kind: "pct" });
+    if (best.found.ebitda) { const e = series("ebitda"); rows.push({ key: "ebitda", name: "EBITDA", values: e, kind: "money" }); rows.push({ key: "ebm", name: "EBITDA margin (implied)", values: e.map((v, i) => v === null || !rev[i] ? null : v / rev[i]), kind: "pct" }); rows.push({ key: "ebg", name: "EBITDA growth y/y", values: growth(e), kind: "pct" }); }
+    if (best.found.eps) { const e = series("eps"); rows.push({ key: "eps", name: "EPS (" + best.found.eps.label + ")", values: e, kind: "eps" }); rows.push({ key: "epsg", name: "EPS growth y/y", values: growth(e), kind: "pct" }); }
+    return { sheet: best.sn, years: years.map(([c, p]) => ({ label: p.label, year: Math.floor(p.end / 100), forecast: Math.floor(p.end / 100) > lastActualYear })), rows };
+  };
+})();

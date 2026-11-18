@@ -8,7 +8,7 @@
     ["Valuation!B16", "FY2028 adjusted EBITDA with theses"],
     ["Valuation!E21", "Upside, baseline roll with deleveraging"],
   ];
-  let M = null, outKey = null, isSample = true, sheet = null, selKey = null, openRow = null;
+  let M = null, M2 = null, name1 = "", name2 = "", outKey = null, isSample = true, sheet = null, selKey = null, openRow = null, withActuals = false;
 
   /* ---------- formatting ---------- */
   function isPct(k) { const c = M && M.cell(k); return !!(c && c.z && /%/.test(c.z)); }
@@ -24,6 +24,13 @@
     const s = v.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
     return (isMoney(k) ? "$" : "") + s;
   }
+  const PCTLAB = /growth|q\/q|y\/y|qoq|yoy|margin|rate|%|change|attach|ramp|retention|share of/i;
+  function fmtA(m, k, v, name) {
+    const c = m.cell(k);
+    if (typeof v === "number" && !(c && c.z && /%/.test(c.z)) && Math.abs(v) <= 1.5 && PCTLAB.test(name || "")) return (v * 100).toFixed(Math.abs(v) < 0.1 ? 1 : 1) + "%";
+    const keep = M; M = m; try { return fmt(k, v); } finally { M = keep; }
+  }
+  const useInput = k => withActuals || M.inputKind(k) === "forecast";
   function label(k) {
     const r = M.rowLabel(k), h = M.colHeader(k);
     return h && h !== r && !/^(value|item|unit|source)$/i.test(h) ? (r ? r + " · " + h : h) : (r || k);
@@ -45,12 +52,19 @@
       M = new E.Model(wb, XLSX); isSample = sample;
     } catch (e) { $("#fname").textContent = "Could not read " + name; $("#fsub").textContent = String(e.message || e); return; }
     const nIn = [...M.cells.keys()].filter(k => M.isInput(k) && M.dep.has(k)).length;
-    $("#fname").textContent = name;
+    $("#fname").textContent = name; name1 = name;
     $("#fsub").textContent = `${M.sheets.length} sheets · ${M.ast.size.toLocaleString()} formulas · ${nIn.toLocaleString()} typed inputs in use` +
       (M.unsupported.size ? ` · ${M.unsupported.size} formulas use functions this reader can't recompute (their saved values are still shown)` : "");
     $("#sample").hidden = sample;
     sheet = M.sheets.find(s => /valuation/i.test(s)) || M.sheets[0];
-    setupOutputs(); renderSheets();
+    setupOutputs(); renderSheets(); renderAssumes();
+  }
+  function readFile2(f) {
+    if (!f) return; const fr = new FileReader();
+    fr.onload = () => { try { M2 = new E.Model(XLSX.read(fr.result, { type: "array", cellFormula: true, cellNF: true, sheetStubs: true }), XLSX); name2 = f.name;
+        $("#f2sub").hidden = false; $("#f2sub").textContent = "Comparing with: " + f.name; } catch (e) { $("#f2sub").hidden = false; $("#f2sub").textContent = "Could not read " + f.name; M2 = null; }
+      renderAssumes(); document.querySelector('.tab[data-p="assumes"]').click(); };
+    fr.readAsArrayBuffer(f);
   }
   async function loadSample() {
     const r = await fetch(SAMPLE); const b = await r.arrayBuffer();
@@ -63,14 +77,15 @@
     const re = /(price target|target price|fair value|implied (share )?price|value per share|upside|\bPT\b)/i, out = [];
     for (const k of M.ast.keys()) { const l = M.rowLabel(k); if (re.test(l)) out.push([k, label(k)]); if (out.length > 30) break; }
     if (!out.length) { // sell-side models label earnings rows, not a target: take the furthest-out forecasts
-      const re2 = /^(adj(usted)?\.?\s*)?(EBITDA|EPS|diluted EPS|earnings per share)\b/i, rows = new Map();
+      const re2 = /^(adj(usted)?\.?\s*|pro ?forma\s*|non-gaap\s*|diluted\s*)?(EBITDA|EPS|earnings per share)\b/i, rows = new Map();
       for (const k of M.ast.keys()) {
-        const l = M.rowLabel(k); if (!re2.test(l)) continue;
+        const l = M.rowLabel(k); if (!re2.test(l) || /guid|consensus|street/i.test(l)) continue;
         const [s, a] = k.split("!"), A = E.splitAddr(a), rk = s + "|" + A.r;
         const v = M.cell(k).v; if (typeof v !== "number") continue;
         if (!rows.has(rk) || E.splitAddr(rows.get(rk).split("!")[1]).c < A.c) rows.set(rk, k);
       }
-      for (const k of [...rows.values()].slice(0, 10)) out.push([k, label(k)]);
+      const score = k => { const l = M.rowLabel(k); return (/EPS|earnings per share/i.test(l) ? 2 : 0) + (/oper|adj|pro ?forma|non-gaap/i.test(l) ? 1 : 0) + (M.isForecastCol(k) ? 4 : 0); };
+      for (const k of [...rows.values()].sort((x, y) => score(y) - score(x)).slice(0, 10)) out.push([k, label(k)]);
     }
     if (!out.length) { // fall back to the formula cells nothing else depends on, biggest cones first
       const sinks = [...M.ast.keys()].filter(k => !M.dep.has(k)).slice(0, 300)
@@ -93,7 +108,7 @@
     $("#outLab").textContent = label(k) + " · " + k;
     if ([...$("#outSel").options].every(o => o.value !== k)) $("#outSel").insertAdjacentHTML("afterbegin", `<option value="${esc(k)}">${esc(label(k))} (${esc(k)})</option>`);
     $("#outSel").value = k;
-    renderRank(); renderInputs(); if (sheet) renderGrid();
+    renderRank(); renderInputs(); renderAssumes(); if (sheet) renderGrid();
   }
 
   /* ---------- ranking ---------- */
@@ -105,7 +120,7 @@
   function fmtImp(x) { if (x === null || isNaN(x)) return "n/a"; const s = (x >= 0 ? "+" : "−") + Math.abs(x * 100).toFixed(1); return s + (isPct(outKey) ? "pt" : "%"); }
   function renderRank() {
     const box = $("#rank"); if (!outKey) { box.innerHTML = ""; return; }
-    const { inputs } = M.inputsOf(outKey);
+    const all = M.inputsOf(outKey).inputs, inputs = all.filter(useInput), hidden = all.length - inputs.length;
     const rows = [];
     for (const k of inputs.slice(0, 600)) {
       let up = null, dn = null, err = null;
@@ -115,15 +130,15 @@
     const moving = rows.filter(r => r.err || r.m > 1e-9).sort((a, b) => b.m - a.m);
     const still = rows.length - moving.length;
     const max = Math.max(1e-9, ...moving.map(r => r.m));
-    $("#rankHint").textContent = `${inputs.length} typed inputs feed this answer. Each moved 10% up (teal) and down (grey), ranked by how far the answer moves` +
-      (isPct(outKey) ? " in percentage points." : ".") + (still ? ` ${still} more feed it without moving it.` : "") + " Tap one to drag it.";
+    $("#rankHint").textContent = `${inputs.length} forecast assumptions feed this answer. Each moved 10% up (teal) and down (grey), ranked by how far the answer moves` +
+      (isPct(outKey) ? " in percentage points." : ".") + (still ? ` ${still} more feed it without moving it.` : "") + (hidden ? ` ${hidden} reported actuals and facts are left out.` : "") + " Tap one to drag it.";
     box.innerHTML = moving.slice(0, 60).map((r, i) => {
       const c = M.cell(r.k), note = M.note(r.k), [tc, tl] = tagOf(note);
       const w = x => Math.min(50, Math.abs(x || 0) / max * 50);
       const bar = x => x === null ? "" : `<i style="${x >= 0 ? "left:50%" : `left:${50 - w(x)}%`};width:${w(x)}%;background:${x === r.up ? "var(--accent)" : "var(--faint)"}"></i>`;
       return `<div class="ri" data-k="${esc(r.k)}" tabindex="0">
-        <div class="top"><span class="lab">${i + 1}. ${esc(label(r.k))}</span><span class="imp">${r.err ? "n/a" : fmtImp(r.up) + " / " + fmtImp(r.dn)}</span></div>
-        <div class="meta"><span>${esc(r.k)}</span><span>now ${esc(fmt(r.k, c.v))}</span><span class="tag ${tc}">${tl}</span></div>
+        <div class="top"><span class="lab">${i + 1}. ${esc(M.assumptionName(r.k))}${M.periodOf(r.k) ? " · " + esc(M.periodOf(r.k).label) : ""}</span><span class="imp">${r.err ? "n/a" : fmtImp(r.up) + " / " + fmtImp(r.dn)}</span></div>
+        <div class="meta"><span>${esc(r.k)}</span><span>now ${esc(fmtA(M, r.k, c.v, M.assumptionName(r.k)))}</span><span class="tag ${tc}">${tl}</span></div>
         ${r.err ? `<div class="err">Can't recompute through this one (${esc(r.err)}).</div>` : `<div class="bars"><span class="mid"></span>${bar(r.up)}${bar(r.dn)}</div>`}
         ${note ? `<div class="note">${esc(note)}</div>` : ""}
         <div class="whatif" hidden></div></div>`;
@@ -153,11 +168,11 @@
   /* ---------- assumptions ---------- */
   function renderInputs() {
     const cone = outKey ? M.inputsOf(outKey).cone : new Set();
-    const list = [...M.cells.keys()].filter(k => M.isInput(k) && M.dep.has(k));
+    const list = [...M.cells.keys()].filter(k => M.isInput(k) && M.dep.has(k) && !M.isHeaderCell(k) && useInput(k));
     list.sort((a, b) => (cone.has(b) - cone.has(a)) || a.localeCompare(b, "en", { numeric: true }));
     const rows = list.slice(0, 800).map(k => {
       const note = M.note(k), [tc, tl] = tagOf(note);
-      return `<tr><td class="k">${esc(k)}</td><td>${esc(label(k))}${note ? `<div class="note">${esc(note)}</div>` : ""}</td><td class="v">${esc(fmt(k, M.cell(k).v))}</td><td><span class="tag ${tc}">${tl}</span></td><td class="k">${cone.has(k) ? "✓ feeds answer" : ""}</td></tr>`;
+      return `<tr><td class="k">${esc(k)}</td><td>${esc(M.assumptionName(k))}${M.periodOf(k) ? " · " + esc(M.periodOf(k).label) : ""}${note ? `<div class="note">${esc(note)}</div>` : ""}</td><td class="v">${esc(fmtA(M, k, M.cell(k).v, M.assumptionName(k)))}</td><td><span class="tag ${tc}">${M.inputKind(k) === "forecast" ? "forecast" : M.inputKind(k)}</span>${tl !== "typed in" ? ` <span class="tag ${tc}">${tl}</span>` : ""}</td><td class="k">${cone.has(k) ? "✓ feeds answer" : ""}</td></tr>`;
     }).join("");
     $("#alist").innerHTML = `<thead><tr><th>Cell</th><th>What it is</th><th>Value</th><th>Kind</th><th></th></tr></thead><tbody>${rows}</tbody>` +
       (list.length > 800 ? `<tfoot><tr><td colspan="5" class="note">Showing 800 of ${list.length}.</td></tr></tfoot>` : "");
@@ -206,10 +221,67 @@
     d.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
+  /* ---------- what it assumes ---------- */
+  function impliedTable() {
+    const A = M.impliedMetrics(), B = M2 ? M2.impliedMetrics() : null;
+    if (!A && !B) return null;
+    const base = A || B, years = [...new Set([...(A ? A.years : []), ...(B ? B.years : [])].map(y => y.year))].sort();
+    const yinfo = y => (A && A.years.find(x => x.year === y)) || (B && B.years.find(x => x.year === y));
+    const f = (r, v) => v === null || v === undefined ? "–" : r.kind === "pct" ? (v * 100).toFixed(1) + "%" : r.kind === "eps" ? "$" + v.toFixed(2) : Math.round(v).toLocaleString("en-US");
+    const get = (X, key, y) => { if (!X) return undefined; const r = X.rows.find(r => r.key === key); if (!r) return undefined; const i = X.years.findIndex(x => x.year === y); return i < 0 ? undefined : r.values[i]; };
+    const keys = []; for (const X of [A, B]) if (X) for (const r of X.rows) if (!keys.find(k => k.key === r.key)) keys.push(r);
+    let h = `<div class="imp-wrap"><table class="imp"><thead><tr><th></th>${years.map(y => `<th class="${yinfo(y).forecast ? "fc" : ""}">FY${y}${yinfo(y).forecast ? "E" : "A"}</th>`).join("")}</tr></thead><tbody>`;
+    for (const r of keys) {
+      h += `<tr><td class="m">${esc(r.name)}${B ? '<span class="who">A</span>' : ""}</td>${years.map(y => `<td>${f(r, get(A, r.key, y))}</td>`).join("")}</tr>`;
+      if (B) h += `<tr class="b"><td class="m"><span class="who">B</span></td>${years.map(y => `<td>${f(r, get(B, r.key, y))}</td>`).join("")}</tr>`;
+    }
+    h += `</tbody></table></div>`;
+    if (B) h += `<p class="hint" style="margin-top:6px">A = ${esc(name1)} · B = ${esc(name2)}</p>`;
+    return h;
+  }
+  function rowImpact(cells) {
+    if (!outKey) return null;
+    try { const base = M.safeValue(outKey), ov = new Map(cells.map(k => [k, M.cell(k).v * 1.1])), nv = M.recompute(ov, outKey); return isPct(outKey) ? nv - base : (base ? nv / base - 1 : 0); } catch (e) { return null; }
+  }
+  function assumptionList(m, withImpact) {
+    const allRows = m.forecastRows(), zero = allRows.filter(g => g.cells.every(k => m.cell(k).v === 0));
+    const rows = allRows.filter(g => !zero.includes(g)).map(g => ({ g, name: m.assumptionName(g.cells[0]), imp: withImpact ? rowImpact(g.cells) : null }));
+    if (withImpact) rows.sort((a, b) => Math.abs(b.imp || 0) - Math.abs(a.imp || 0)); else rows.sort((a, b) => a.g.id.localeCompare(b.g.id, "en", { numeric: true }));
+    const out = rows.slice(0, 80).map(({ g, name, imp }) => {
+      const chips = g.cells.slice(0, 16).map(k => { const p = m.periodOf(k); return `<span class="chip">${p ? `<b>${esc(p.label)}</b>` : ""}${esc(fmtA(m, k, m.cell(k).v, name))}</span>`; }).join("") + (g.cells.length > 16 ? `<span class="chip">+${g.cells.length - 16} more</span>` : "");
+      const note = m.note(g.cells[0]);
+      return `<div class="arow"><div class="top"><span class="nm">${esc(name)}</span>${imp !== null && withImpact ? `<span class="ix">${Math.abs(imp) < 1e-12 ? "" : "+10% → " + fmtImp(imp)}</span>` : ""}</div>
+        <div class="where">${esc(g.id)}</div><div class="chips">${chips}</div>${note ? `<div class="note">${esc(note)}</div>` : ""}</div>`;
+    }).join("");
+    const z = zero.length ? `<p class="hint">Set to zero in every forecast period (${zero.length}): ${zero.map(g => esc(m.assumptionName(g.cells[0]))).join(", ")}.</p>` : "";
+    return (out || `<p class="hint">No typed forecast assumptions found.</p>`) + z;
+  }
+  function constantList(m) {
+    const gs = m.formulaConstants().sort((a, b) => b.cells.length - a.cells.length);
+    if (!gs.length) return `<p class="hint">None. Every forecast number in this model sits in its own cell.</p>`;
+    return gs.slice(0, 40).map(g => {
+      const k = g.cells[0], periods = g.cells.map(x => m.periodOf(x)).filter(Boolean).map(p => p.label);
+      return `<div class="arow"><div class="top"><span class="nm">${esc(m.niceLabel(k) || k)}</span><span class="ix">${esc(String(g.value))}</span></div>
+        <div class="where">${esc(g.sheet + "!" + g.row)} · ${g.cells.length} cell${g.cells.length > 1 ? "s" : ""}${periods.length ? " · " + esc(periods.slice(0, 6).join(", ")) + (periods.length > 6 ? "…" : "") : ""}</div>
+        <div class="chips"><span class="chip k">=${esc(m.cell(k).f.length > 90 ? m.cell(k).f.slice(0, 90) + "…" : m.cell(k).f)}</span></div></div>`;
+    }).join("");
+  }
+  function renderAssumes() {
+    if (!M) return;
+    const two = !!M2;
+    const it = impliedTable();
+    let h = it ? `<h2 class="sec">What the forecast adds up to</h2><p class="hint">Backed out of the model's own statement rows, by fiscal year. Nobody typed these; they are what the assumptions below produce.</p>${it}` : "";
+    h += `<h2 class="sec">Typed into the forecast</h2><p class="hint">Numbers someone typed into forecast periods, one line per row. ${outKey ? "Ranked by how far the answer moves if the whole row is 10% higher." : ""} Reported actuals are left out.</p>`;
+    h += `<div class="two ${two ? "on" : ""}"><div>${two ? `<p class="colh">A · ${esc(name1)}</p>` : ""}${assumptionList(M, true)}</div>${two ? `<div><p class="colh">B · ${esc(name2)}</p>${assumptionList(M2, false)}</div>` : ""}</div>`;
+    h += `<h2 class="sec">Written inside formulas</h2><p class="hint">Numbers hard-coded into forecast formulas rather than kept in their own cell. Easy to miss, and you can't change them without editing the formula.</p>`;
+    h += `<div class="two ${two ? "on" : ""}"><div>${two ? `<p class="colh">A · ${esc(name1)}</p>` : ""}${constantList(M)}</div>${two ? `<div><p class="colh">B · ${esc(name2)}</p>${constantList(M2)}</div>` : ""}</div>`;
+    $("#assumes").innerHTML = h;
+  }
+
   /* ---------- events ---------- */
   document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", x === t));
-    ["rank", "inputs", "sheets"].forEach(p => $("#p-" + p).hidden = p !== t.dataset.p);
+    ["assumes", "rank", "inputs", "sheets"].forEach(p => $("#p-" + p).hidden = p !== t.dataset.p);
   }));
   $("#rank").addEventListener("click", e => { const r = e.target.closest(".ri"); if (r && !e.target.closest(".whatif")) openWhatIf(r); });
   $("#rank").addEventListener("keydown", e => { if (e.key === "Enter") { const r = e.target.closest(".ri"); if (r) openWhatIf(r); } });
@@ -219,11 +291,19 @@
   $("#outSel").addEventListener("change", e => setOutput(e.target.value));
   $("#outAddr").addEventListener("change", e => { let v = e.target.value.trim().replace(/\$/g, ""); if (!v) return; if (!v.includes("!")) v = sheet + "!" + v.toUpperCase(); else { const [s, a] = v.split("!"); v = s.replace(/^'|'$/g, "") + "!" + a.toUpperCase(); } setOutput(v); });
   $("#file").addEventListener("change", e => readFile(e.target.files[0]));
+  $("#file2").addEventListener("change", e => readFile2(e.target.files[0]));
+  document.querySelectorAll(".withActuals").forEach(cb => cb.addEventListener("change", e => { withActuals = e.target.checked; document.querySelectorAll(".withActuals").forEach(x => x.checked = withActuals); renderRank(); renderInputs(); }));
   $("#sample").addEventListener("click", loadSample);
   const drop = $("#drop");
   ["dragenter", "dragover"].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("on"); }));
   ["dragleave", "drop"].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); if (ev === "drop" || e.target === drop) drop.classList.remove("on"); }));
   document.addEventListener("drop", e => readFile(e.dataTransfer.files[0]));
 
-  loadSample();
+  // ?model=/path.xlsx&compare=/path2.xlsx (same-site paths only) for opening files hosted next to the page
+  (async () => {
+    const q = new URLSearchParams(location.search), safe = u => u && /^\/?[A-Za-z0-9_\-./ %]+\.xls[xm]?$/.test(u) && !u.includes("//") && !u.includes("..");
+    const m = q.get("model"), c = q.get("compare");
+    if (safe(m)) { const r = await fetch(m); await loadBuffer(await r.arrayBuffer(), decodeURIComponent(m.split("/").pop()), false); } else await loadSample();
+    if (safe(c)) { const r = await fetch(c); const f = new File([await r.arrayBuffer()], decodeURIComponent(c.split("/").pop())); readFile2(f); }
+  })();
 })();
