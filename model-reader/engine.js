@@ -331,18 +331,7 @@
           if (ok) hdrRows.push({ r, cols });
         }
       }
-      // forecast boundary: last quarterly/monthly column whose numbers are mostly typed, with every later one mostly formulas
-      let boundary = null;
-      if (hdrRows.length) {
-        const all = new Map(); for (const h of hdrRows) for (const [c, p] of h.cols) if (!all.has(c) && (p.kind === "q" || p.kind === "m")) all.set(c, p);
-        const qs = [...all.entries()].sort((a, b) => a[1].end - b[1].end || a[0] - b[0]);
-        const hr = new Set(hdrRows.map(h => h.r));
-        const ratio = c => { let t = 0, f = 0; for (let r = bd.r0; r <= bd.r1; r++) { if (hr.has(r)) continue; const x = this.cells.get(ME.key(sn, ME.numToCol(c) + r)); if (!x) continue; if (x.f) f++; else if (typeof x.v === "number") t++; } return t + f >= 3 ? t / (t + f) : null; };
-        const rs = qs.map(([c, p]) => [p, ratio(c)]).filter(x => x[1] !== null);
-        for (let i = rs.length - 1; i >= 0; i--) {
-          if (rs[i][1] >= 0.5) { if (rs.slice(i + 1).every(x => x[1] < 0.5) && i < rs.length - 1) boundary = rs[i][0].end; break; }
-        }
-      }
+      const boundary = null;
       out[sn] = { hdrRows, boundary: boundary || cutoff, detected: !!boundary };
     }
     this._periods = out; return out;

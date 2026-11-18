@@ -55,7 +55,7 @@
     $("#fname").textContent = name; name1 = name;
     $("#fsub").textContent = `${M.sheets.length} sheets · ${M.ast.size.toLocaleString()} formulas · ${nIn.toLocaleString()} typed inputs in use` +
       (M.unsupported.size ? ` · ${M.unsupported.size} formulas use functions this reader can't recompute (their saved values are still shown)` : "");
-    $("#sample").hidden = sample;
+    $("#sample").hidden = sample; $("#samplebar").hidden = !sample;
     sheet = M.sheets.find(s => /valuation/i.test(s)) || M.sheets[0];
     setupOutputs(); renderSheets(); renderAssumes();
   }

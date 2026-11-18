@@ -108,6 +108,7 @@ h1{font:600 26px/1.2 var(--sans);margin:10px 0 4px}
 .detail .refs button{font:12px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--accent);border-radius:4px;padding:2px 6px;cursor:pointer}
 .err{color:var(--bad);font-size:13px}
 footer{margin-top:40px;font-size:12px;color:var(--faint)}
+.samplebar{margin:12px 0 0;background:var(--warn-soft);color:var(--ink);border-radius:8px;padding:10px 12px;font-size:13.5px}
 .toggle{display:flex;gap:8px;align-items:center;cursor:pointer}
 h2.sec{font:600 17px/1.3 var(--sans);margin:22px 0 4px}
 h2.sec:first-child{margin-top:4px}
@@ -152,6 +153,7 @@ h2.sec:first-child{margin-top:4px}
     <div class="drop" id="drop" style="flex-basis:100%">…or drop a workbook here. It is read inside this browser and never uploaded.</div>
   </div>
 
+  <div class="samplebar" id="samplebar" hidden>You are looking at the <b>sample</b>: our MKSI valuation model with broker and data-vendor numbers replaced by public ones. Open your own .xlsx above to read it instead.</div>
   <div class="answer" id="answerBox" hidden>
     <div class="row">
       <label for="outSel">Answer cell</label>
@@ -192,7 +194,7 @@ h2.sec:first-child{margin-top:4px}
   <footer>Sample: MKS Inc. (MKSI) chemistry build and valuation, public-data version. Broker and data-vendor figures were removed and replaced with public inputs or labelled illustrative stand-ins, so its target price is not the pitch's. Built with Claude.</footer>
 </div>
 <script src="vendor/xlsx.full.min.js"></script>
-<script src="engine.js?v=7"></script>
-<script src="app.js?v=7"></script>
+<script src="engine.js?v=8"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>
