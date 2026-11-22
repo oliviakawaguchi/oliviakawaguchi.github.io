@@ -1,4 +1,10 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
+body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Shelf Variance</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
@@ -169,62 +175,6 @@ h3{font-family:var(--display);font-weight:600;font-size:19px;margin:0 0 6px;lett
 .not b{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:11px;
   color:var(--muted);white-space:nowrap}
 
-/* the read */
-.rp-stage{background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:14px;margin-top:14px}
-.rp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-.rp-go{font:inherit;font-family:var(--display);font-size:16px;font-weight:600;background:var(--kdp);
-  border:1px solid var(--kdp);border-radius:3px;color:#fff;padding:9px 18px;min-height:44px;cursor:pointer}
-.rp-go:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
-.rp-go[disabled]{opacity:.5;cursor:default}
-.rp-url{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted);
-  background:var(--bg);border:1px solid var(--line);border-radius:3px;padding:7px 10px;flex:1 1 220px;
-  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rp-clock{font-family:var(--display);font-weight:700;font-size:21px;font-variant-numeric:tabular-nums;
-  color:var(--muted);min-width:3.6em;text-align:right}
-.rp-track{position:relative;height:7px;background:var(--blank);border-radius:4px;margin:0 0 4px;overflow:visible}
-.rp-prog{position:absolute;inset:0 auto 0 0;width:0;background:var(--kdp);border-radius:4px}
-.rp-mark{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--warn)}
-.rp-marklab{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);
-  font-variant-numeric:tabular-nums;margin-bottom:14px}
-.rp-marklab b{color:var(--warn);font-weight:600;font-family:var(--display);text-transform:uppercase;letter-spacing:.07em}
-.rp-counts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
-.rp-c{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:10px 12px}
-.rp-c.bad{box-shadow:inset 4px 0 0 var(--warn)}
-.rp-c.good{box-shadow:inset 4px 0 0 var(--good)}
-.rp-c .k{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:10.5px;color:var(--muted)}
-.rp-c .v{font-family:var(--display);font-weight:700;font-size:33px;line-height:1.05;font-variant-numeric:tabular-nums}
-.rp-c .s{font-size:12px;color:var(--muted);line-height:1.3;margin-top:2px}
-.rp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:6px}
-.rp-t{aspect-ratio:3/4;border-radius:3px;background:var(--bg);border:1px solid var(--line);
-  opacity:0;transform:translateY(6px);transition:opacity .28s ease,transform .28s ease;
-  display:flex;flex-direction:column;justify-content:flex-end;padding:5px;overflow:hidden;position:relative}
-.rp-t::after{content:"";position:absolute;left:5px;right:5px;top:5px;height:52%;
-  border-radius:2px;background:var(--empty)}
-.rp-t.in{opacity:1;transform:none}
-.rp-t i{display:block;height:6px;border-radius:2px;background:var(--rb);margin-bottom:4px;width:78%}
-.rp-t u{display:block;height:6px;border-radius:2px;background:var(--empty);width:46%;text-decoration:none}
-.rp-t.sp{border-color:var(--warn);border-width:2px}
-.rp-t.sp::after{background:var(--blank)}
-.rp-t.sp::before{content:"AD";font-family:var(--display);font-weight:700;font-size:10px;letter-spacing:.1em;
-  color:var(--warn);align-self:flex-start;margin-bottom:auto;position:relative;z-index:1}
-.rp-plat{display:flex;align-items:center;gap:7px;margin-top:12px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
-.rp-dots{display:flex;gap:4px}
-.rp-dots b{width:10px;height:10px;border-radius:50%;background:var(--empty);display:block}
-.rp-dots b.on{background:var(--good)}
-.rp-say{margin-top:12px;font-size:14.5px;min-height:3em;border-left:3px solid var(--line);padding-left:12px;color:var(--muted)}
-.rp-say.hot{border-left-color:var(--warn);color:var(--fg)}
-.rp-say.done{border-left-color:var(--good);color:var(--fg)}
-.rp-tab{width:100%;border-collapse:collapse;margin-top:10px;font-size:14.5px}
-.rp-tab th{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:11px;
-  color:var(--muted);text-align:left;padding:6px 10px 6px 0;border-bottom:1px solid var(--line);font-weight:600}
-.rp-tab td{padding:8px 10px 8px 0;border-bottom:1px solid var(--line)}
-.rp-tab td.n{font-variant-numeric:tabular-nums;font-family:var(--display);font-weight:700;font-size:18px;
-  white-space:nowrap;text-align:right;width:3.2em}
-.rp-tab td.n.was{color:var(--warn)}
-.rp-tab td.n.is{color:var(--good)}
-.rp-tab td small{color:var(--muted);display:block;font-size:12px;line-height:1.3}
-@media (prefers-reduced-motion:reduce){.rp-t{transition:none}}
-
 /* drawer */
 .scrim{position:fixed;inset:0;background:rgba(20,12,10,.45);z-index:20}
 .drawer{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--surface);border-top:2px solid var(--fg);
@@ -256,6 +206,8 @@ h3{font-family:var(--display);font-weight:600;font-size:19px;margin:0 0 6px;lett
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
+</head>
+<body>
 <div class="wrap">
   <p class="stamp">Read 17 Nov 2026 &middot; 25 US grocery chains &middot; all 50 states</p>
   <h1>Watching a launch<br>cross the country</h1>
@@ -267,7 +219,6 @@ h3{font-family:var(--display);font-weight:600;font-size:19px;margin:0 0 6px;lett
     <button class="tab" role="tab" data-p="shelf" aria-selected="false">The shelf</button>
     <button class="tab" role="tab" data-p="energy" aria-selected="false">Energy</button>
     <button class="tab" role="tab" data-p="depth" aria-selected="false">Depth</button>
-    <button class="tab" role="tab" data-p="read" aria-selected="false">The read</button>
     <button class="tab" role="tab" data-p="says" aria-selected="false">What it says</button>
   </div>
 
@@ -421,77 +372,6 @@ h3{font-family:var(--display);font-weight:600;font-size:19px;margin:0 0 6px;lett
     </div>
   </section>
 
-  <section class="panel" id="p-read" role="tabpanel" hidden>
-    <h2>Every number here was wrong the first time</h2>
-    <p class="dek">These pages do not finish loading when they look finished. Four sponsored tiles
-    arrive at once and sit there. The real shelf comes seconds later. Press play and watch the gap.</p>
-
-    <div class="rp-stage">
-      <div class="rp-bar">
-        <button class="rp-go" id="rpgo">&#9654;&nbsp; Play the read</button>
-        <span class="rp-url" id="rpurl">instacart.com/store/food-lion/s?k=red+bull</span>
-        <span class="rp-clock" id="rpclock">0.0s</span>
-      </div>
-
-      <div class="rp-track"><div class="rp-prog" id="rpprog"></div>
-        <div class="rp-mark" style="left:52.5%"></div></div>
-      <div class="rp-marklab"><span>page opens</span><b>8.4s &mdash; first pass stopped here</b><span>16.0s</span></div>
-
-      <div class="rp-counts">
-        <div class="rp-c"><div class="k">products on page</div><div class="v" id="rpnow">0</div>
-          <div class="s">distinct product links matching <i>red bull</i></div></div>
-        <div class="rp-c bad"><div class="k">fixed 8.4s scroll</div><div class="v" id="rpbad">&mdash;</div>
-          <div class="s">what the first pass wrote down</div></div>
-        <div class="rp-c good"><div class="k">plateau + floor</div><div class="v" id="rpgood">&mdash;</div>
-          <div class="s">unchanged four reads running, and at least 20</div></div>
-      </div>
-
-      <div class="rp-grid" id="rpgrid"></div>
-
-      <div class="rp-plat"><span>Plateau check</span><span class="rp-dots" id="rpdots"></span>
-        <span id="rpdotlab">waiting for the count to stop moving</span></div>
-
-      <p class="rp-say" id="rpsay">Food Lion, 17 November, query <i>red bull</i>. Reconstructed from the
-      diagnostic re-run &mdash; the timings and both counts are the ones we recorded; the tiles are drawn,
-      not a recording of the page.</p>
-    </div>
-
-    <div class="chart" style="margin-top:30px">
-      <h3>The same shelf, read twice</h3>
-      <p class="cap">Food Lion. The first pass used a fixed scroll and stopped early. The whole row was
-      thrown away, not corrected.</p>
-      <table class="rp-tab">
-        <thead><tr><th>Brand</th><th class="n">First</th><th class="n">Final</th><th>What happened</th></tr></thead>
-        <tbody>
-          <tr><td>Red Bull</td><td class="n was">2</td><td class="n is">28</td>
-            <td>Organic grid had not rendered<small>Re-running the same query with a stopwatch caught it mid-render: 4 products, then 27 a few seconds later. That re-run is what the replay above shows.</small></td></tr>
-          <tr><td>Celsius</td><td class="n was">3</td><td class="n is">22</td>
-            <td>Same<small></small></td></tr>
-          <tr><td>Ghost</td><td class="n was">0</td><td class="n is">9</td>
-            <td>Same &mdash; and this is the zero that gave it away<small>Ghost could not be absent from Food Lion; the presence data said it was there</small></td></tr>
-          <tr><td>Monster</td><td class="n was">27</td><td class="n is">24</td>
-            <td>Counted by name, not by link<small>Three of the 27 were banner headings, not products</small></td></tr>
-          <tr><td>Black Rifle</td><td class="n was">4</td><td class="n is">3</td>
-            <td>The pattern matched Black Rifle <i>Coffee</i><small>A later run read 13 here; ten were coffee, not energy</small></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="chart">
-      <h3>What replaced the clock</h3>
-      <div class="nots">
-        <div class="not"><b>not a timer</b><span>Stop when the product count is unchanged four reads in a row
-          <i>and</i> is at least 20. A timer stops when you run out of patience; this stops when the page does.</span></div>
-        <div class="not"><b>the floor matters</b><span>Plateau alone still failed. Four sponsored tiles are
-          a perfectly stable count. The floor is what tells a finished page from an empty one.</span></div>
-        <div class="not"><b>a ceiling too</b><span>30 seconds, then give up and record what is there.
-          Three chains never got past the sponsored row and were re-run by hand.</span></div>
-        <div class="not"><b>why it is honest</b><span>This bug only ever removes products. Every error it caused
-          was a number too low &mdash; which is why the headline is a floor, not an estimate.</span></div>
-      </div>
-    </div>
-  </section>
-
   <section class="panel" id="p-says" role="tabpanel" hidden>
     <p class="pull">A launch arrives as a pair, one chain at a time.</p>
 
@@ -609,102 +489,6 @@ tabs.forEach(function(t){
     window.scrollTo({top:0, behavior:"smooth"});
   };
 });
-
-/* the read -- replay of one measurement */
-(function(){
-  var SPON = 4, TOTAL = 28, REAL = 16.0, RATE = 2.4, POLL = 0.5;
-  var ARRIVE = [];                       /* real-second arrival of each tile */
-  var i;
-  for (i = 0; i < SPON; i++) ARRIVE.push(0.6);
-  for (i = 0; i < TOTAL - SPON; i++) ARRIVE.push(9.5 + 3.0 * (i / (TOTAL - SPON - 1)));
-
-  function countAt(t){ var c = 0; for (var j = 0; j < TOTAL; j++) if (t >= ARRIVE[j]) c++; return c; }
-
-  var grid = document.getElementById("rpgrid");
-  var tiles = [];
-  for (i = 0; i < TOTAL; i++) {
-    var t = document.createElement("div");
-    t.className = "rp-t" + (i < SPON ? " sp" : "");
-    t.innerHTML = "<i></i><u></u>";
-    grid.appendChild(t); tiles.push(t);
-  }
-  var dots = document.getElementById("rpdots");
-  for (i = 0; i < 4; i++) dots.appendChild(document.createElement("b"));
-  var dotEls = dots.querySelectorAll("b");
-
-  var go = document.getElementById("rpgo"), clock = document.getElementById("rpclock"),
-      prog = document.getElementById("rpprog"), now = document.getElementById("rpnow"),
-      bad = document.getElementById("rpbad"), good = document.getElementById("rpgood"),
-      say = document.getElementById("rpsay"), dotlab = document.getElementById("rpdotlab");
-  var raf = null, t0 = 0, stable = 0, locked = false, snapped = false;
-
-  var SCRIPT = [
-    [0.0, "", "Page opens. Nothing on screen yet."],
-    [0.7, "", "Four tiles. They are the sponsored row, and they arrive together."],
-    [3.0, "", "Still four. The page looks finished. It is not."],
-    [8.4, "hot", "This is where the first pass stopped scrolling and wrote down its number."],
-    [9.6, "hot", "The organic grid starts to render."],
-    [12.8, "", "Count climbing. Nothing about the page said it was going to do this."],
-    [13.6, "done", "Four identical reads, and above the floor of 20. Stop here."]
-  ];
-
-  function reset(){
-    if (raf) cancelAnimationFrame(raf);
-    tiles.forEach(function(t){ t.classList.remove("in"); });
-    dotEls.forEach(function(d){ d.classList.remove("on"); });
-    prog.style.width = "0%"; clock.textContent = "0.0s";
-    now.textContent = "0"; bad.innerHTML = "&mdash;"; good.innerHTML = "&mdash;";
-    stable = 0; locked = false; snapped = false;
-    dotlab.textContent = "waiting for the count to stop moving";
-    say.className = "rp-say";
-  }
-
-  function frame(ts){
-    if (!t0) t0 = ts;
-    var rt = Math.min(REAL, (ts - t0) / 1000 * RATE);
-    clock.textContent = rt.toFixed(1) + "s";
-    prog.style.width = (100 * rt / REAL).toFixed(1) + "%";
-
-    var n = 0;
-    for (var i = 0; i < TOTAL; i++) {
-      if (rt >= ARRIVE[i]) { tiles[i].classList.add("in"); n++; }
-    }
-    now.textContent = n;
-
-    if (rt >= 8.4 && !snapped) { snapped = true; bad.textContent = SPON; }
-
-    var p = Math.floor(rt / POLL), np = countAt(p * POLL);
-    stable = 0;
-    for (var k = p; k >= 0 && stable < 4; k--) {
-      if (countAt(k * POLL) !== np) break;
-      stable++;
-    }
-    for (var d = 0; d < 4; d++) dotEls[d].classList.toggle("on", d < stable && np >= 20);
-    if (np < 20 && stable >= 4) dotlab.textContent = "steady, but only " + np + " \u2014 under the floor of 20";
-    else if (stable >= 4 && np >= 20) dotlab.textContent = "steady and above the floor \u2014 this is the number";
-    else dotlab.textContent = "waiting for the count to stop moving";
-
-    if (!locked && stable >= 4 && np >= 20) { locked = true; good.textContent = np; }
-
-    var line = SCRIPT[0];
-    for (var k = 0; k < SCRIPT.length; k++) if (rt >= SCRIPT[k][0]) line = SCRIPT[k];
-    say.className = "rp-say " + line[1];
-    say.textContent = line[2];
-
-    if (rt < REAL) { raf = requestAnimationFrame(frame); }
-    else {
-      go.disabled = false; go.innerHTML = "\u21bb&nbsp; Play again";
-      say.className = "rp-say done";
-      say.textContent = "4 against 28. Not off by a little \u2014 the early read was looking at a different page.";
-    }
-  }
-
-  go.onclick = function(){
-    reset(); go.disabled = true; go.innerHTML = "&#9654;&nbsp; Reading\u2026";
-    t0 = 0; raf = requestAnimationFrame(frame);
-  };
-  reset();
-})();
 
 /* depth */
 if (typeof SKU !== "undefined" && SKU) {
@@ -914,4 +698,5 @@ function stateDrawer(s){
 }
 </script>
 
-</body></html>
+</body>
+</html>
