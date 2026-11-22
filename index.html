@@ -51,7 +51,7 @@ a.item:hover .title{text-decoration-color:var(--ink)}
 .feat .title{font-size:18px;margin:0 0 2px}
 .hero{position:relative;margin:12px 0 0;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--soft)}
 .hero img{width:100%;height:auto;display:block}
-.tap{position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;gap:6px;background:rgba(10,12,14,.78);color:#fff;font:600 12.5px/1 var(--sans);padding:8px 12px;border-radius:999px;pointer-events:none}
+.tap{position:absolute;bottom:10px;right:10px;display:inline-flex;align-items:center;gap:6px;background:rgba(10,12,14,.78);color:#fff;font:600 12.5px/1 var(--sans);padding:8px 12px;border-radius:999px;pointer-events:none}
 .tap::before{content:"";width:0;height:0;border-left:8px solid #fff;border-top:5px solid transparent;border-bottom:5px solid transparent}
 a.feat:hover .tap{background:var(--accent)}
 .hero.stat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));aspect-ratio:1208/573}
@@ -85,12 +85,12 @@ footer{margin:56px 0 0;font-size:12.5px;color:var(--faint)}
 </header>
 
 <section>
-  <h2>Featured</h2>
+  <h2>Tools</h2>
   <a class="item feat" href="signal/">
     <div class="title">Signal Watch: is 2028 really the peak?</div>
     <div class="meta"><b>Monitoring · MKSI</b> · 2026-11-16</div>
     <div class="hero"><span class="tap">Tap to open the app</span><img src="assets/hero-signal.jpg" alt="TSMC Arizona from orbit: empty desert in 2021, a finished fab in 2026" width="1208" height="573"></div>
-    <div class="desc">Measures each step AI capex takes before it reaches MKS: fab buildings from satellite, tool imports at customs, board-maker revenue.</div>
+    <div class="desc">AI tracks 17 new chip factories from free satellite photos and lines them up with customs records of chip-making machines shipped in, months before MKS reports.</div>
     <div class="num">17 fab sites · 251 satellite images</div>
   </a>
   <a class="item feat" href="thesis-monitor/">
@@ -100,15 +100,12 @@ footer{margin:56px 0 0;font-size:12.5px;color:var(--faint)}
     <div class="desc">Press play and a fund's published thesis runs forward to today: every earnings release and news item is scored against the claim it touches, next to the fund's actual trades from SEC filings. The same tool diagnoses our MKSI pitch and watches it live.</div>
     <div class="num">7 real cases · built from 59 audited theses · only 19 beat the S&amp;P 500</div>
   </a>
-</section>
-
-<section>
-  <h2>Tools · Alpha Challenge team</h2>
-  <a class="item feat" href="signal/">
-    <div class="title">Signal Watch</div>
-    <div class="meta"><b>Monitoring</b> · 2026-11-16</div>
-    <div class="hero"><span class="tap">Tap to open the app</span><img src="assets/card-signal.jpg" alt="Signal Watch: Fabs from space, Micron Clay NY from Sentinel-2" loading="lazy" width="1208" height="604"></div>
-    <div class="desc">Satellite, customs and supplier revenue, lined up as a sequence that leads MKS's reported numbers.</div>
+  <a class="item feat" href="shelf/">
+    <div class="title">Shelf Variance: watching a launch cross the country</div>
+    <div class="meta"><b>Monitoring · KDP</b> · 2026-11-17</div>
+    <div class="hero"><span class="tap">Tap to open the app</span><img src="assets/card-shelf.jpg" alt="US maps: Dr Pepper Blackberry (2025) on shelves almost everywhere; Creamy Coconut (2026) in 11 of 25 chains, the Mountain West and Texas first" loading="lazy" width="1208" height="536"></div>
+    <div class="desc">AI checks the online stores of 25 grocery chains covering all 50 states in one morning, so a Keurig Dr Pepper launch can be tracked state by state, week by week.</div>
+    <div class="num">25 chains · 50 states · break points fixed in advance</div>
   </a>
   <a class="item feat" href="screen/">
     <div class="title">Live Screen: 697 companies, re-ranked every day</div>
@@ -124,28 +121,8 @@ footer{margin:56px 0 0;font-size:12.5px;color:var(--faint)}
     <div class="desc">Open any Excel model. It finds every typed number, traces what each one drives, and ranks which move the answer most. Drag one and the answer recomputes. Runs on a public-data version of our MKSI model; the sell-side originals in person.</div>
     <div class="num">Rebuilds a 13,805-formula broker model to the cent</div>
   </a>
-</section>
-
-<section>
-  <h2>Tools · Independent</h2>
-  <a class="item feat" href="thesis-monitor/">
-    <div class="title">Thesis Monitor</div>
-    <div class="meta"><b>Interactive</b> · 2026-11-17</div>
-    <div class="hero"><span class="tap">Tap to open the app</span><img src="assets/card-monitor.jpg" alt="Thesis Monitor home: Time Machine, Pitch Diagnosis, Live Monitor" loading="lazy" width="1208" height="604"></div>
-    <div class="desc">Time machine, pitch diagnosis and live monitoring for an investment thesis.</div>
-  </a>
-  <a class="item feat" href="shelf/">
-    <div class="title">Shelf Variance: watching a launch cross the country</div>
-    <div class="meta"><b>Monitoring · KDP</b> · 2026-11-17</div>
-    <div class="hero"><span class="tap">Tap to open the app</span><img src="assets/card-shelf.jpg" alt="Shelf Variance: guess where Dr Pepper launches first" loading="lazy" width="1208" height="604"></div>
-    <div class="desc">Keurig Dr Pepper launches read across 25 grocery chains in all 50 states on one morning, with the break points fixed in advance.</div>
-  </a>
-</section>
-
-<section>
-  <h2>On the record</h2>
   <a class="item feat" href="agents/">
-    <div class="title">60 agents working alone reached the answer once and finished it never. One agent working with me found it.</div>
+    <div class="title">Research Agents: 60 agents working alone reached the answer once and finished it never. One agent working with me found it.</div>
     <div class="meta"><b>Experiment · Research agents</b> · 2026-10-28</div>
     <div class="hero"><span class="tap">Tap to open the app</span><img src="assets/card-agents.jpg" alt="Research agents: 60 agents alone vs one research agent working with me" loading="lazy" width="1208" height="604"></div>
     <div class="desc">MKS doesn't disclose its chemistry margin. Its own 10-K names three Japanese competitors; their filings gave the gap: 3.9–32.2pt.</div>
